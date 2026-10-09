@@ -1,0 +1,22 @@
+const { chromium } = require('playwright');
+const WS = process.env.FR_WORKSPACE || 'C:/Users/asus/.claude/plugins/marketplaces/fr-flow-v3';
+const { login } = require(WS + '/foundation/tools/api_tester/fr_login');
+const BASE = 'http://localhost:8075/webroot';
+(async () => {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await login(page, BASE);
+  const target = process.argv[2] || BASE + '/decision/view/report?op=write&reportlet=whjyx/pages/verify_individual.cpt';
+  const errs = [];
+  page.on('console', m => { if (m.type() === 'error') errs.push('[console] ' + m.text().slice(0,200)); });
+  page.on('pageerror', e => errs.push('[pageerror] ' + e.message.slice(0,200)));
+  await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(4000);
+  const app = await page.locator('#app-root').innerText().catch(() => '(无 app-root)');
+  console.log('target:', target.split('/report?')[1]);
+  console.log('app片段:', app.replace(/\n+/g, ' ').slice(0,100));
+  console.log('错误数:', errs.length);
+  errs.slice(0,10).forEach(e => console.log('  ' + e));
+  await browser.close();
+})();

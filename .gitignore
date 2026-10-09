@@ -1,0 +1,11 @@
+# 截图产物 / 日志 / 依赖
+test_shots/
+*.log
+node_modules/
+
+# 分析中间提取物（原始 .js/.datasets/.labels 逐文件 dump，可从 origin/ 的 cpt 重新生成）；
+# 保留 SPEC_*.md 与 poolmine 等 sql 分析
+**/analyze/*.txt
+
+# 本机环境（口令走环境变量）
+.fr.yaml

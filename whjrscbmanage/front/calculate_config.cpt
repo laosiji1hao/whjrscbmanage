@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<TableDataMap>
+<TableData name="获取配置参数" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_upper_storage_config]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<ToolBars>
+<ToolBarManager>
+<Location>
+<Embed position="1"/>
+</Location>
+<ToolBar>
+<Widget class="com.fr.report.web.button.write.Submit">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Utils_Submit')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[submit]]></IconName>
+<Verify failVerifySubmit="false" value="true"/>
+<Sheet onlySubmitSelect="false"/>
+</Widget>
+<Widget class="com.fr.report.web.button.write.Verify">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Verify_Data')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[verify]]></IconName>
+</Widget>
+</ToolBar>
+</ToolBarManager>
+</ToolBars>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck check="false"/>
+<ShowWidgets show="true"/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[723900,1152000,1333500,723900,723900,723900,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[2743200,8001000,8001000,2743200,2743200,2743200,2743200,2743200,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="0" s="0">
+<O t="DSColumn">
+<Attributes dsName="获取配置参数" columnName="id"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="1" r="1" cs="2" s="1">
+<O>
+<![CDATA[计算参数]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="2" s="2">
+<O>
+<![CDATA[增值税]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="2" s="2">
+<O>
+<![CDATA[附加]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="3" s="0">
+<O t="DSColumn">
+<Attributes dsName="获取配置参数" columnName="vat"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0"/>
+</C>
+<C c="2" r="3" s="0">
+<O t="DSColumn">
+<Attributes dsName="获取配置参数" columnName="surcharge"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0"/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting>
+<PaperSize width="42768000" height="60480000"/>
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+<FollowingTheme background="true"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<ReportWriteAttr>
+<SubmitVisitor class="com.fr.report.write.BuiltInSQLSubmiter">
+<Name>
+<![CDATA[内置SQL1]]></Name>
+<Attributes dsName="whjrscbmanage"/>
+<DMLConfig class="com.fr.write.config.UpdateConfig">
+<Table schema="" name="bus_upper_storage_config"/>
+<ColumnConfig name="id" isKey="true" skipUnmodified="false">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=A1]]></Attributes>
+</O>
+</ColumnConfig>
+<ColumnConfig name="coupon_rate" isKey="false" skipUnmodified="false">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=A4]]></Attributes>
+</O>
+</ColumnConfig>
+<ColumnConfig name="vat" isKey="false" skipUnmodified="false">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=B4]]></Attributes>
+</O>
+</ColumnConfig>
+<ColumnConfig name="surcharge" isKey="false" skipUnmodified="false">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=C4]]></Attributes>
+</O>
+</ColumnConfig>
+<Condition class="com.fr.data.condition.ListCondition"/>
+</DMLConfig>
+</SubmitVisitor>
+</ReportWriteAttr>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+</ReportParameterAttr>
+<StyleList>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" textStyle="1" imageLayout="1">
+<FRFont name="宋体" style="1" size="80"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-11561760" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border>
+<Top style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Top>
+<Bottom style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Bottom>
+<Left style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Left>
+<Right style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Right>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="1" size="96">
+<foreground>
+<FineColor color="-12080918" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1379330" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="0"/>
+<StrongestControlAttr class="com.fr.widgettheme.control.attr.WidgetDisplayEnhanceMarkAttr">
+<StrongestControlAttr widgetEnhance="false"/>
+</StrongestControlAttr>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="经典浅灰" dark="false"/>
+</TemplateThemeAttrMark>
+<StrategyConfigsAttr class="com.fr.esd.core.strategy.persistence.StrategyConfigsAttr">
+<StrategyConfigs>
+<StrategyConfig dsName="获取配置参数" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+<StrategyConfig dsName="ds1" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+</StrategyConfigs>
+</StrategyConfigsAttr>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="8350d5a3-e97c-44de-80eb-c1851abf4b4b"/>
+</ForkIdAttrMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v11" plugin-version="3.37.13">
+<TemplateCloudInfoAttrMark createTime="1782738798540"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="8350d5a3-e97c-44de-80eb-c1851abf4b4b"/>
+</TemplateIdAttMark>
+</WorkBook>

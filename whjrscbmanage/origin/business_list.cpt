@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<TableDataMap>
+<TableData name="当前用户的业务申报表的内容" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters>
+<Parameter>
+<Attributes name="customer_name"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="fine_username"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=$fine_username]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_bond_business b
+where b.status = 0
+and b.creator = '${fine_username}'
+${if(len(customer_name)=0,"","and customer_name = '"+customer_name+"'")}]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="查询所有待填客户" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters>
+<Parameter>
+<Attributes name="fine_username"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_bond_business b
+where b.status = 0
+and b.creator = '${fine_username}']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck/>
+<ShowWidgets/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[723900,990600,1676400,1371600,1524000,1676400,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[2743200,5829300,3048000,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="1" s="1">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="1" cs="2" s="1">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[myFR.dialog.create('./my_business_pc_add.cpt',{
+		"id":0
+		},'新增业务信息',1400,1200
+	)]]></Content>
+</JavaScript>
+</Listener>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[新增业务]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="2" s="1">
+<O t="DSColumn">
+<Attributes dsName="当前用户的业务申报表的内容" columnName="id"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[条件属性1]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="0"/>
+</C>
+<C c="2" r="2" cs="2" s="2">
+<O t="DSColumn">
+<Attributes dsName="当前用户的业务申报表的内容" columnName="customer_name"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<NameJavaScriptGroup>
+<NameJavaScript name="JavaScript脚本1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name="id"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=B3]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[myFR.dialog.create('./my_business_pc_add.cpt',{
+		"id":id
+		},'新增业务信息',1400,1200
+	)]]></Content>
+</JavaScript>
+</NameJavaScript>
+</NameJavaScriptGroup>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="3" s="1">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="3" cs="2" s="2">
+<PrivilegeControl/>
+<NameJavaScriptGroup>
+<NameJavaScript name="网络报表1">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<Parameters/>
+<TargetFrame>
+<![CDATA[_blank]]></TargetFrame>
+<Features width="600" height="400"/>
+<ReportletName showPI="true">
+<![CDATA[]]></ReportletName>
+<Attr>
+<DialogAttr class="com.fr.js.ReportletHyperlinkDialogAttr">
+<O>
+<![CDATA[]]></O>
+<Location center="true"/>
+</DialogAttr>
+</Attr>
+</JavaScript>
+</JavaScript>
+</NameJavaScript>
+</NameJavaScriptGroup>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="4" s="1">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="4" cs="2" s="2">
+<PrivilegeControl/>
+<NameJavaScriptGroup>
+<NameJavaScript name="网络报表1">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<Parameters/>
+<TargetFrame>
+<![CDATA[_blank]]></TargetFrame>
+<Features width="600" height="400"/>
+<ReportletName showPI="true">
+<![CDATA[]]></ReportletName>
+<Attr>
+<DialogAttr class="com.fr.js.ReportletHyperlinkDialogAttr">
+<O>
+<![CDATA[]]></O>
+<Location center="true"/>
+</DialogAttr>
+</Attr>
+</JavaScript>
+</JavaScript>
+</NameJavaScript>
+</NameJavaScriptGroup>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="5" s="1">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="5" cs="2" s="2">
+<PrivilegeControl/>
+<NameJavaScriptGroup>
+<NameJavaScript name="网络报表1">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<JavaScript class="com.fr.js.ReportletHyperlink">
+<Parameters/>
+<TargetFrame>
+<![CDATA[_blank]]></TargetFrame>
+<Features width="600" height="400"/>
+<ReportletName showPI="true">
+<![CDATA[]]></ReportletName>
+<Attr>
+<DialogAttr class="com.fr.js.ReportletHyperlinkDialogAttr">
+<O>
+<![CDATA[]]></O>
+<Location center="true"/>
+</DialogAttr>
+</Attr>
+</JavaScript>
+</JavaScript>
+</NameJavaScript>
+</NameJavaScriptGroup>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting/>
+<FollowingTheme background="true"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="4"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<ParameterUI class="com.fr.form.main.parameter.FormParameterUI">
+<Parameters/>
+<Layout class="com.fr.form.ui.container.WParameterLayout">
+<WidgetName name="para"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<FollowingTheme borderStyle="false"/>
+<Margin top="0" left="0" bottom="0" right="0"/>
+<Border>
+<border style="0" borderRadius="0" type="0" borderStyle="0">
+<color>
+<FineColor color="-723724" hor="-1" ver="-1"/>
+</color>
+</border>
+<WidgetTitle>
+<O>
+<![CDATA[新建标题]]></O>
+<FRFont name="SimSun" style="0" size="72"/>
+<Position pos="0"/>
+</WidgetTitle>
+<Alpha alpha="1.0"/>
+</Border>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-526086" hor="-1" ver="-1"/>
+</color>
+</Background>
+<LCAttr vgap="0" hgap="0" compInterval="0"/>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.parameter.FormSubmitButton">
+<WidgetName name="Search"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[查询]]></Text>
+<Hotkeys>
+<![CDATA[enter]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="413" y="25" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboBox">
+<WidgetName name="customer_name"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="customer_name" viName="customer_name"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[查询所有待填客户]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[]]></O>
+</widgetValue>
+</InnerWidget>
+<BoundsAttr x="143" y="25" width="126" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelcustomer_name"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O>
+<![CDATA[客户名称]]></O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="SimSun" style="0" size="72"/>
+<border style="0">
+<color>
+<FineColor color="-723724" hor="-1" ver="-1"/>
+</color>
+</border>
+</InnerWidget>
+<BoundsAttr x="50" y="25" width="93" height="21"/>
+</Widget>
+<ShowBookmarks showBookmarks="false"/>
+<Sorted sorted="false"/>
+<MobileWidgetList>
+<Widget widgetName="customer_name"/>
+<Widget widgetName="Search"/>
+</MobileWidgetList>
+<FrozenWidgets/>
+<MobileBookMarkStyle class="com.fr.form.ui.mobile.impl.DefaultMobileBookMarkStyle"/>
+<Display display="true"/>
+<DelayDisplayContent delay="true"/>
+<UseParamsTemplate use="true"/>
+<paramFireStopEdit fireEvent="false"/>
+<Position position="0"/>
+<Design_Width design_width="960"/>
+<NameTagModified/>
+<WidgetNameTagMap/>
+<ParamAttr class="com.fr.report.mobile.DefaultMobileParamStyle"/>
+<ParamStyle class="com.fr.form.ui.mobile.impl.DefaultMobileParameterStyle"/>
+<FollowingTheme background="true"/>
+</Layout>
+<DesignAttr width="960" height="80"/>
+</ParameterUI>
+</ReportParameterAttr>
+<StyleList>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style imageLayout="1">
+<FRFont name="simhei" style="0" size="112"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="simhei" style="0" size="112" underline="1">
+<foreground>
+<FineColor color="-16776961" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="1"/>
+<StrongestControlAttr class="com.fr.widgettheme.control.attr.WidgetDisplayEnhanceMarkAttr">
+<StrongestControlAttr widgetEnhance="false"/>
+</StrongestControlAttr>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="经典浅灰" dark="false"/>
+</TemplateThemeAttrMark>
+<StrategyConfigsAttr class="com.fr.esd.core.strategy.persistence.StrategyConfigsAttr">
+<StrategyConfigs>
+<StrategyConfig dsName="查询所有待填客户" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+<StrategyConfig dsName="当前用户的业务申报表的内容" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+</StrategyConfigs>
+</StrategyConfigsAttr>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="8c3e1a44-7565-40ad-8091-c2e99ef32b5f"/>
+</ForkIdAttrMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v11" plugin-version="3.37.13">
+<TemplateCloudInfoAttrMark createTime="1779243725660"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="8c3e1a44-7565-40ad-8091-c2e99ef32b5f"/>
+</TemplateIdAttMark>
+</WorkBook>

@@ -1,0 +1,2577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<TableDataMap>
+<TableData name="数据字典-信用评级" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[val]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String">
+<![CDATA[F*)NRk&PQc"CYRg#_rf3"L>Of[$-]A;2?3~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-行业分类" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[?'3l>_E\NaYM#fcjIgEm5U^_>=t)Fsb/"+0;;1"8!i>;%\Ck`V_PD<b`g`Mno)4'DfgI^WEL
+.cKg_CL)#]A,QoQ5&JL>Ya9a'coCiBS&,UFr*q('sM5ak#G/N\_\PR1e$'b"h80]Aqh3Ps>H,b
+l(LHB;dWc!aMk*ZQ"6n%*hB]ADJ@+u6aO_Ks@Ob9KphfF9lnLQCLG`$8Ya?]AJoRM05m4QL,_^
+(ri8F(H\Q.WgDU'(h;3PLYs@FcofC%FEa>X_G"=bG47=ZN%#%Ij]AY%GJhAoOW$)o,25aQ`PE
+gl>F)4fS4)V!Xr+P>M)%d->aW&(D+'9Xk4bV$KkE_J_gUIa\6<^f_\&D:Z[@=TJ!(`q%<-+M
+,P2C4P0k=E-d<DE5Ksk\MBb7oqt)k_&%*-<2+O%e+=5$[*]AOaCkBaGTUh.Q@RAd^p4O'[Ai,
+YGR/Be(n[X@0A~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-客户分类" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[Ha9F*q8V6\#$arIomdm6>YfNbJf$s^:M7uX0oQ,~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-是否" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[Ha9F@fs]A2(rEYot>gI#`k;3;A~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-业务品种" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[?'*l;K0U!%YBQU,02,":IliHT.%s,l-^G)BUT%Qjj+Xim@UE_[J)8%.N3;#3B"g:gjQO8'hN
+]AR&r8$>$9YRlA1[m=I8CZsYN9ILdRBr`G=!Db9b!CP[<9FEtpYmO:Y<=um#:2_t1B)WQnj4]A
+FKIO9%eK<\qr]AfU%1lN?`#Xj,2%]AEg@c1Uu@oAO-!Vs4WeCN=)R(_)Z"*s(l&0eYOB#W[<c3
+g5J*AeW^;]ASctK^9(rDM"9WZeGHPhJq!)^.)qUs;VN'LV)iA<TpI0>rPfc'^;?N]AIUN*SmWs
+Y4F+'BBkj$e9IYp"?gZ^>q/.-:4gQYh#:B~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-币种" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[HbQ]APBkoNfF"kT+ACmts)^[c)dDuW,!<<~
+]]></RowData>
+</TableData>
+<TableData name="数据字典-担保情况" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[Ha8.[o-l1L%Ci"rTDN)G,Gu^:ZgLj:S(!2ZC$W2T]A;KWe!rr~
+]]></RowData>
+</TableData>
+<TableData name="获取申报表已有业务信息" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters>
+<Parameter>
+<Attributes name="id"/>
+<O>
+<![CDATA[1]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_bond_business b
+where b.id = '${id}']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="数据字典-是否行权特殊值" class="com.fr.data.impl.EmbeddedTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<DSName>
+<![CDATA[null]]></DSName>
+<ColumnNames>
+<![CDATA[key,,.,,value]]></ColumnNames>
+<ColumnTypes>
+<![CDATA[java.lang.String,java.lang.String]]></ColumnTypes>
+<RowData ColumnTypes="java.lang.String,java.lang.String">
+<![CDATA[!E0!"s5^\Lk-g-.O,=5t$Kd_Zn%=J=S=f&6OQ<p_1Fk6CLmBnK2<V)uk-g-.O,E(WQ0>W/jL
+VqbSV-$[WTT_'k(ABLL:-6K\*8F"k)65-]ASQqL~
+]]></RowData>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="afterload">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[myFR.init()
+myFR.dialog.afterload()]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck/>
+<ShowWidgets show="true"/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+<JSImport>
+<![CDATA[scripts/js/myFR2.js]]></JSImport>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1676400,1257120,1828800,4876800,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,1257120,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[1028700,8001000,432000,11772900,1257300,8001000,432000,11772900,5219700,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="0" s="0">
+<O>
+<![CDATA[编号]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[条件属性1]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="0" s="1">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="id"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="5" r="0" s="2">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="0" s="1">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="1" s="0">
+<O>
+<![CDATA[标准/非标准]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="1" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="1" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="bond_type"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="bond_type"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<EMSG>
+<![CDATA[必选]]></EMSG>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.CustomDictionary">
+<CustomDictAttr>
+<Dict key="0" value="标准化业务"/>
+<Dict key="1" value="非标准化业务"/>
+</CustomDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.CustomDictionary">
+<CustomDictAttr>
+<Dict key="0" value="标准化业务"/>
+<Dict key="1" value="非标准化业务"/>
+</CustomDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="1" s="0">
+<O>
+<![CDATA[客户编号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="1" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="1" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="customer_no"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[function v(name) {
+    var w = _g().getWidgetByName(name);
+    return w ? w.getValue() : "";
+}
+myFR.callCloud("226010", {
+    custNo: v("customer_no")
+}, function(data) {
+    console.log(data);
+    // ===== ECIF客户号处理 =====
+    var currentEcifCustomerNo = v("ecif_customer_no");
+    if (data.ecifCustomerNo === '' || data.ecifCustomerNo == null) {
+        // 返回为空，不覆盖，仅提示
+        if (currentEcifCustomerNo !== '' && currentEcifCustomerNo != null) {
+            FR.Msg.alert('提示', '该客户编号查询的ECIF客户号不存在');
+        }
+    } else {
+        // 返回有值，进行一致性校验
+        if (currentEcifCustomerNo !== '' && currentEcifCustomerNo != null
+                && currentEcifCustomerNo !== data.ecifCustomerNo) {
+            FR.Msg.confirm('提示',
+                'ECIF客户号已在页面上填写为【' + currentEcifCustomerNo + '】，与查询结果【' + data.ecifCustomerNo + '】不一致，是否以此为准？',
+                function(btn) {
+                    if (btn === 'ok') {
+                        _g().getWidgetByName("ecif_customer_no").setValue(data.ecifCustomerNo);
+                    }
+                });
+        } else {
+            _g().getWidgetByName("ecif_customer_no").setValue(data.ecifCustomerNo);
+        }
+    }
+    // ===== 客户名称处理 =====
+    var currentCustomerName = v("customer_name");
+    if (data.customerName === '' || data.customerName == null) {
+        // 返回为空，不覆盖，仅提示
+        if (currentCustomerName !== '' && currentCustomerName != null) {
+            FR.Msg.alert('提示', '该客户编号查询的客户名称不存在');
+        }
+    } else {
+        // 返回有值，进行一致性校验
+        if (currentCustomerName !== '' && currentCustomerName != null
+                && currentCustomerName !== data.customerName) {
+            FR.Msg.confirm('提示',
+                '客户名称已在页面上填写为【' + currentCustomerName + '】，与查询结果【' + data.customerName + '】不一致，是否以此为准？',
+                function(btn) {
+                    if (btn === 'ok') {
+                        _g().getWidgetByName("customer_name").setValue(data.customerName);
+                    }
+                });
+        } else {
+            _g().getWidgetByName("customer_name").setValue(data.customerName);
+        }
+    }
+}, null, true);]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="customer_no"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<TextAttr allowBlank="false"/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="2" s="0">
+<O>
+<![CDATA[ECIF客户号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="2" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="2">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="ecif_customer_no"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="ecif_customer_no"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="2" s="0">
+<O>
+<![CDATA[融资人名称]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="2" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="2" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="customer_name"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="customer_name"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="3" s="0">
+<O>
+<![CDATA[项目/债券名称]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="3" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="3" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="biz_name"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="biz_name"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="3" s="0">
+<O>
+<![CDATA[债券编号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="3" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="3" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="bond_code"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="bond_code"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="4" s="0">
+<O>
+<![CDATA[是否绿色/科技/养老]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="4" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="green_tech_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="green_tech_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.CustomDictionary">
+<CustomDictAttr>
+<Dict key="0" value="绿色"/>
+<Dict key="1" value="科技"/>
+<Dict key="2" value="养老"/>
+<Dict key="3" value="不涉及"/>
+</CustomDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.CustomDictionary">
+<CustomDictAttr>
+<Dict key="0" value="绿色"/>
+<Dict key="1" value="科技"/>
+<Dict key="2" value="养老"/>
+<Dict key="3" value="不涉及"/>
+</CustomDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="4" s="0">
+<O>
+<![CDATA[外部信用评级]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="4" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="ext_rating"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="ext_rating"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="val"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-信用评级]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="5" s="0">
+<O>
+<![CDATA[外部信用评级日期]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="5" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="5" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="ext_rating_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="ext_rating_date"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="code" viName="code_name"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-国标行业]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="5" s="0">
+<O>
+<![CDATA[外部评级机构]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="5" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="5" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="rating_agency"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="rating_agency"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="6" s="0">
+<O>
+<![CDATA[内部评级]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="6" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="6" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="int_rating"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[var int_rating = _g().getWidgetByName("int_rating").getValue();
+	  var classOneRatings = ['AAA+', 'AAA', 'AAA-']A;
+        // 第二类：AA+/AA/AA-/A+/A/A-/BBB+ -> customer_type = 1
+       var classTwoRatings = ['AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+']A;
+       if (classOneRatings.indexOf(int_rating) !== -1) {
+            _g().getWidgetByName("customer_type").setValue(0);
+        } else if (classTwoRatings.indexOf(int_rating) !== -1) {
+            _g().getWidgetByName("customer_type").setValue(1);
+        }]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="int_rating"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="val"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-信用评级]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="name"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-客户规模]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="6">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="6" s="0">
+<O>
+<![CDATA[内部评级日期]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="6" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="6" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="int_rating_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="int_rating_date"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="7" s="0">
+<O>
+<![CDATA[主承销商]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="7" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="7" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="lead_underwriter"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="lead_underwriter"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="8" s="0">
+<O>
+<![CDATA[行业分类]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="8" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="8" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="industry"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="industry"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-行业分类]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-行业分类]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="8">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="8" s="0">
+<O>
+<![CDATA[客户分类]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="8" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="8" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="customer_type"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="customer_type"/>
+<WidgetAttr disabled="true" aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-客户分类]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-客户分类]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="9" s="0">
+<O>
+<![CDATA[发放日]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="9" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="9" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="start_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="start_date"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="9">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="9" s="0">
+<O>
+<![CDATA[到期日]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="9" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="9" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="mature_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="mature_date"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="10" s="0">
+<O>
+<![CDATA[币种]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="10" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="10" s="1">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="currency"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="currency"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-币种]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="10">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="10" s="0">
+<O>
+<![CDATA[初始金额]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="10" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="10" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="orig_amount"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name="currency"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=D11]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="orig_amount"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=H11]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[console.log(currency);
+console.log(orig_amount);
+if (currency == "人民币") {                                            
+_g().getWidgetByName("rmb_amount").setValue(orig_amount);
+_g().getWidgetByName("balance").setValue(orig_amount);  
+} else if(currency == "美元") {
+    _g().getWidgetByName("rmb_amount").setValue((orig_amount * 6.8).toFixed(2));
+    _g().getWidgetByName("balance").setValue((orig_amount * 6.8).toFixed(2));
+}]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="orig_amount"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="11" s="5">
+<O>
+<![CDATA[初始金额（折人民币）]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="11" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="11" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="rmb_amount"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="rmb_amount"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<TextAttr allowBlank="false"/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="11">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="11" s="0">
+<O>
+<![CDATA[业务余额（折人民币）]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="11" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="11" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="balance"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="balance"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="12" s="0">
+<O>
+<![CDATA[投资利率（%）]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="12" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="12" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="invest_rate"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="invest_rate"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="12">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="12" s="0">
+<O>
+<![CDATA[价值转移利率（%）]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="12" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="12" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="transfer_rate"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="transfer_rate"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="13" s="0">
+<O>
+<![CDATA[担保情况]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="13" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="13" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="guarantee_info"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="guarantee_info"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-担保情况]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-担保情况]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="13">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="13" s="0">
+<O>
+<![CDATA[是否涉及分期还款]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="13" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="13" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="installment_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="installment_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="14" s="0">
+<O>
+<![CDATA[还款计划]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="14" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="14" s="1">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name="row"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=ROW()]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="col"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=COL()]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="bond_code"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=H4]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[var installment_flag = _g().getWidgetByName("installment_flag").getValue();
+if(installment_flag == "0"){
+	alert("分期还款请选择是！");
+	}else{
+myFR.dialog.create('./install_ment.cpt&row='+row+'&col='+col+'&type=0',{
+		"bond_code":bond_code
+		},'还款计划',1200,1000
+	)
+	}]]></Content>
+</JavaScript>
+</Listener>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[添加还款计划]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="14" s="0">
+<O>
+<![CDATA[还款计划明细]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="14" s="3">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="14" s="1">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextArea">
+<WidgetName name="installment_detail"/>
+<WidgetAttr disabled="true" aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="false" textInputMode="1" isSupportManual="true" isSupportScan="false" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="false" showWordCount="false"/>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="8" r="14" s="1">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="installment"/>
+<WidgetAttr disabled="true" invisible="true" aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="15" s="0">
+<O>
+<![CDATA[是否我行承销]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="15" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="15" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="our_bank_underwrite"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<WidgetName name="our_bank_underwrite"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="15" s="0">
+<O>
+<![CDATA[约定资金用途]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="15" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="15" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="agreed_usage"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="agreed_usage"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<TextAttr allowBlank="false"/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="text"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="16" s="0">
+<O>
+<![CDATA[是否存在资金发放/募集账户账号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="16" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="16" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="fund_account_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name=""/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[var fund_account_flag = _g().getWidgetByName("fund_account_flag").getValue();
+console.log(fund_account_flag);
+if(fund_account_flag == "0"){
+	_g().getWidgetByName("fund_account").setValue("");
+	_g().getWidgetByName("fund_account").setVisible(false); 
+}else{
+	_g().getWidgetByName("fund_account").setVisible(true); 
+}]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="fund_account_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="16" s="0">
+<O>
+<![CDATA[资金发放/募集账户账号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="16" s="3">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="16" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="fund_account"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[ var fund_account = _g().getWidgetByName("fund_account").getValue();
+myFR.callCloud("226014", {
+        acctNo: fund_account
+    }, function(data) {
+        	console.log(data);
+    },function(data){
+    	FR.Msg.toast("账户不可用");
+    	        	_g().getWidgetByName("fund_account").reset();
+    	},true);]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="fund_account"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="branch_no" viName="branch_name2"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[机构列表]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="17" s="0">
+<O>
+<![CDATA[是否存在资金监管/回款专户账号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="17" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="17" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="supervise_account_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[var supervise_account_flag = _g().getWidgetByName("supervise_account_flag").getValue();
+if(supervise_account_flag == "0"){
+	_g().getWidgetByName("supervise_account").setValue("");
+	_g().getWidgetByName("supervise_account").setVisible(false); 
+	}else{
+	_g().getWidgetByName("supervise_account").setVisible(true); 
+		}]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="supervise_account_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="17" s="0">
+<O>
+<![CDATA[资金监管/回款专户账号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="17" s="3">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="17" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="supervise_account"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[ var supervise_account = _g().getWidgetByName("supervise_account").getValue();
+myFR.callCloud("226014", {
+        acctNo: supervise_account
+    }, function(data) {
+        if(data.status != "AS00"){
+        	FR.Msg.alert('提示', '该账号不可用，查询结果为' + data.statusTxt);
+        	_g().getWidgetByName("supervise_account").reset();
+        	}
+    },function(data){
+    	FR.Msg.toast("账户不可用");
+    	        	_g().getWidgetByName("supervise_account").reset();
+    	},true);]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="supervise_account"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="branch_no" viName="branch_name2"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[机构列表]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="18" s="0">
+<O>
+<![CDATA[批复号]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="18" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="18" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="remark_number"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetName name="remark_number"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<TextAttr allowBlank="false"/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0" isSupportManual="true" isSupportScan="true" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="true"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="18" s="0">
+<O>
+<![CDATA[批复管理要求]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="18" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="18" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="remark"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextArea">
+<WidgetName name="remark"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="false" textInputMode="1" isSupportManual="true" isSupportScan="false" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="false" showWordCount="false"/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="19" s="0">
+<O>
+<![CDATA[是否存在金融市场部批复管理要求]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="19" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="19" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="js_remark_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[var js_remark_flag = _g().getWidgetByName("js_remark_flag").getValue();
+if(js_remark_flag == "0"){
+	_g().getWidgetByName("js_remark").setValue("");
+	_g().getWidgetByName("js_remark").setVisible(false); 
+	}else{
+	_g().getWidgetByName("js_remark").setVisible(true);
+}]]></Content>
+</JavaScript>
+</Listener>
+<Listener event="beforeedit" name="编辑前1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[_g().getWidgetByName("js_remark_flag").setValue(0);//初始默认值为否]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="js_remark_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="19" s="0">
+<O>
+<![CDATA[金融市场部批复管理要求]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="19" s="3">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="19" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="js_remark"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.TextArea">
+<WidgetName name="js_remark"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="false" textInputMode="1" isSupportManual="true" isSupportScan="false" isSupportNFC="false" nfcContentType="0"/>
+<MobileTextEditAttr allowOneClickClear="false" showWordCount="false"/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="user_id" viName="user_name2"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[用户列表]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="20" s="0">
+<O>
+<![CDATA[是否行权]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="20" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="20" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="exercise_flag"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name=""/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[var exercise_flag = _g().getWidgetByName("exercise_flag").getValue();
+if(exercise_flag == "1")//当是行权时，行权日期为到期日期；否则不填
+{
+	_g().getWidgetByName("exercise_date").setVisible(true);
+	var mature_date = _g().getWidgetByName("mature_date").getValue();
+	_g().getWidgetByName("exercise_date").setValue(mature_date);
+	}else if(exercise_flag == "0"){
+	_g().getWidgetByName("exercise_date").reset();
+	_g().getWidgetByName("exercise_date").setVisible(false);
+	}
+	]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="exercise_flag"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否行权特殊值]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="value" viName="key"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[数据字典-是否]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="20" s="0">
+<O>
+<![CDATA[行权日期]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="6" r="20" s="3">
+<O>
+<![CDATA[*]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="7" r="20" s="4">
+<O t="DSColumn">
+<Attributes dsName="获取申报表已有业务信息" columnName="exercise_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="exercise_date"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Present class="com.fr.base.present.DictPresent">
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="user_id" viName="user_name2"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[用户列表]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+</Present>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="5" r="22" s="1">
+<O>
+<![CDATA[保存]]></O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name="id"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=D1]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[console.log(id);
+    function v(name) {
+        var w = _g().getWidgetByName(name);
+        return w ? w.getValue() : "";
+    }
+    var inspect_freq
+    if(v("customer_type") == "0" || v("customer_type") == "1"){
+        inspect_freq = 3
+    }else{
+        inspect_freq = 1
+    }
+    myFR.callCloud("226006", {
+        "businessId":      "",
+        "bondCode":            v("bond_code"),
+        "ecifCustomerNo":      v("ecif_customer_no"),
+        "customerNo":          v("customer_no"),
+        "customerName":        v("customer_name"),
+        "bizName":             v("biz_name"),
+        "bondType":            v("bond_type"),
+        "greenTechFlag":       v("green_tech_flag"),
+        "extRating":           v("ext_rating"),
+        "extRatingDate":       v("ext_rating_date"),
+        "ratingAgency":        v("rating_agency"),
+        "intRating":           v("int_rating"),
+        "intRatingDate":       v("int_rating_date"),
+        "industry":            v("industry"),
+        "customerType":        v("customer_type"),
+        "startDate":           v("start_date"),
+        "matureDate":          v("mature_date"),
+        "currency":            v("currency"),
+        "origAmount":          v("orig_amount"),
+        "rmbAmount":           v("rmb_amount"),
+        "balance":             v("balance"),
+        "investRate":          v("invest_rate"),
+        "transferRate":        v("transfer_rate"),
+        "guaranteeInfo":       v("guarantee_info"),
+        "installmentFlag":     v("installment_flag"),
+        "installmentPlan":     v("installment_plan"),
+        "ourBankUnderwrite":   v("our_bank_underwrite"),
+        "agreedUsage":         v("agreed_usage"),
+        "fundAccount":         v("fund_account"),
+        "fundAccountFlag":     v("fund_account_flag"),
+        "superviseAccount":     v("supervise_account"),
+        "superviseAccountFlag":v("supervise_account_flag"),
+        "drawdownCheck":       v("drawdown_check"),
+        "exerciseFlag":        v("exercise_flag"),
+        "exerciseDate":        v("exercise_date"),
+        "remarkNumber":       v("remark_number"),
+        "remark":              v("remark"),
+        "jsRemark":            v("js_remark"),
+        "jsRemarkFlag":        v("js_remark_flag"),
+        "leadUnderwriter":     v("lead_underwriter"),
+        "inspectFreq":         inspect_freq,
+        "inspectorPost":      "客户经理"
+    }, function(data) {
+//        window.parent.FR.closeDialog();
+//        window.parent.contentPane.parameterCommit();
+        window.parent.FR.Msg.toast("创建分期业务信息审批中");
+    },null,true);]]></Content>
+</JavaScript>
+</Listener>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[确定]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[submit]]></IconName>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting/>
+<FollowingTheme background="false"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="false" windowPosition="1" align="0" useParamsTemplate="false" currentIndex="7"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<Parameter>
+<Attributes name="cloudUrl"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[="http://" + $cloud_service_ip]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="prjId"/>
+<O>
+<![CDATA[whjrscbmanage]]></O>
+</Parameter>
+</ReportParameterAttr>
+<StyleList>
+<Style horizontal_alignment="0" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="1" size="96">
+<foreground>
+<FineColor color="-12080918" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1379330" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="SimSun" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="1" size="96">
+<foreground>
+<FineColor color="-1424335" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1379330" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="1" size="96">
+<foreground>
+<FineColor color="-12080918" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1379330" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="1"/>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="兼容主题" dark="false"/>
+</TemplateThemeAttrMark>
+<StrategyConfigsAttr class="com.fr.esd.core.strategy.persistence.StrategyConfigsAttr">
+<StrategyConfigs>
+<StrategyConfig dsName="获取申报表已有业务信息" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+</StrategyConfigs>
+</StrategyConfigsAttr>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="d4b4d0e0-22a1-4685-b11a-462ecf132aa4"/>
+</ForkIdAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="d4b4d0e0-22a1-4685-b11a-462ecf132aa4"/>
+</TemplateIdAttMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v11" plugin-version="3.37.13">
+<TemplateCloudInfoAttrMark createTime="1677467894498"/>
+</TemplateCloudInfoAttrMark>
+</WorkBook>

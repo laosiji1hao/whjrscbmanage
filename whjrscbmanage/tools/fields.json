@@ -1,0 +1,1054 @@
+{
+ "普惠": {
+  "credit_renewal": [
+   {
+    "name": "cust_name",
+    "label": "客户名称",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "mt_fac_name",
+    "label": "业务种类",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_first_disb",
+    "label": "发放日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_maturity",
+    "label": "到期日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_dbl_inc",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_refinance",
+    "label": "是否续贷",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "refinance_amt",
+    "label": "续贷金额（万元）",
+    "kind": "number",
+    "required": false,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "declaration_date",
+    "label": "申报时间",
+    "kind": "date",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "non_profit_conversion": [
+   {
+    "name": "cust_name",
+    "label": "客户名称",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cms_cust_cd",
+    "label": "客户编号",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bus_line",
+    "label": "所属条线",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "aprved_amt",
+    "label": "授信金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_amt",
+    "label": "授信后预计余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "prepayment": [
+   {
+    "name": "cust_name",
+    "label": "客户名称",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "mt_fac_name",
+    "label": "业务种类",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_first_disb",
+    "label": "发放日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_maturity",
+    "label": "到期日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_dbl_inc",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_repayment_date",
+    "label": "预计还款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "actual_repayment_date",
+    "label": "实际还款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_repayment_amount",
+    "label": "预计还款金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "actual_repayment_amount",
+    "label": "实际还款金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "reserve_project": [
+   {
+    "name": "customer_name",
+    "label": "客户",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_double_increase",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bus_line",
+    "label": "所属条线",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "net_increase_amount",
+    "label": "金额（净增）（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "loan_type",
+    "label": "贷款类型",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": "流贷"
+   },
+   {
+    "name": "expected_declaration_date",
+    "label": "预计申报时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_loan_date",
+    "label": "预计放款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr_phone",
+    "label": "责任人联系电话",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "enterprise_tag",
+    "label": "企业标签",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "enterprise_tag_other",
+    "label": "企业标签（选“其他”时请手动填写）",
+    "kind": "text",
+    "required": false,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ]
+ },
+ "零售信贷": {
+  "credit_renewal": [
+   {
+    "name": "cust_chinese_name",
+    "label": "客户名称",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_name",
+    "label": "客户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "mt_fac_name",
+    "label": "业务种类",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_maturity",
+    "label": "到期日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_first_disb",
+    "label": "发放日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_refinance",
+    "label": "是否续贷",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_dbl_inc",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "declaration_date",
+    "label": "申报时间",
+    "kind": "date",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "refinance_amt",
+    "label": "续贷金额（万元）",
+    "kind": "number",
+    "required": false,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": false,
+    "cond": [
+     "is_refinance",
+     "true"
+    ],
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "non_profit_conversion": [
+   {
+    "name": "cust_name",
+    "label": "客户名称",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cms_cust_cd",
+    "label": "客户编号",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bus_line",
+    "label": "所属条线",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "aprved_amt",
+    "label": "授信金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_amt",
+    "label": "授信后预计余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "prepayment": [
+   {
+    "name": "cust_name",
+    "label": "客户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_chinese_name",
+    "label": "客户名称",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "new_bcs_acct_no",
+    "label": "账户号",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "mt_fac_name",
+    "label": "业务种类",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_first_disb",
+    "label": "发放日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "dt_maturity",
+    "label": "到期日期",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bsn_bal",
+    "label": "业务余额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_dbl_inc",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_repayment_date",
+    "label": "预计还款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "actual_repayment_date",
+    "label": "实际还款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_repayment_amount",
+    "label": "预计还款金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "actual_repayment_amount",
+    "label": "实际还款金额（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ],
+  "reserve_project": [
+   {
+    "name": "customer_name",
+    "label": "客户",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_double_increase",
+    "label": "是否两增",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "bus_line",
+    "label": "所属条线",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "is_low_risk",
+    "label": "是否特别授信业务",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "net_increase_amount",
+    "label": "金额（净增）（万元）",
+    "kind": "number",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "loan_type",
+    "label": "贷款类型",
+    "kind": "text",
+    "required": true,
+    "cond": null,
+    "default": "个人经营性"
+   },
+   {
+    "name": "expected_declaration_date",
+    "label": "预计申报时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "expected_loan_date",
+    "label": "预计放款时间",
+    "kind": "date",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "cust_mgr",
+    "label": "责任人",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "branch_no",
+    "label": "经办行",
+    "kind": "ref",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status",
+    "label": "办理状态",
+    "kind": "pick",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "processing_status_date",
+    "label": "当前状态办理时间",
+    "kind": "datetime",
+    "required": true,
+    "cond": null,
+    "default": ""
+   },
+   {
+    "name": "remarks",
+    "label": "备注",
+    "kind": "textarea",
+    "required": false,
+    "cond": null,
+    "default": ""
+   }
+  ]
+ },
+ "_modes": {
+  "普惠": {
+   "credit_renewal": {
+    "gated": true,
+    "batch": true,
+    "row": false
+   },
+   "non_profit_conversion": {
+    "gated": false,
+    "batch": false,
+    "row": true
+   },
+   "prepayment": {
+    "gated": true,
+    "batch": true,
+    "row": false
+   },
+   "reserve_project": {
+    "gated": true,
+    "batch": true,
+    "row": false
+   }
+  },
+  "零售信贷": {
+   "credit_renewal": {
+    "gated": false,
+    "batch": false,
+    "row": true
+   },
+   "non_profit_conversion": {
+    "gated": false,
+    "batch": false,
+    "row": true
+   },
+   "prepayment": {
+    "gated": false,
+    "batch": false,
+    "row": true
+   },
+   "reserve_project": {
+    "gated": false,
+    "batch": false,
+    "row": true
+   }
+  }
+ }
+}

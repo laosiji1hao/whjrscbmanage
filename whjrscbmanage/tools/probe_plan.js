@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+const WS = process.env.FR_WORKSPACE || 'C:/Users/asus/.claude/plugins/marketplaces/fr-flow-v3';
+const { login } = require(WS + '/foundation/tools/api_tester/fr_login');
+const BASE = 'http://localhost:8075/webroot';
+(async () => {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await login(page, BASE);
+  const errs = [];
+  page.on('pageerror', e => errs.push('PAGEERROR ' + e.message.slice(0, 200)));
+  page.on('console', m => { if (m.type() === 'error') errs.push('CONS ' + m.text().slice(0, 150)); });
+  await page.goto(BASE + '/decision/view/report?op=write&reportlet=whjrscbmanage/pages/installment_ment.cpt&bond_code=BC000002&type=0', { waitUntil: 'domcontentloaded' });
+  await page.locator('#app-root').waitFor({ timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(2000);
+  const app = await page.locator('#app-root').innerText().catch(() => '(无 app-root)');
+  console.log('app:', app.replace(/\n+/g, ' ').slice(0, 120));
+  errs.filter(e => !/qrcode|CryptoJS|BI is not defined/.test(e)).slice(0,6).forEach(e => console.log('ERR ' + e));
+  await browser.close();
+})();

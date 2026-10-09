@@ -1,0 +1,744 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="afterload">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content><![CDATA[
+(() => {
+  
+  var PATH = {
+    currentDir: (function() {
+      var name = null;
+      try {
+        name = FR.remoteEvaluate("=reportName");
+      } catch (e) {
+      }
+      return name ? name.substring(0, name.lastIndexOf("/") + 1) : "whjrscbmanage/pages/";
+    })(),
+    apiBase: (function() {
+      var su = null;
+      try {
+        su = servletURL;
+      } catch (e) {
+      }
+      if (!su) {
+        try {
+          su = FR.remoteEvaluate("=servletURL");
+        } catch (e2) {
+        }
+      }
+      if (!su) return "/webroot/decision";
+      var parts = su.split("/");
+      return "/" + parts[1] + "/" + parts[2];
+    })(),
+    getDataTemplate: function(filename) {
+      return this.currentDir.replace("/pages/", "/data/") + filename;
+    },
+    getTemplatePath: function(filename) {
+      return this.currentDir + filename;
+    }
+  };
+  var hideStyle = document.createElement("style");
+  hideStyle.innerHTML = ".fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}";
+  document.head.appendChild(hideStyle);
+  document.body.setAttribute(
+    "style",
+    "margin:0;padding:0;min-height:100vh;box-sizing:border-box;overflow-y:auto;"
+  );
+  var appRoot = document.createElement("div");
+  appRoot.id = "app-root";
+  document.body.insertBefore(appRoot, document.body.firstChild);
+  var DATA_CPT = "whjrscbmanage_data.cpt";
+  var CLOUD_FALLBACK = { cloudUrl: "http://localhost:9058", prjId: "whjrscbmanage" };
+  var zhCN = {
+    locale: "zh-cn",
+    Pagination: {
+      items_per_page: "条/页",
+      jump_to: "跳至",
+      jump_to_confirm: "确定",
+      page: "页",
+      prev_page: "上一页",
+      next_page: "下一页",
+      prev_5: "向前 5 页",
+      next_5: "向后 5 页",
+      prev_3: "向前 3 页",
+      next_3: "向后 3 页",
+      page_size: "页码"
+    },
+    Table: {
+      filterTitle: "筛选",
+      filterConfirm: "确定",
+      filterReset: "重置",
+      selectAll: "全选",
+      selectInvert: "反选",
+      sortTitle: "排序",
+      expand: "展开行",
+      collapse: "折叠行",
+      emptyText: "暂无数据"
+    },
+    Modal: { okText: "确定", cancelText: "取消", justOkText: "知道了" },
+    Popconfirm: { okText: "确定", cancelText: "取消" },
+    Form: { optional: "（可选）", defaultValidateMessages: {
+      default: "字段验证错误 ${label}",
+      required: "请输入 ${label}",
+      enum: "${label} 必须是其中一个",
+      whitespace: "不能输入空格"
+    } },
+    Empty: { description: "暂无数据" },
+    DatePicker: { placeholder: "请选择日期", rangePlaceholder: ["开始日期", "结束日期"] },
+    Select: { placeholder: "请选择" }
+  };
+  var iconBase = PATH.apiBase.replace("/decision", "/help/lib/antd/icons");
+  var iconCache = {};
+  (function() {
+    var names = [
+      "search",
+      "plus",
+      "reload",
+      "edit",
+      "delete",
+      "close",
+      "check",
+      "filter",
+      "export",
+      "download",
+      "setting",
+      "user"
+    ];
+    names.forEach(function(name) {
+      $.ajax({
+        url: iconBase + "/outlined/" + name + ".svg",
+        type: "GET",
+        async: false,
+        dataType: "text",
+        success: function(svg) {
+          iconCache[name] = svg;
+        },
+        error: function() {
+          iconCache[name] = null;
+        }
+      });
+    });
+  })();
+  function icon(name) {
+    var key = name.replace("/outlined/", "").replace(".svg", "");
+    var svg = iconCache[key];
+    if (!svg) return null;
+    svg = svg.replace("<svg ", '<svg fill="currentColor" width="1em" height="1em" ');
+    return React.createElement("span", {
+      style: { display: "inline-flex", alignItems: "center", lineHeight: 1 },
+      dangerouslySetInnerHTML: { __html: svg }
+    });
+  }
+  var CUR_USER = (function() {
+    try {
+      return String(FR.remoteEvaluate("=$fine_username") || "");
+    } catch (e) {
+      return "";
+    }
+  })();
+  function identityParams() {
+    return [
+      { name: "p_operator", type: "String", value: CUR_USER },
+      { name: "user_name", type: "String", value: CUR_USER }
+    ];
+  }
+  function callData(dsName, params, onOk, onErr) {
+    $.ajax({
+      url: PATH.apiBase + "/api/data",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        report_path: PATH.getDataTemplate(DATA_CPT),
+        datasource_name: dsName,
+        page_number: -1,
+        page_size: -1,
+        parameters: (params || []).concat(identityParams())
+      }),
+      success: function(res) {
+        if (typeof res === "string") {
+          try {
+            res = JSON.parse(res);
+          } catch (e) {
+          }
+        }
+        if (!res || res.err_code !== 0) {
+          antd.message.error(res && res.err_msg || "操作失败");
+          if (onErr) onErr(res);
+          return;
+        }
+        if (onOk) onOk(res.data || []);
+      },
+      error: function(xhr, status, error) {
+        antd.message.error("网络错误：" + error);
+        if (onErr) onErr(null);
+      }
+    });
+  }
+  var CLIENT = (function() {
+    function text(v) {
+      if (v === null || v === void 0) return "";
+      return String(v);
+    }
+    function remote(p) {
+      try {
+        return text(FR.remoteEvaluate("=$" + p));
+      } catch (e) {
+        return "";
+      }
+    }
+    function resolve(promise) {
+      try {
+        var r = remote(promise);
+        if (r) return r;
+      } catch (e) {
+      }
+      if (typeof myFR !== "undefined" && myFR[promise]) return myFR[promise];
+      return CLOUD_FALLBACK[promise];
+    }
+    function ensureLoaded() {
+      if (typeof window.myFR !== "undefined") return true;
+      try {
+        var url = PATH.apiBase.replace("/decision", "") + "/js/myFR.js";
+        var r = (function() {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, false);
+          xhr.send(null);
+          return xhr.responseText;
+        })();
+        if (!r) return false;
+        new Function(r)();
+        return typeof window.myFR !== "undefined";
+      } catch (e) {
+        return false;
+      }
+    }
+    var loaded = ensureLoaded();
+    return {
+      ready: loaded,
+      cloudUrl: function() {
+        try {
+          var v = remote("cloudUrl");
+          if (v) return v;
+        } catch (e) {
+        }
+        if (typeof myFR !== "undefined" && myFR.cloudUrl) return myFR.cloudUrl;
+        return CLOUD_FALLBACK.cloudUrl;
+      },
+      call: function(code, body, onOk, onErr) {
+        if (!ensureLoaded() || typeof window.myFR === "undefined" || !window.myFR.callCloud) {
+          antd.message.warning("云平台服务不可用（myFR 未加载），请检查后重试");
+          if (onErr) onErr(null);
+          return;
+        }
+        try {
+          var cu = this.cloudUrl();
+          if (!myFR.cloudUrl) myFR.cloudUrl = cu;
+          if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
+          window.myFR.callCloud(String(code), body || {}, function(data) {
+            if (onOk) onOk(data);
+          }, function(msg) {
+            if (msg) {
+              try {
+                antd.message.error(String(msg));
+              } catch (e) {
+              }
+            }
+            if (onErr) onErr(null);
+          }, true);
+        } catch (e) {
+          if (onErr) onErr(null);
+        }
+      }
+    };
+  })();
+  var DICT_YN = [{ v: "0", t: "否" }, { v: "1", t: "是" }];
+  var DICTS = {
+    "yn": DICT_YN,
+    symbolStandard: [{ v: "0", t: "标准化业务" }, { v: "1", t: "非标准化业务" }],
+    greenTech: [{ v: "0", t: "绿色" }, { v: "1", t: "科技" }, { v: "2", t: "养老" }, { v: "3", t: "不涉及" }],
+    industry: [{ v: "0", t: "货币金融服务" }, { v: "1", t: "资本市场服务" }, { v: "2", t: "保险业" }, { v: "3", t: "其他金融业" }],
+    customerType: [{ v: "0", t: "一类" }, { v: "1", t: "二类" }, { v: "2", t: "三类" }, { v: "3", t: "四类" }],
+    currency: [{ v: "人民币", t: "人民币" }, { v: "美元", t: "美元" }],
+    guaranty: [{ v: "信用", t: "信用" }, { v: "保证", t: "保证" }, { v: "抵押", t: "抵押" }, { v: "质押", t: "质押" }],
+    fiveLevel: ["正常一档", "正常二档", "正常三档", "关注", "次级", "可疑", "损失"],
+    manageLine: [{ v: "金融市场部", t: "金融市场部" }],
+    dept: [{ v: "利率室", t: "利率室" }, { v: "同业室", t: "同业室" }, { v: "托管室", t: "托管室" }],
+    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BB", "B", "CCC", "CC", "C"],
+    exercise: [{ v: "0", t: "否" }, { v: "1", t: "是" }],
+    bizType: [{ v: "0", t: "国债" }, { v: "1", t: "地方债" }, { v: "2", t: "金融债" }, { v: "3", t: "企业债" }, { v: "4", t: "中期票据" }, { v: "5", t: "短期融资券" }, { v: "6", t: "资产支持证券" }, { v: "7", t: "同业存单" }, { v: "8", t: "货币市场工具" }, { v: "9", t: "非标准化资产" }, { v: "10", t: "股权" }, { v: "11", t: "基金" }, { v: "12", t: "其他" }],
+    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
+    ynNot: [{ v: "0", t: "不涉及" }, { v: "1", t: "是" }]
+  };
+  function selOpts(arr) {
+    if (!arr) return [];
+    return arr.map(function(o) {
+      if (o && typeof o === "object" && "v" in o) {
+        return { value: String(o.v), label: o.t === void 0 || o.t === null ? "" : String(o.t) };
+      }
+      return o;
+    });
+  }
+  function notifyHeight() {
+    try {
+      if (window.parent === window) return;
+      var el = document.getElementById("app-root");
+      var h = el ? el.scrollHeight : document.body.scrollHeight;
+      window.parent.postMessage({ type: "fr_iframe_resize", height: h }, "*");
+    } catch (e) {
+    }
+  }
+  function closeSelf() {
+    try {
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+    } catch (e) {
+    }
+  }
+  function App() {
+    var { Form, Input, InputNumber, Select, Button, Space, Row, Col, Spin, Modal, DatePicker } = antd;
+    const [form] = Form.useForm();
+    var _hook_001_ = React.useState("add");var mode = _hook_001_[0];var setMode = _hook_001_[1];
+    var _hook_002_ = React.useState(false);var loading = _hook_002_[0];var setLoading = _hook_002_[1];
+    var _hook_003_ = React.useState(false);var saving = _hook_003_[0];var setSaving = _hook_003_[1];
+    var _hook_004_ = React.useState("0");var recordId = _hook_004_[0];var setRecordId = _hook_004_[1];
+    var _hook_005_ = React.useState({ open: false, url: "" });var planModal = _hook_005_[0];var setPlanModal = _hook_005_[1];
+    var _hook_006_ = React.useState("");var instDetail = _hook_006_[0];var setInstDetail = _hook_006_[1];
+    var _hook_007_ = React.useState("");var instJson = _hook_007_[0];var setInstJson = _hook_007_[1];
+    var _hook_008_ = React.useState(false);var showFund = _hook_008_[0];var setShowFund = _hook_008_[1];
+    var _hook_009_ = React.useState(false);var showSuper = _hook_009_[0];var setShowSuper = _hook_009_[1];
+    var _hook_010_ = React.useState(false);var showJs = _hook_010_[0];var setShowJs = _hook_010_[1];
+    var _hook_011_ = React.useState(false);var showExDate = _hook_011_[0];var setShowExDate = _hook_011_[1];
+    var M_TITLE = { add: "新增业务信息", edit: "编辑业务信息", installment: "创建分期业务" };
+    var loadingRef = React.useRef(false);
+    React.useEffect(function() {
+      var q = new URLSearchParams(window.location.search);
+      var m = q.get("mode") || "add";
+      var id = q.get("id") || "0";
+      setMode(m);
+      setRecordId(id);
+      if (m === "add") {
+        form.setFieldsValue({
+          our_bank_underwrite: "0",
+          currency: "人民币",
+          guarantee_info: "信用",
+          five_level_class: "正常一档",
+          inspect_freq: "3",
+          green_tech_flag: "0"
+        });
+      } else if (id && id !== "0") {
+        setLoading(true);
+        loadingRef.current = true;
+        callData("get_business", [{ name: "p_id", type: "String", value: id }], function(rows) {
+          setLoading(false);
+          loadingRef.current = false;
+          if (!rows || !rows.length) {
+            antd.message.error("记录不存在");
+            return;
+          }
+          var d = rows[0];
+          form.setFieldsValue({
+            id: d.id,
+            bond_type: d.bond_type,
+            customer_no: d.customer_no,
+            ecif_customer_no: d.ecif_customer_no,
+            customer_name: d.customer_name,
+            biz_name: d.biz_name,
+            bond_code: d.bond_code,
+            green_tech_flag: d.green_tech_flag,
+            ext_rating: d.ext_rating,
+            ext_rating_date: pickDay(d.ext_rating_date),
+            rating_agency: d.rating_agency,
+            int_rating: d.int_rating,
+            int_rating_date: pickDay(d.int_rating_date),
+            lead_underwriter: d.lead_underwriter,
+            industry: d.industry,
+            customer_type: d.customer_type,
+            start_date: pickDay(d.start_date),
+            mature_date: pickDay(d.mature_date),
+            currency: d.currency,
+            orig_amount: num(d.orig_amount),
+            rmb_amount: num(d.rmb_amount),
+            balance: num(d.balance),
+            invest_rate: num(d.invest_rate),
+            transfer_rate: num(d.transfer_rate),
+            guarantee_info: d.guarantee_info,
+            installment_flag: d.installment_flag,
+            our_bank_underwrite: d.our_bank_underwrite,
+            agreed_usage: d.agreed_usage,
+            fund_account_flag: d.fund_account_flag,
+            fund_account: d.fund_account,
+            supervise_account_flag: d.supervise_account_flag,
+            supervise_account: d.supervise_account,
+            remark_number: d.remark_number,
+            remark: d.remark,
+            js_remark_flag: d.js_remark_flag,
+            js_remark: d.js_remark,
+            exercise_flag: d.exercise_flag,
+            exercise_date: pickDay(d.exercise_date)
+          });
+          setShowFund(String(d.fund_account_flag || "0") === "1");
+          setShowSuper(String(d.supervise_account_flag || "0") === "1");
+          setShowJs(String(d.js_remark_flag || "0") === "1");
+          setShowExDate(String(d.exercise_flag || "0") === "1");
+          if (d.installment_plan) {
+            setInstDetail(d.installment_plan);
+          }
+        }, function() {
+          setLoading(false);
+        });
+      }
+      setTimeout(notifyHeight, 50);
+    }, []);
+    function pickDay(v) {
+      if (!v) return null;
+      var d = dayjs(String(v).slice(0, 10));
+      return d.isValid() ? d : null;
+    }
+    function num(v) {
+      if (v === void 0 || v === null || v === "") return null;
+      var n = Number(v);
+      return isNaN(n) ? null : n;
+    }
+    React.useEffect(function() {
+      notifyHeight();
+    });
+    React.useEffect(function() {
+      function handler(e) {
+        var d = e.data;
+        if (!d || d.type !== "fr_inst_plan") return;
+        setPlanModal({ open: false, url: "" });
+        setInstDetail(d.result || "");
+        setInstJson(d.json || "[]");
+      }
+      window.addEventListener("message", handler);
+      return function() {
+        window.removeEventListener("message", handler);
+      };
+    }, []);
+    function outtext(v) {
+      return v === void 0 || v === null ? "" : String(v);
+    }
+    function ecifQuery(custNo) {
+      if (!custNo) return;
+      CLIENT.call("226010", { custNo: outtext(custNo) }, function(data) {
+        var f = data || {};
+        var curE = outtext(form.getFieldValue("ecif_customer_no"));
+        var curN = outtext(form.getFieldValue("customer_name"));
+        var ne = f.ecifCustomerNo === void 0 || f.ecifCustomerNo === null ? "" : String(f.ecifCustomerNo);
+        var nn = f.customerName === void 0 || f.customerName === null ? "" : String(f.customerName);
+        if (ne === "") {
+          if (curE !== "") antd.message.warning("该客户编号查询的ECIF客户号不存在");
+        } else if (curE !== "" && curE !== ne) {
+          antd.Modal.confirm({
+            title: "提示",
+            content: "ECIF客户号已在页面上填写为【" + curE + "】，与查询结果【" + ne + "】不一致，是否以此为准？",
+            okText: "确定",
+            cancelText: "取消",
+            onOk: function() {
+              form.setFieldsValue({ ecif_customer_no: ne });
+            }
+          });
+        } else {
+          form.setFieldsValue({ ecif_customer_no: ne });
+        }
+        if (nn === "") {
+          if (curN !== "") antd.message.warning("该客户编号查询的客户名称不存在");
+        } else if (curN !== "" && curN !== nn) {
+          antd.Modal.confirm({
+            title: "提示",
+            content: "客户名称已在页面上填写为【" + curN + "】，与查询结果【" + nn + "】不一致，是否以此为准？",
+            okText: "确定",
+            cancelText: "取消",
+            onOk: function() {
+              form.setFieldsValue({ customer_name: nn });
+            }
+          });
+        } else {
+          form.setFieldsValue({ customer_name: nn });
+        }
+      }, null);
+    }
+    function ratingToType(r) {
+      var c1 = ["AAA+", "AAA", "AAA-"];
+      var c2 = ["AA+", "AA", "AA-", "A+", "A", "A-", "BBB+"];
+      if (c1.indexOf(String(r)) !== -1) return "0";
+      if (c2.indexOf(String(r)) !== -1) return "1";
+      return form.getFieldValue("customer_type");
+    }
+    function convertAmount(currency, amt) {
+      if (amt === null || amt === void 0 || amt === "") return null;
+      var val = Number(amt);
+      if (isNaN(val)) return null;
+      if (String(currency) === "美元") return Number((val * 6.8).toFixed(2));
+      return Number(val.toFixed(2));
+    }
+    function checkAccount(name, acct) {
+      if (!acct) return;
+      CLIENT.call("226014", { acctNo: outtext(acct) }, function(data) {
+        if (data && data.status !== "AS00") {
+          antd.message.warning("该账号不可用，查询结果为" + (data.statusTxt || data.status));
+          form.setFieldsValue({ [name]: "" });
+        }
+      }, function() {
+        form.setFieldsValue({ [name]: "" });
+      });
+    }
+    function openPlan() {
+      var flag = form.getFieldValue("installment_flag");
+      if (String(flag) !== "1") {
+        antd.message.warning("分期还款请选择是！");
+        return;
+      }
+      var bc = outtext(form.getFieldValue("bond_code"));
+      setPlanModal({
+        open: true,
+        url: PATH.apiBase + "/view/report?op=write&viewlet=" + PATH.getTemplatePath("installment_ment.cpt") + "&bond_code=" + encodeURIComponent(bc) + "&type=0"
+      });
+    }
+    function handleSubmit() {
+      form.validateFields().then(function(values) {
+        var ct = outtext(values.customer_type);
+        var inspectFreq = ct === "0" || ct === "1" ? 3 : 1;
+        var isNew = mode === "installment" || mode === "add";
+        var businessId = mode === "installment" ? "" : isNew ? outtext(recordId) : outtext(recordId);
+        if (mode === "add") businessId = outtext(recordId);
+        var body = {
+          businessId,
+          bondCode: outtext(values.bond_code),
+          ecifCustomerNo: outtext(values.ecif_customer_no),
+          customerNo: outtext(values.customer_no),
+          customerName: outtext(values.customer_name),
+          bizName: outtext(values.biz_name),
+          bondType: outtext(values.bond_type),
+          greenTechFlag: outtext(values.green_tech_flag),
+          extRating: outtext(values.ext_rating),
+          extRatingDate: values.ext_rating_date ? dayjs(values.ext_rating_date).format("YYYY-MM-DD") : "",
+          ratingAgency: outtext(values.rating_agency),
+          intRating: outtext(values.int_rating),
+          intRatingDate: values.int_rating_date ? dayjs(values.int_rating_date).format("YYYY-MM-DD") : "",
+          industry: outtext(values.industry),
+          customerType: ct,
+          startDate: values.start_date ? dayjs(values.start_date).format("YYYY-MM-DD") : "",
+          matureDate: values.mature_date ? dayjs(values.mature_date).format("YYYY-MM-DD") : "",
+          currency: outtext(values.currency),
+          origAmount: values.orig_amount === null || values.orig_amount === void 0 ? "" : String(values.orig_amount),
+          rmbAmount: values.rmb_amount === null || values.rmb_amount === void 0 ? "" : String(values.rmb_amount),
+          balance: values.balance === null || values.balance === void 0 ? "" : String(values.balance),
+          investRate: values.invest_rate === null || values.invest_rate === void 0 ? "" : String(values.invest_rate),
+          transferRate: values.transfer_rate === null || values.transfer_rate === void 0 ? "" : String(values.transfer_rate),
+          guaranteeInfo: outtext(values.guarantee_info),
+          installmentFlag: outtext(values.installment_flag),
+          installment: instJson || "",
+          ourBankUnderwrite: outtext(values.our_bank_underwrite),
+          agreedUsage: outtext(values.agreed_usage),
+          fundAccount: outtext(values.fund_account),
+          fundAccountFlag: outtext(values.fund_account_flag),
+          superviseAccount: outtext(values.supervise_account),
+          superviseAccountFlag: outtext(values.supervise_account_flag),
+          drawdownCheck: "",
+          exerciseFlag: outtext(values.exercise_flag),
+          exerciseDate: values.exercise_date ? dayjs(values.exercise_date).format("YYYY-MM-DD") : "",
+          remarkNumber: outtext(values.remark_number),
+          remark: outtext(values.remark),
+          jsRemark: outtext(values.js_remark),
+          jsRemarkFlag: outtext(values.js_remark_flag),
+          leadUnderwriter: outtext(values.lead_underwriter),
+          inspectFreq: String(inspectFreq),
+          inspectorPost: "客户经理"
+        };
+        setSaving(true);
+        CLIENT.call("226006", body, function() {
+          setSaving(false);
+          try {
+            window.parent.FR.Msg.toast(mode === "installment" ? "创建分期业务信息审批中" : "新增业务业务信息审批中");
+          } catch (e) {
+          }
+          setTimeout(closeSelf, 300);
+        }, function() {
+          setSaving(false);
+        });
+      }).catch(function() {
+      });
+    }
+    var sel = function(opts, placeholder) {
+      return {
+        style: { width: "100%" },
+        placeholder: placeholder || "请选择",
+        options: selOpts(opts)
+      };
+    };
+    return  React.createElement("div", { style: { padding: "16px 24px", paddingBottom: 16 } },  React.createElement("h3", { style: { marginTop: 0, marginBottom: 12 } }, M_TITLE[mode] || "业务申报"),  React.createElement(Spin, { spinning: loading },  React.createElement(
+      Form,
+      {
+        form,
+        layout: "vertical",
+        autoComplete: "off",
+        onValuesChange: function(changed, all) {
+          if (loadingRef.current) return;
+          if (changed.int_rating !== void 0) {
+            var t = ratingToType(changed.int_rating);
+            if (t) form.setFieldsValue({ customer_type: t });
+          }
+          if (changed.orig_amount !== void 0 || changed.currency !== void 0) {
+            var amt = changed.orig_amount !== void 0 ? changed.orig_amount : all.orig_amount;
+            var cur = changed.currency !== void 0 ? changed.currency : all.currency;
+            var rmb = convertAmount(cur, amt);
+            form.setFieldsValue({ rmb_amount: rmb, balance: rmb });
+          }
+          if (changed.fund_account_flag !== void 0) {
+            var fv = String(changed.fund_account_flag);
+            setShowFund(fv === "1");
+            if (fv !== "1") form.setFieldsValue({ fund_account: "" });
+          }
+          if (changed.supervise_account_flag !== void 0) {
+            var sv = String(changed.supervise_account_flag);
+            setShowSuper(sv === "1");
+            if (sv !== "1") form.setFieldsValue({ supervise_account: "" });
+          }
+          if (changed.js_remark_flag !== void 0) {
+            setShowJs(String(changed.js_remark_flag) === "1");
+          }
+          if (changed.exercise_flag !== void 0) {
+            var ev = String(changed.exercise_flag);
+            setShowExDate(ev === "1");
+            if (ev === "1") {
+              form.setFieldsValue({ exercise_date: form.getFieldValue("mature_date") });
+            } else {
+              form.setFieldsValue({ exercise_date: null });
+            }
+          }
+          setTimeout(notifyHeight, 50);
+        }
+      },
+       React.createElement(Row, { gutter: 16 },  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "标准/非标准业务", name: "bond_type", rules: [{ required: true, message: "请选择" }] },  React.createElement(Select, { ...sel(DICTS.symbolStandard) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "客户编号", name: "customer_no", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, { placeholder: "客户编号（失焦自动查ECIF）", onBlur: function(e) {
+        ecifQuery(e.target.value);
+      } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "ECIF客户号", name: "ecif_customer_no" },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "融资人名称", name: "customer_name", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "项目/债券名称", name: "biz_name", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "债券编号", name: "bond_code", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否绿色/科技/养老/不涉及", name: "green_tech_flag" },  React.createElement(Select, { ...sel(DICTS.greenTech) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "外部信用评级", name: "ext_rating" },  React.createElement(Select, { ...sel(DICTS.rating.map(function(x) {
+        return { v: x, t: x };
+      })) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "外部信用评级日期", name: "ext_rating_date", rules: [{ required: true, message: "请选择" }] },  React.createElement(DatePicker, { style: { width: "100%" } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "外部评级机构", name: "rating_agency" },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "内部评级", name: "int_rating" },  React.createElement(Select, { ...sel(DICTS.rating.map(function(x) {
+        return { v: x, t: x };
+      })) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "内部评级日期", name: "int_rating_date", rules: [{ required: true, message: "请选择" }] },  React.createElement(DatePicker, { style: { width: "100%" } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "主承销商", name: "lead_underwriter" },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "行业分类", name: "industry", rules: [{ required: true, message: "请选择" }] },  React.createElement(Select, { ...sel(DICTS.industry) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "客户分类", name: "customer_type" },  React.createElement(Select, { ...sel(DICTS.customerType), disabled: true }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "发放日", name: "start_date", rules: [{ required: true, message: "请选择" }] },  React.createElement(DatePicker, { style: { width: "100%" } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "到期日", name: "mature_date", rules: [{ required: true, message: "请选择" }] },  React.createElement(DatePicker, { style: { width: "100%" } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "币种", name: "currency", rules: [{ required: true, message: "请选择" }] },  React.createElement(Select, { ...sel(DICTS.currency) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "初始金额", name: "orig_amount", rules: [{ required: true, message: "请输入" }] },  React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "初始金额（折人民币）", name: "rmb_amount" },  React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "业务余额（折人民币）", name: "balance" },  React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "投资利率（%）", name: "invest_rate" },  React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "价值转移利率（%）", name: "transfer_rate" },  React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "担保情况", name: "guarantee_info" },  React.createElement(Select, { ...sel(DICTS.guaranty) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否涉及分期还款", name: "installment_flag" },  React.createElement(Select, { ...sel(DICTS.yn) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "还款计划" },  React.createElement(Button, { icon: icon("/outlined/plus.svg"), onClick: openPlan }, "添加还款计划"))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "还款计划明细" },  React.createElement(Input.TextArea, { disabled: true, autoSize: { minRows: 2, maxRows: 4 }, value: instDetail }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否我行承销", name: "our_bank_underwrite" },  React.createElement(Select, { ...sel(DICTS.yn) }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "约定资金用途", name: "agreed_usage", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否存在资金发放/募集账户账号", name: "fund_account_flag" },  React.createElement(Select, { ...sel(DICTS.yn) }))), showFund &&  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "资金发放/募集账户账号", name: "fund_account", rules: [{ required: true, message: "账号不允许为空" }] },  React.createElement(Input, { placeholder: "失焦校验账号可用性", onBlur: function(e) {
+        checkAccount("fund_account", e.target.value);
+      } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否存在资金监管/回款专户账号", name: "supervise_account_flag" },  React.createElement(Select, { ...sel(DICTS.yn) }))), showSuper &&  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "资金监管/回款专户账号", name: "supervise_account", rules: [{ required: true, message: "账号不允许为空" }] },  React.createElement(Input, { placeholder: "失焦校验账号可用性", onBlur: function(e) {
+        checkAccount("supervise_account", e.target.value);
+      } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "批复号", name: "remark_number", rules: [{ required: true, message: "请输入" }] },  React.createElement(Input, null))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "批复管理要求", name: "remark" },  React.createElement(Input.TextArea, { autoSize: { minRows: 2, maxRows: 4 } }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否存在金融市场部批复管理要求", name: "js_remark_flag" },  React.createElement(Select, { ...sel(DICTS.yn) }))), showJs &&  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "金融市场部批复管理要求", name: "js_remark" },  React.createElement(Input.TextArea, { autoSize: { minRows: 2, maxRows: 4 }, placeholder: "金融市场部批复管理要求不允许为空" }))),  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "是否行权", name: "exercise_flag" },  React.createElement(Select, { ...sel(DICTS.exercise) }))), showExDate &&  React.createElement(Col, { span: 8 },  React.createElement(Form.Item, { label: "行权日期", name: "exercise_date" },  React.createElement(DatePicker, { style: { width: "100%" } })))),
+       React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } },  React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } },  React.createElement(Button, { onClick: closeSelf }, "取消"),  React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "保存")))
+    )), planModal.open &&  React.createElement(
+      Modal,
+      {
+        title: "还款计划",
+        open: true,
+        footer: null,
+        width: 640,
+        destroyOnClose: true,
+        onCancel: function() {
+          setPlanModal({ open: false, url: "" });
+        },
+        styles: { body: { padding: 0 } }
+      },
+       React.createElement(
+        "iframe",
+        {
+          id: "planFrame",
+          src: planModal.url,
+          style: { width: "100%", height: "420px", border: "none" }
+        }
+      )
+    ));
+  }
+  ReactDOM.createRoot(document.getElementById("app-root")).render(
+    React.createElement(
+      antd.ConfigProvider,
+      { locale: zhCN },
+      React.createElement(App)
+    )
+  );
+})();
+
+]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck check="false"/>
+<ShowWidgets/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+723900,723900,723900,723900,723900,723900,723900,723900,723900,723900,723900</RowHeight>
+<ColumnWidth defaultValue="2743200">
+2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200</ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting/>
+<FollowingTheme background="true"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="0"/>
+<PWTitle>
+参数</PWTitle>
+<Parameter>
+<Attributes name="cloudUrl"/>
+<O>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="prjId"/>
+<O>
+</O>
+</Parameter>
+</ReportParameterAttr>
+<StyleList>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="1"/>
+<StrongestControlAttr class="com.fr.widgettheme.control.attr.WidgetDisplayEnhanceMarkAttr">
+<StrongestControlAttr widgetEnhance="false"/>
+</StrongestControlAttr>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="经典浅灰" dark="false"/>
+</TemplateThemeAttrMark>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="0b330108-1a1d-479a-b7d6-5ded33a7bd95"/>
+</ForkIdAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttMark">
+<TemplateIdAttMark TemplateId="0b330108-1a1d-479a-b7d6-5ded33a7bd95"/>
+</TemplateIdAttMark>
+</WorkBook>

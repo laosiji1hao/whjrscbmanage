@@ -1,0 +1,623 @@
+(() => {
+  // pages/business_look.jsx
+  var PATH = {
+    currentDir: (function() {
+      var name = null;
+      try {
+        name = FR.remoteEvaluate("=reportName");
+      } catch (e) {
+      }
+      return name ? name.substring(0, name.lastIndexOf("/") + 1) : "whjrscbmanage/pages/";
+    })(),
+    apiBase: (function() {
+      var su = null;
+      try {
+        su = servletURL;
+      } catch (e) {
+      }
+      if (!su) {
+        try {
+          su = FR.remoteEvaluate("=servletURL");
+        } catch (e2) {
+        }
+      }
+      if (!su) return "/webroot/decision";
+      var parts = su.split("/");
+      return "/" + parts[1] + "/" + parts[2];
+    })(),
+    getDataTemplate: function(filename) {
+      return this.currentDir.replace("/pages/", "/data/") + filename;
+    },
+    getTemplatePath: function(filename) {
+      return this.currentDir + filename;
+    }
+  };
+  var hideStyle = document.createElement("style");
+  hideStyle.innerHTML = ".fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}";
+  document.head.appendChild(hideStyle);
+  document.body.setAttribute(
+    "style",
+    "margin:0;padding:0;min-height:100vh;box-sizing:border-box;overflow-y:auto;"
+  );
+  var appRoot = document.createElement("div");
+  appRoot.id = "app-root";
+  document.body.insertBefore(appRoot, document.body.firstChild);
+  var DATA_CPT = "whjrscbmanage_data.cpt";
+  var CLOUD_FALLBACK = { cloudUrl: "http://localhost:9058", prjId: "whjrscbmanage" };
+  var zhCN = {
+    locale: "zh-cn",
+    Pagination: {
+      items_per_page: "条/页",
+      jump_to: "跳至",
+      jump_to_confirm: "确定",
+      page: "页",
+      prev_page: "上一页",
+      next_page: "下一页",
+      prev_5: "向前 5 页",
+      next_5: "向后 5 页",
+      prev_3: "向前 3 页",
+      next_3: "向后 3 页",
+      page_size: "页码"
+    },
+    Table: {
+      filterTitle: "筛选",
+      filterConfirm: "确定",
+      filterReset: "重置",
+      selectAll: "全选",
+      selectInvert: "反选",
+      sortTitle: "排序",
+      expand: "展开行",
+      collapse: "折叠行",
+      emptyText: "暂无数据"
+    },
+    Modal: { okText: "确定", cancelText: "取消", justOkText: "知道了" },
+    Popconfirm: { okText: "确定", cancelText: "取消" },
+    Form: { optional: "（可选）", defaultValidateMessages: {
+      default: "字段验证错误 ${label}",
+      required: "请输入 ${label}",
+      enum: "${label} 必须是其中一个",
+      whitespace: "不能输入空格"
+    } },
+    Empty: { description: "暂无数据" },
+    DatePicker: { placeholder: "请选择日期", rangePlaceholder: ["开始日期", "结束日期"] },
+    Select: { placeholder: "请选择" }
+  };
+  var iconBase = PATH.apiBase.replace("/decision", "/help/lib/antd/icons");
+  var iconCache = {};
+  (function() {
+    var names = [
+      "search",
+      "plus",
+      "reload",
+      "edit",
+      "delete",
+      "close",
+      "check",
+      "filter",
+      "export",
+      "download",
+      "setting",
+      "user"
+    ];
+    names.forEach(function(name) {
+      $.ajax({
+        url: iconBase + "/outlined/" + name + ".svg",
+        type: "GET",
+        async: false,
+        dataType: "text",
+        success: function(svg) {
+          iconCache[name] = svg;
+        },
+        error: function() {
+          iconCache[name] = null;
+        }
+      });
+    });
+  })();
+  function icon(name) {
+    var key = name.replace("/outlined/", "").replace(".svg", "");
+    var svg = iconCache[key];
+    if (!svg) return null;
+    svg = svg.replace("<svg ", '<svg fill="currentColor" width="1em" height="1em" ');
+    return React.createElement("span", {
+      style: { display: "inline-flex", alignItems: "center", lineHeight: 1 },
+      dangerouslySetInnerHTML: { __html: svg }
+    });
+  }
+  var CUR_USER = (function() {
+    try {
+      return String(FR.remoteEvaluate("=$fine_username") || "");
+    } catch (e) {
+      return "";
+    }
+  })();
+  function identityParams() {
+    return [
+      { name: "p_operator", type: "String", value: CUR_USER },
+      { name: "user_name", type: "String", value: CUR_USER }
+    ];
+  }
+  function callData(dsName, params, onOk, onErr) {
+    $.ajax({
+      url: PATH.apiBase + "/api/data",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        report_path: PATH.getDataTemplate(DATA_CPT),
+        datasource_name: dsName,
+        page_number: -1,
+        page_size: -1,
+        parameters: (params || []).concat(identityParams())
+      }),
+      success: function(res) {
+        if (typeof res === "string") {
+          try {
+            res = JSON.parse(res);
+          } catch (e) {
+          }
+        }
+        if (!res || res.err_code !== 0) {
+          antd.message.error(res && res.err_msg || "操作失败");
+          if (onErr) onErr(res);
+          return;
+        }
+        if (onOk) onOk(res.data || []);
+      },
+      error: function(xhr, status, error) {
+        antd.message.error("网络错误：" + error);
+        if (onErr) onErr(null);
+      }
+    });
+  }
+  var CLIENT = (function() {
+    function text(v) {
+      if (v === null || v === void 0) return "";
+      return String(v);
+    }
+    function remote(p) {
+      try {
+        return text(FR.remoteEvaluate("=$" + p));
+      } catch (e) {
+        return "";
+      }
+    }
+    function resolve(promise) {
+      try {
+        var r = remote(promise);
+        if (r) return r;
+      } catch (e) {
+      }
+      if (typeof myFR !== "undefined" && myFR[promise]) return myFR[promise];
+      return CLOUD_FALLBACK[promise];
+    }
+    function ensureLoaded() {
+      if (typeof window.myFR !== "undefined") return true;
+      try {
+        var url = PATH.apiBase.replace("/decision", "") + "/js/myFR.js";
+        var r = (function() {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, false);
+          xhr.send(null);
+          return xhr.responseText;
+        })();
+        if (!r) return false;
+        new Function(r)();
+        return typeof window.myFR !== "undefined";
+      } catch (e) {
+        return false;
+      }
+    }
+    var loaded = ensureLoaded();
+    return {
+      ready: loaded,
+      cloudUrl: function() {
+        try {
+          var v = remote("cloudUrl");
+          if (v) return v;
+        } catch (e) {
+        }
+        if (typeof myFR !== "undefined" && myFR.cloudUrl) return myFR.cloudUrl;
+        return CLOUD_FALLBACK.cloudUrl;
+      },
+      call: function(code, body, onOk, onErr) {
+        if (!ensureLoaded() || typeof window.myFR === "undefined" || !window.myFR.callCloud) {
+          antd.message.warning("云平台服务不可用（myFR 未加载），请检查后重试");
+          if (onErr) onErr(null);
+          return;
+        }
+        try {
+          var cu = this.cloudUrl();
+          if (!myFR.cloudUrl) myFR.cloudUrl = cu;
+          if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
+          window.myFR.callCloud(String(code), body || {}, function(data) {
+            if (onOk) onOk(data);
+          }, function(msg) {
+            if (msg) {
+              try {
+                antd.message.error(String(msg));
+              } catch (e) {
+              }
+            }
+            if (onErr) onErr(null);
+          }, true);
+        } catch (e) {
+          if (onErr) onErr(null);
+        }
+      }
+    };
+  })();
+  var DICT_YN = [{ v: "0", t: "否" }, { v: "1", t: "是" }];
+  var DICTS = {
+    "yn": DICT_YN,
+    symbolStandard: [{ v: "0", t: "标准化业务" }, { v: "1", t: "非标准化业务" }],
+    greenTech: [{ v: "0", t: "绿色" }, { v: "1", t: "科技" }, { v: "2", t: "养老" }, { v: "3", t: "不涉及" }],
+    industry: [{ v: "0", t: "货币金融服务" }, { v: "1", t: "资本市场服务" }, { v: "2", t: "保险业" }, { v: "3", t: "其他金融业" }],
+    customerType: [{ v: "0", t: "一类" }, { v: "1", t: "二类" }, { v: "2", t: "三类" }, { v: "3", t: "四类" }],
+    currency: [{ v: "人民币", t: "人民币" }, { v: "美元", t: "美元" }],
+    guaranty: [{ v: "信用", t: "信用" }, { v: "保证", t: "保证" }, { v: "抵押", t: "抵押" }, { v: "质押", t: "质押" }],
+    fiveLevel: ["正常一档", "正常二档", "正常三档", "关注", "次级", "可疑", "损失"],
+    manageLine: [{ v: "金融市场部", t: "金融市场部" }],
+    dept: [{ v: "利率室", t: "利率室" }, { v: "同业室", t: "同业室" }, { v: "托管室", t: "托管室" }],
+    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BB", "B", "CCC", "CC", "C"],
+    exercise: [{ v: "0", t: "否" }, { v: "1", t: "是" }],
+    bizType: [{ v: "0", t: "国债" }, { v: "1", t: "地方债" }, { v: "2", t: "金融债" }, { v: "3", t: "企业债" }, { v: "4", t: "中期票据" }, { v: "5", t: "短期融资券" }, { v: "6", t: "资产支持证券" }, { v: "7", t: "同业存单" }, { v: "8", t: "货币市场工具" }, { v: "9", t: "非标准化资产" }, { v: "10", t: "股权" }, { v: "11", t: "基金" }, { v: "12", t: "其他" }],
+    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
+    ynNot: [{ v: "0", t: "不涉及" }, { v: "1", t: "是" }]
+  };
+  function selOpts(arr) {
+    if (!arr) return [];
+    return arr.map(function(o) {
+      if (o && typeof o === "object" && "v" in o) {
+        return { value: String(o.v), label: o.t === void 0 || o.t === null ? "" : String(o.t) };
+      }
+      return o;
+    });
+  }
+  function notifyHeight() {
+    try {
+      if (window.parent === window) return;
+      var el = document.getElementById("app-root");
+      var h = el ? el.scrollHeight : document.body.scrollHeight;
+      window.parent.postMessage({ type: "fr_iframe_resize", height: h }, "*");
+    } catch (e) {
+    }
+  }
+  function closeSelf() {
+    try {
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+    } catch (e) {
+    }
+  }
+  function App() {
+    var { Form, Input, InputNumber, Select, Button, Space, Row, Col, Spin, Modal, DatePicker } = antd;
+    const [form] = Form.useForm();
+    const [loading, setLoading] = React.useState(false);
+    const [saving, setSaving] = React.useState(false);
+    const [recordId, setRecordId] = React.useState("0");
+    const [updaterType, setUpdaterType] = React.useState("0");
+    const [cfg, setCfg] = React.useState({ coupon_rate: 0, vat: 0, surcharge: 0 });
+    const [instDetail, setInstDetail] = React.useState("");
+    const [instJson, setInstJson] = React.useState("");
+    const [showPassage, setShowPassage] = React.useState(false);
+    const [showFund, setShowFund] = React.useState(false);
+    const [showSuper, setShowSuper] = React.useState(false);
+    const [showJs, setShowJs] = React.useState(false);
+    const [showExDate, setShowExDate] = React.useState(false);
+    const [planModal, setPlanModal] = React.useState({ open: false, url: "" });
+    const loadingRef = React.useRef(false);
+    function outtext(v) {
+      return v === void 0 || v === null ? "" : String(v);
+    }
+    function pickDay(v) {
+      if (!v) return null;
+      var d = dayjs(String(v).slice(0, 10));
+      return d.isValid() ? d : null;
+    }
+    function num(v) {
+      if (v === void 0 || v === null || v === "") return null;
+      var n = Number(v);
+      return isNaN(n) ? null : n;
+    }
+    function six(n) {
+      if (n === void 0 || n === null || n === "" || isNaN(Number(n))) return null;
+      return parseFloat(Number(n).toFixed(6));
+    }
+    React.useEffect(function() {
+      var q = new URLSearchParams(window.location.search);
+      var id = q.get("id") || "0";
+      setRecordId(id);
+      setUpdaterType(q.get("updaterType") || "0");
+      loadingRef.current = true;
+      callData("config_get", [], function(rows) {
+        if (rows && rows.length) {
+          var c = rows[0];
+          setCfg({ coupon_rate: num(c.coupon_rate) || 0, vat: num(c.vat) || 0, surcharge: num(c.surcharge) || 0 });
+        }
+      }, null);
+      if (id && id !== "0") {
+        callData("get_business", [{ name: "p_id", type: "String", value: id }], function(rows) {
+          loadingRef.current = false;
+          setLoading(false);
+          if (!rows || !rows.length) {
+            antd.message.error("记录不存在");
+            return;
+          }
+          var d = rows[0];
+          form.setFieldsValue({
+            id: d.id,
+            bond_type: d.bond_type,
+            customer_no: d.customer_no,
+            ecif_customer_no: d.ecif_customer_no,
+            customer_name: d.customer_name,
+            biz_name: d.biz_name,
+            bond_code: d.bond_code,
+            green_tech_flag: d.green_tech_flag,
+            ext_rating: d.ext_rating,
+            ext_rating_date: pickDay(d.ext_rating_date),
+            rating_agency: d.rating_agency,
+            int_rating: d.int_rating,
+            int_rating_date: pickDay(d.int_rating_date),
+            lead_underwriter: d.lead_underwriter,
+            industry: d.industry,
+            customer_type: d.customer_type,
+            alert_customer: d.alert_customer,
+            biz_type: d.biz_type,
+            start_date: pickDay(d.start_date),
+            mature_date: pickDay(d.mature_date),
+            currency: d.currency,
+            orig_amount: num(d.orig_amount),
+            rmb_amount: num(d.rmb_amount),
+            balance: num(d.balance),
+            invest_rate: num(d.invest_rate),
+            transfer_rate: num(d.transfer_rate),
+            guarantee_info: d.guarantee_info,
+            breach_flag: d.breach_flag,
+            five_level_class: d.five_level_class,
+            installment_flag: d.installment_flag,
+            our_bank_underwrite: d.our_bank_underwrite,
+            agreed_usage: d.agreed_usage,
+            manage_line: d.manage_line,
+            dept: d.dept,
+            fund_account_flag: d.fund_account_flag,
+            fund_account: d.fund_account,
+            supervise_account_flag: d.supervise_account_flag,
+            supervise_account: d.supervise_account,
+            fund_used_flag: d.fund_used_flag,
+            fund_used_up: d.fund_used_up,
+            drawdown_check: d.drawdown_check,
+            remark_number: d.remark_number,
+            remark: d.remark,
+            js_remark_flag: d.js_remark_flag,
+            js_remark: d.js_remark,
+            inspect_freq: d.inspect_freq,
+            is_original_am: d.is_original_am,
+            exercise_flag: d.exercise_flag,
+            exercise_date: pickDay(d.exercise_date),
+            creator: d.creator,
+            org_name: d.org_name,
+            inspector_post: d.inspector_post,
+            is_passage: outtext(d.is_passage),
+            passage_amount: num(d.passage_amount),
+            upper_storage_rate: num(d.upper_storage_rate)
+          });
+          setShowFund(String(d.fund_account_flag || "0") === "1");
+          setShowSuper(String(d.supervise_account_flag || "0") === "1");
+          setShowJs(String(d.js_remark_flag || "0") === "1");
+          setShowExDate(String(d.exercise_flag || "0") === "1");
+          setShowPassage(String(d.is_passage || "0") === "1");
+          if (String(d.is_passage || "0") !== "1") {
+            form.setFieldsValue({ upper_storage_rate: six(num(cfg.coupon_rate) - num(cfg.vat) - num(cfg.surcharge)) });
+          }
+        });
+      } else {
+        loadingRef.current = false;
+        setLoading(false);
+      }
+      callData("schedule_of_business", [{ name: "p_id", type: "String", value: id }], function(rows) {
+        if (rows && rows.length) {
+          setInstDetail(rows[0].repayment_info || "");
+          setInstJson(rows[0].installment_list || "[]");
+        }
+      }, null);
+      setTimeout(notifyHeight, 50);
+    }, []);
+    React.useEffect(function() {
+      notifyHeight();
+    });
+    React.useEffect(function() {
+      function handler(e) {
+        var d = e.data;
+        if (!d || d.type !== "fr_inst_plan") return;
+        setPlanModal({ open: false, url: "" });
+        setInstDetail(d.result || "");
+        setInstJson(d.json || "[]");
+      }
+      window.addEventListener("message", handler);
+      return function() {
+        window.removeEventListener("message", handler);
+      };
+    }, []);
+    function recalcRate(isPassage, passage) {
+      var rate = null;
+      if (String(isPassage) !== "1") {
+        rate = six(num(cfg.coupon_rate) - num(cfg.vat) - num(cfg.surcharge));
+      } else {
+        var ir = num(form.getFieldValue("invest_rate"));
+        rate = six(ir - num(cfg.vat) - num(cfg.surcharge) - num(passage));
+      }
+      form.setFieldsValue({ upper_storage_rate: rate });
+    }
+    function openPlan() {
+      var flag = form.getFieldValue("installment_flag");
+      if (String(flag) !== "1") {
+        antd.message.warning("分期还款请选择是！");
+        return;
+      }
+      var bc = outtext(form.getFieldValue("bond_code"));
+      setPlanModal({
+        open: true,
+        url: PATH.apiBase + "/view/report?op=write&viewlet=" + PATH.getTemplatePath("installment_ment.cpt") + "&bond_code=" + encodeURIComponent(bc) + "&type=1"
+      });
+    }
+    function handleSubmit() {
+      form.validateFields().then(function(values) {
+        var ct = outtext(values.customer_type);
+        var inspectFreq = ct === "0" || ct === "1" ? 3 : 1;
+        var body = {
+          businessId: outtext(recordId),
+          bondCode: outtext(values.bond_code),
+          ecifCustomerNo: outtext(values.ecif_customer_no),
+          customerNo: outtext(values.customer_no),
+          customerName: outtext(values.customer_name),
+          bizName: outtext(values.biz_name),
+          bondType: outtext(values.bond_type),
+          bizType: outtext(values.biz_type),
+          greenTechFlag: outtext(values.green_tech_flag),
+          extRating: outtext(values.ext_rating),
+          extRatingDate: values.ext_rating_date ? dayjs(values.ext_rating_date).format("YYYY-MM-DD") : "",
+          ratingAgency: outtext(values.rating_agency),
+          intRating: outtext(values.int_rating),
+          intRatingDate: values.int_rating_date ? dayjs(values.int_rating_date).format("YYYY-MM-DD") : "",
+          industry: outtext(values.industry),
+          customerType: ct,
+          alertCustomer: outtext(values.alert_customer),
+          startDate: values.start_date ? dayjs(values.start_date).format("YYYY-MM-DD") : "",
+          matureDate: values.mature_date ? dayjs(values.mature_date).format("YYYY-MM-DD") : "",
+          currency: outtext(values.currency),
+          origAmount: values.orig_amount === null || values.orig_amount === void 0 ? "" : String(values.orig_amount),
+          rmbAmount: values.rmb_amount === null || values.rmb_amount === void 0 ? "" : String(values.rmb_amount),
+          balance: values.balance === null || values.balance === void 0 ? "" : String(values.balance),
+          investRate: values.invest_rate === null || values.invest_rate === void 0 ? "" : String(values.invest_rate),
+          transferRate: values.transfer_rate === null || values.transfer_rate === void 0 ? "" : String(values.transfer_rate),
+          guaranteeInfo: outtext(values.guarantee_info),
+          breachFlag: outtext(values.breach_flag),
+          fiveLevelClass: outtext(values.five_level_class),
+          fundUsedFlag: outtext(values.fund_used_flag),
+          fundUsedUp: outtext(values.fund_used_up),
+          installmentFlag: outtext(values.installment_flag),
+          installment: instJson || "",
+          ourBankUnderwrite: outtext(values.our_bank_underwrite),
+          manageLine: outtext(values.manage_line),
+          dept: outtext(values.dept),
+          agreedUsage: outtext(values.agreed_usage),
+          fundAccount: outtext(values.fund_account),
+          fundAccountFlag: outtext(values.fund_account_flag),
+          superviseAccount: outtext(values.supervise_account),
+          superviseAccountFlag: outtext(values.supervise_account_flag),
+          drawdownCheck: outtext(values.drawdown_check),
+          isOriginalAm: outtext(values.is_original_am),
+          exerciseFlag: outtext(values.exercise_flag),
+          exerciseDate: values.exercise_date ? dayjs(values.exercise_date).format("YYYY-MM-DD") : "",
+          remark: outtext(values.remark),
+          remarkNumber: outtext(values.remark_number),
+          jsRemark: outtext(values.js_remark),
+          jsRemarkFlag: outtext(values.js_remark_flag),
+          inspectFreq: String(inspectFreq),
+          inspectorPost: outtext(values.inspector_post),
+          leadUnderwriter: outtext(values.lead_underwriter),
+          isPassage: outtext(values.is_passage),
+          passageAmount: values.passage_amount === null || values.passage_amount === void 0 ? "" : String(values.passage_amount),
+          upperStorageRate: values.upper_storage_rate === null || values.upper_storage_rate === void 0 ? "" : String(values.upper_storage_rate),
+          updaterType
+        };
+        setSaving(true);
+        CLIENT.call("226007", body, function() {
+          setSaving(false);
+          try {
+            window.parent.FR.closeDialog();
+            window.parent.contentPane && window.parent.contentPane.parameterCommit();
+            window.parent.FR.Msg.toast("申请变更业务信息审批中");
+          } catch (e) {
+          }
+          setTimeout(closeSelf, 300);
+        }, function() {
+          setSaving(false);
+        });
+      }).catch(function() {
+      });
+    }
+    var sel = function(opts, placeholder) {
+      return { style: { width: "100%" }, placeholder: placeholder || "请选择", options: selOpts(opts) };
+    };
+    var readOnlySpanStyle = { display: "inline-block", paddingTop: 5 };
+    return /* @__PURE__ */ React.createElement("div", { style: { padding: "16px 24px", paddingBottom: 16 } }, /* @__PURE__ */ React.createElement("h3", { style: { marginTop: 0, marginBottom: 12 } }, "查看/编辑业务信息（变更申请）"), /* @__PURE__ */ React.createElement(Spin, { spinning: loading }, /* @__PURE__ */ React.createElement(
+      Form,
+      {
+        form,
+        layout: "vertical",
+        autoComplete: "off",
+        onValuesChange: function(changed) {
+          if (loadingRef.current) return;
+          if (changed.is_passage !== void 0) {
+            var pv = String(changed.is_passage);
+            setShowPassage(pv === "1");
+            if (pv !== "1") form.setFieldsValue({ passage_amount: null });
+            recalcRate(pv, pv === "1" ? form.getFieldValue("passage_amount") : null);
+          }
+          if (changed.passage_amount !== void 0 || changed.invest_rate !== void 0) {
+            if (String(form.getFieldValue("is_passage")) === "1") recalcRate("1", changed.passage_amount !== void 0 ? changed.passage_amount : form.getFieldValue("passage_amount"));
+          }
+          if (changed.int_rating !== void 0) {
+            var c1 = ["AAA+", "AAA", "AAA-"];
+            var c2 = ["AA+", "AA", "AA-", "A+", "A", "A-", "BBB+"];
+            var r = String(changed.int_rating);
+            if (c1.indexOf(r) !== -1) form.setFieldsValue({ customer_type: "0" });
+            else if (c2.indexOf(r) !== -1) form.setFieldsValue({ customer_type: "1" });
+          }
+          if (changed.fund_account_flag !== void 0) {
+            setShowFund(String(changed.fund_account_flag) === "1");
+          }
+          if (changed.supervise_account_flag !== void 0) {
+            var sv = String(changed.supervise_account_flag);
+            setShowSuper(sv === "1");
+            form.setFieldsValue({ fund_used_flag: sv === "1" ? "1" : "0" });
+          }
+          if (changed.js_remark_flag !== void 0) setShowJs(String(changed.js_remark_flag) === "1");
+          if (changed.exercise_flag !== void 0) {
+            var ev = String(changed.exercise_flag);
+            setShowExDate(ev === "1");
+            if (ev === "1") form.setFieldsValue({ exercise_date: form.getFieldValue("mature_date") });
+            else form.setFieldsValue({ exercise_date: null });
+          }
+          setTimeout(notifyHeight, 50);
+        }
+      },
+      /* @__PURE__ */ React.createElement(Row, { gutter: 16 }, /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "标准/非标准业务", name: "bond_type", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.symbolStandard) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "客户编号", name: "customer_no", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "ECIF客户号", name: "ecif_customer_no" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "融资人名称", name: "customer_name", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "项目/债券名称", name: "biz_name" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "债券编号", name: "bond_code" }, /* @__PURE__ */ React.createElement(Input, { disabled: true, style: { background: "#f5f5f5" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否绿色/科技/养老/不涉及", name: "green_tech_flag", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.greenTech) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "外部信用评级", name: "ext_rating", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.rating.map(function(x) {
+        return { v: x, t: x };
+      })) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "外部信用评级日期", name: "ext_rating_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "外部评级机构", name: "rating_agency" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "内部评级", name: "int_rating", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.rating.map(function(x) {
+        return { v: x, t: x };
+      })) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "内部评级日期", name: "int_rating_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "主承销商", name: "lead_underwriter" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否有通道费", name: "is_passage" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showPassage && /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "通道费金额(%)", name: "passage_amount" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "上存利率(%)", name: "upper_storage_rate", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "行业分类", name: "industry", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.industry) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "客户分类", name: "customer_type" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.customerType) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否我行预警客户", name: "alert_customer" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "业务品种", name: "biz_type" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.bizType) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "发放日", name: "start_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "到期日", name: "mature_date" }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "币种", name: "currency", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.currency) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额", name: "orig_amount", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额（折人民币）", name: "rmb_amount" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "业务余额（折人民币）", name: "balance" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "投资利率（%）", name: "invest_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "价值转移利率（%）", name: "transfer_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "担保情况", name: "guarantee_info" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否逾欠/违约", name: "breach_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "五级分类", name: "five_level_class" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.fiveLevel.map(function(x) {
+        return { v: x, t: x };
+      })) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否涉及分期还款", name: "installment_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划" }, /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/plus.svg"), onClick: openPlan }, "添加还款计划"))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划明细" }, /* @__PURE__ */ React.createElement(Input.TextArea, { disabled: true, autoSize: { minRows: 2, maxRows: 4 }, value: instDetail }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否我行承销", name: "our_bank_underwrite" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "约定资金用途", name: "agreed_usage", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "所属管理条线", name: "manage_line" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.manageLine) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "对应处室", name: "dept" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.dept) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在资金发放/募集账户账号", name: "fund_account_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showFund && /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "资金发放/募集账户账号", name: "fund_account", rules: [{ required: true, message: "账号不允许为空" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在资金监管/回款专户账号", name: "supervise_account_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showSuper && /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "资金监管/回款专户账号", name: "supervise_account", rules: [{ required: true, message: "账号不允许为空" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否涉及我行资金监管", name: "fund_used_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "我行监管资金是否已使用完毕", name: "fund_used_up" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "支用检查情况", name: "drawdown_check" }, /* @__PURE__ */ React.createElement(Input, { disabled: true, style: { background: "#f5f5f5" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "批复号", name: "remark_number" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "批复管理要求", name: "remark" }, /* @__PURE__ */ React.createElement(Input.TextArea, { autoSize: { minRows: 2, maxRows: 4 } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在金融市场部批复管理要求", name: "js_remark_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showJs && /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "金融市场部批复管理要求", name: "js_remark", rules: [{ required: true, message: "金融市场部批复管理要求不允许为空" }] }, /* @__PURE__ */ React.createElement(Input.TextArea, { autoSize: { minRows: 2, maxRows: 4 } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "实地检查频率（月）", name: "inspect_freq" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否原资产管理部回表业务", name: "is_original_am" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否行权", name: "exercise_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.exercise) }))), showExDate && /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "行权日期", name: "exercise_date" }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "所属客户经理", name: "creator" }, /* @__PURE__ */ React.createElement(Input, { disabled: true, style: { background: "#f5f5f5" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "所属机构", name: "org_name" }, /* @__PURE__ */ React.createElement(Input, { disabled: true, style: { background: "#f5f5f5" } }))), /* @__PURE__ */ React.createElement(Col, { span: 8 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "投后检查实施人员岗位", name: "inspector_post" }, /* @__PURE__ */ React.createElement(Input, null)))),
+      /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "确定")))
+    )), planModal.open && /* @__PURE__ */ React.createElement(
+      Modal,
+      {
+        title: "还款计划",
+        open: true,
+        footer: null,
+        width: 640,
+        destroyOnClose: true,
+        onCancel: function() {
+          setPlanModal({ open: false, url: "" });
+        },
+        styles: { body: { padding: 0 } }
+      },
+      /* @__PURE__ */ React.createElement(
+        "iframe",
+        {
+          id: "planFrame2",
+          src: planModal.url,
+          style: { width: "100%", height: "420px", border: "none" }
+        }
+      )
+    ));
+  }
+  ReactDOM.createRoot(document.getElementById("app-root")).render(
+    React.createElement(
+      antd.ConfigProvider,
+      { locale: zhCN },
+      React.createElement(App)
+    )
+  );
+})();

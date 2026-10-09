@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<TableDataMap>
+<TableData name="ds1" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters>
+<Parameter>
+<Attributes name="bond_code"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_repayment_schedule b
+where b.bond_code = '${bond_code}'
+and b.status = 2]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="false"/>
+<UnloadCheck check="false"/>
+<ShowWidgets show="true"/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[723900,723900,1152000,1257120,1257120,723900,723900,1143000,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[2743200,6629400,5448300,5448300,5905500,2743200,2743200,2743200,2743200,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="2" cs="2" s="1">
+<O>
+<![CDATA[还款计划]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="2" s="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="4" r="2" s="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="3" s="2">
+<O>
+<![CDATA[还款时间]]></O>
+<PrivilegeControl/>
+<Expand dir="0">
+<cellSortAttr>
+<sortExpressions/>
+<sortHeader sortArea="B4"/>
+</cellSortAttr>
+</Expand>
+</C>
+<C c="2" r="3" s="2">
+<O>
+<![CDATA[还款金额]]></O>
+<PrivilegeControl/>
+<Expand dir="0">
+<cellSortAttr>
+<sortExpressions/>
+<sortHeader sortArea="B4"/>
+</cellSortAttr>
+</Expand>
+</C>
+<C c="1" r="4" s="0">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="repayment_date"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.DateEditor">
+<WidgetName name="installmentTime"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DateAttr/>
+<widgetValue/>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="4" s="0">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="repayment_amount"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.NumberEditor">
+<WidgetName name="installmentAmount"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<NumberAttr>
+<MobileTextEditAttr allowOneClickClear="true"/>
+<widgetValue/>
+</NumberAttr>
+</Widget>
+<Expand dir="0">
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="4" s="0">
+<PrivilegeControl/>
+<Widget class="com.fr.report.web.button.write.AppendRowButton">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[插入行]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[add]]></IconName>
+<FixCell row="4" col="1"/>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="4" r="4" s="0">
+<PrivilegeControl/>
+<Widget class="com.fr.report.web.button.write.DeleteRowButton">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[删除行]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[delete]]></IconName>
+<FixCell row="4" col="1"/>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="7" s="0">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[ window.parent.FR.closeDialog();]]></Content>
+</JavaScript>
+</Listener>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[关闭]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="3" r="7" s="0">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[var list = []A;
+var arr= _g().getWidgetsByName("installmentTime");
+var arr1= _g().getWidgetsByName("installmentAmount");
+
+ function getUrlParam(para) {
+ 	var params = location.search.substr(1).split('&');
+ 	for (var i = 0; i < params.length; i++) {
+ 		var pair = params[i]A.split('=');
+ 		if (decodeURIComponent(pair[0]A) == para) {
+ 			return decodeURIComponent(pair[1]A);
+ 		}
+ 	}
+ 	return null;
+ }
+
+//获取扩展单选按钮组ratio的控件对象数组
+if (arr1[1]A != undefined) {
+	for (var i = 0; i < arr1.length; i++) {
+		var obj1 = {};
+		console.log(arr1.length);
+		if(arr1.length > 1){
+		obj1['installmentTime']A = arr[i]A.getValue();
+		obj1['installmentAmount']A = arr1[i]A.getValue();
+		}else{
+			obj1['installmentTime']A = arr.getValue();
+			obj1['installmentAmount']A = arr1.getValue();
+			console.log(obj1);
+		}
+		list.push(obj1);
+	}
+}else{
+	var obj1 = {};
+	obj1['installmentTime']A = arr.getValue();
+	obj1['installmentAmount']A = arr1.getValue();
+	list.push(obj1);
+}
+console.log(list);
+var listStr = JSON.stringify(list);
+console.log(listStr);
+var result = list.map(function(item) {
+    return "还款时间:" + item.installmentTime + ",还款金额:" + item.installmentAmount + ";";
+}).join("");
+console.log(result);
+var type = getUrlParam('type');
+if(type == '1'){
+ window.parent._g().setCellValue("H18", result);
+ window.parent._g().setCellValue("I18", listStr);
+ }else if(type == '0'){
+  window.parent._g().setCellValue("H15", result);
+  window.parent._g().setCellValue("I15", listStr);
+ 	}
+ window.parent.FR.closeDialog();]]></Content>
+</JavaScript>
+</Listener>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[提交]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting>
+<PaperSize width="85536000" height="121104000"/>
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+<FollowingTheme background="true"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+</ReportParameterAttr>
+<StyleList>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" textStyle="1" imageLayout="1">
+<FRFont name="宋体" style="1" size="80"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-11561760" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border>
+<Top style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Top>
+<Bottom style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Bottom>
+<Left style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Left>
+<Right style="1">
+<color>
+<FineColor color="-2500135" hor="-1" ver="-1"/>
+</color>
+</Right>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="1" size="96">
+<foreground>
+<FineColor color="-12080918" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1379330" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="1"/>
+<StrongestControlAttr class="com.fr.widgettheme.control.attr.WidgetDisplayEnhanceMarkAttr">
+<StrongestControlAttr widgetEnhance="false"/>
+</StrongestControlAttr>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="经典浅灰" dark="false"/>
+</TemplateThemeAttrMark>
+<StrategyConfigsAttr class="com.fr.esd.core.strategy.persistence.StrategyConfigsAttr">
+<StrategyConfigs>
+<StrategyConfig dsName="ds1" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+</StrategyConfigs>
+</StrategyConfigsAttr>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="ad4f2a0f-7c01-4d56-8ffe-45f347c5c5c9"/>
+</ForkIdAttrMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v11" plugin-version="3.37.13">
+<TemplateCloudInfoAttrMark createTime="1782726459237"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="ad4f2a0f-7c01-4d56-8ffe-45f347c5c5c9"/>
+</TemplateIdAttMark>
+</WorkBook>

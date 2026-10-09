@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="11.5.0">
+<TableDataMap>
+<TableData name="查询出所有的客户经理和机构" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[assign]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[SELECT
+    CONCAT(w.user_name, '(', w.user_id, ')') AS name_with_id
+FROM whfr_user w
+WHERE w.status = '00']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="查询机构号以及机构名称" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[assign]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select
+       CONCAT(b.branch_name,'(',b.branch_no,')') as dept_name
+from whoa_branch_info b
+where status = '01';]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="查询当前业务信息" class="com.fr.data.impl.DBTableData">
+<Desensitizations desensitizeOpen="false"/>
+<Parameters>
+<Parameter>
+<Attributes name="id"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[whjrscbmanage]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select *
+from bus_bond_business b
+where b.id = '${id}']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="afterload">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[myFR.init()
+myFR.dialog.afterload()]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="false"/>
+<UnloadCheck check="false"/>
+<ShowWidgets show="true"/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+<USE REPEAT="false" PAGE="false" WRITE="false"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[723900,723900,1752600,1219200,1728000,1752600,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[2095500,9182100,9182100,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="1" s="0">
+<O t="DSColumn">
+<Attributes dsName="查询当前业务信息" columnName="id"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+<cellSortAttr/>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[条件属性1]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="0"/>
+</C>
+<C c="1" r="2" s="1">
+<O>
+<![CDATA[归属机构]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="2" r="2" s="1">
+<O>
+<![CDATA[客户经理]]></O>
+<PrivilegeControl/>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+<C c="1" r="3" s="2">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[null]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="dept1"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="dept_name" viName="dept_name"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[查询机构号以及机构名称]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Expand>
+<cellSortAttr>
+<sortExpressions/>
+<sortHeader sortArea="B11"/>
+</cellSortAttr>
+</Expand>
+</C>
+<C c="2" r="3" s="2">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.ComboBox">
+<Listener event="stopedit" name="编辑结束1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[null]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="person1"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="name_with_id" viName="name_with_id"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[查询出所有的客户经理和机构]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue/>
+</Widget>
+<Expand>
+<cellSortAttr>
+<sortExpressions/>
+<sortHeader sortArea="B11"/>
+</cellSortAttr>
+</Expand>
+</C>
+<C c="1" r="5" cs="2" s="3">
+<O>
+<![CDATA[变更申请]]></O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters>
+<Parameter>
+<Attributes name="id"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=B2]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="creator"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=$fine_username]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="newCreator"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=B4]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="newOrgCode"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=C4]]></Attributes>
+</O>
+</Parameter>
+</Parameters>
+<Content>
+<![CDATA[if (!myFR.validate()) {
+    return
+}
+    function v(name) {
+        var w = _g().getWidgetByName(name);
+        return w ? w.getValue() : "";
+    }
+var newCreatorVal = v("person1").match(/\(([^)]A+)\)/)?.[1]A;
+var newOrgNameVal = v("dept1").replace(/\([^)]A+\)/, "");
+var newOrgCodeVal = v("dept1").match(/\(([^)]A+)\)/)?.[1]A;
+console.log("newCreator:", newCreatorVal);                                                                                                                                                                                                                                                                                          console.log("newOrgCode:", newOrgCodeVal);
+console.log("newOrgName:", newOrgNameVal);
+myFR.callCloud("226008", {
+    "businessId": id,
+    "creator":creator,
+    "newCreator" : newCreatorVal,
+    "newOrgCode" : newOrgCodeVal,
+    "newOrgName" : newOrgNameVal,
+    "updaterType" : "1"
+}, () => {
+    window.parent.FR.closeDialog()
+    window.parent.contentPane.parameterCommit()
+    window.parent.FR.Msg.toast("申请更改客户经理审批中")
+},null,true)]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="save"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[确定]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</Widget>
+<Expand>
+<cellSortAttr/>
+</Expand>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting/>
+<FollowingTheme background="true"/>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1" hor="-1" ver="-1"/>
+</color>
+</Background>
+</ReportSettings>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<Parameter>
+<Attributes name="cloudUrl"/>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[="http://" + $cloud_service_ip]]></Attributes>
+</O>
+</Parameter>
+<Parameter>
+<Attributes name="prjId"/>
+<O>
+<![CDATA[whjrscbmanage]]></O>
+</Parameter>
+</ReportParameterAttr>
+<StyleList>
+<Style style_name="默认" full="true" border_source="-1" imageLayout="1">
+<FRFont name="simhei" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="WenQuanYi Micro Hei" style="1" size="96">
+<foreground>
+<FineColor color="-12080918" hor="-1" ver="-1"/>
+</foreground>
+</FRFont>
+<Background name="ColorBackground">
+<color>
+<FineColor color="-1838593" hor="-1" ver="-1"/>
+</color>
+</Background>
+<Border/>
+</Style>
+<Style imageLayout="1">
+<FRFont name="simhei" style="0" size="80"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="simhei" style="0" size="88"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+</StyleList>
+<DesensitizationList/>
+<DesignerVersion DesignerVersion="LAA"/>
+<PreviewType PreviewType="0"/>
+<StrongestControlAttr class="com.fr.widgettheme.control.attr.WidgetDisplayEnhanceMarkAttr">
+<StrongestControlAttr widgetEnhance="false"/>
+</StrongestControlAttr>
+<TemplateThemeAttrMark class="com.fr.base.iofile.attr.TemplateThemeAttrMark">
+<TemplateThemeAttrMark name="经典浅灰" dark="false"/>
+</TemplateThemeAttrMark>
+<StrategyConfigsAttr class="com.fr.esd.core.strategy.persistence.StrategyConfigsAttr">
+<StrategyConfigs>
+<StrategyConfig dsName="查询当前业务信息" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+<StrategyConfig dsName="查询出所有的客户经理和机构" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+<StrategyConfig dsName="查询机构号以及机构名称" enabled="false" useGlobal="true" shouldMonitor="true" shouldEvolve="false" scheduleBySchema="false" timeToLive="1500000" timeToIdle="86400000" updateInterval="1500000" terminalTime="" updateSchema="0 0 8 * * ? *" activeInitiation="false"/>
+</StrategyConfigs>
+</StrategyConfigsAttr>
+<ForkIdAttrMark class="com.fr.base.iofile.attr.ForkIdAttrMark">
+<ForkIdAttrMark forkId="c881aefe-bc05-4b12-83c8-cba6667721b4"/>
+</ForkIdAttrMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v11" plugin-version="3.37.13">
+<TemplateCloudInfoAttrMark createTime="1780562067114"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="c881aefe-bc05-4b12-83c8-cba6667721b4"/>
+</TemplateIdAttMark>
+</WorkBook>
