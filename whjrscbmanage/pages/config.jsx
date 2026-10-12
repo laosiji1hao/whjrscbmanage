@@ -24,7 +24,9 @@ var hideStyle = document.createElement('style');
 hideStyle.innerHTML =
     '.fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}' +
     '.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}' +
-    'body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}';
+    'body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}' +
+    /* 平台注入的 sentinel 告警浮球（Alert 图标、可拖拽，加载时渲染在报表文档上）——本项目不展示 */
+    '[data-sentinel-button],[class*="sentinel-ant-float-btn"]{display:none!important;visibility:hidden!important;pointer-events:none!important}';
 document.head.appendChild(hideStyle);
 document.body.setAttribute('style',
     'margin:0;padding:0;min-height:100vh;box-sizing:border-box;overflow-y:auto;');
@@ -51,16 +53,65 @@ var zhCN = {
         default: '字段验证错误 ${label}', required: '请输入 ${label}',
         enum: '${label} 必须是其中一个', whitespace: '不能输入空格' } },
     Empty: { description: '暂无数据' },
-    DatePicker: { placeholder: '请选择日期', rangePlaceholder: ['开始日期', '结束日期'] },
+    // antd v5 DatePicker 日历面板中文（月份/星期/操作钮），否则默认英文 August/Sunday
+    DatePicker: {
+        lang: {
+            locale: 'zh-cn',
+            monthBeforeYear: false,
+            yearFormat: 'YYYY年',
+            monthFormat: 'M月',
+            dayFormat: 'D',
+            cellDateFormat: 'D',
+            fieldDateFormat: 'YYYY-MM-DD',
+            fieldDateTimeFormat: 'YYYY-MM-DD HH:mm:ss',
+            fieldMonthFormat: 'YYYY-MM',
+            fieldWeekFormat: 'YYYY-wo',
+            fieldQuarterFormat: 'YYYY-[Q]Q',
+            fieldYearFormat: 'YYYY',
+            years: '年',
+            months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+            monthsShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+            monthText: '月份',
+            quarterText: '季度',
+            today: '今天',
+            now: '此刻',
+            okText: '确定',
+            cancelText: '取消',
+            nextYear: '下一年',
+            prevYear: '上一年',
+            nextMonth: '下月',
+            prevMonth: '上月',
+            yearToday: '今年',
+            weekdays: ['日', '一', '二', '三', '四', '五', '六'],
+            weekdaysShort: ['日', '一', '二', '三', '四', '五', '六'],
+            weekdaysMin: ['日', '一', '二', '三', '四', '五', '六'],
+            firstDayOfWeek: 0
+        },
+        timePickerLocale: { placeholder: '请选择时间', rangePlaceholder: ['开始时间', '结束时间'] },
+        placeholder: '请选择日期',
+        rangePlaceholder: ['开始日期', '结束日期']
+    },
     Select: { placeholder: '请选择' }
 };
+
+// 注册并启用 dayjs 中文 locale（无需 locale 文件；antd DatePicker 星期行/月份读全局 dayjs locale）
+try {
+    dayjs.locale('zh-cn', {
+        months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split('_'),
+        monthsShort: '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
+        weekdays: '星期日_星期一_星期二_星期三_星期四_星期五_星期六'.split('_'),
+        weekdaysShort: '周日_周一_周二_周三_周四_周五_周六'.split('_'),
+        weekdaysMin: '日_一_二_三_四_五_六'.split('_'),
+        weekdaysParseExact: true
+    }, true);
+} catch (e) {}
 
 // 图标：从 help/lib/antd/icons/ 同步加载并缓存，内联渲染
 var iconBase = PATH.apiBase.replace('/decision', '/help/lib/antd/icons');
 var iconCache = {};
 (function() {
     var names = ['search', 'plus', 'reload', 'edit', 'delete', 'close', 'check', 'filter',
-                 'export', 'download', 'setting', 'user'];
+                 'export', 'download', 'setting', 'user', 'exclamation-circle'];
     names.forEach(function(name) {
         $.ajax({
             url: iconBase + '/outlined/' + name + '.svg',
@@ -209,19 +260,38 @@ var DICTS = {
     'yn': DICT_YN,
     symbolStandard: [{v:'0',t:'标准化业务'},{v:'1',t:'非标准化业务'}],
     greenTech: [{v:'0',t:'绿色'},{v:'1',t:'科技'},{v:'2',t:'养老'},{v:'3',t:'不涉及'}],
-    industry: [{v:'0',t:'货币金融服务'},{v:'1',t:'资本市场服务'},{v:'2',t:'保险业'},{v:'3',t:'其他金融业'}],
+    industry: [
+        { v: '0', t: '金融业' }, { v: '1', t: '房地产业' },
+        { v: '2', t: '租赁和商务服务业' }, { v: '3', t: '科学研究和技术服务业' },
+        { v: '4', t: '水利、环境和公共设施管理业' }, { v: '5', t: '居民服务、修理和其他服务业' },
+        { v: '6', t: '教育、卫生和社会工作' }, { v: '7', t: '文化、体育和娱乐业' },
+        { v: '8', t: '公共管理、社会保障和社会组织' }, { v: '9', t: '农、林、牧、渔业' },
+        { v: '10', t: '采矿业' }, { v: '11', t: '制造业' },
+        { v: '12', t: '电力、热力、燃气及水生产和供应业' }, { v: '13', t: '建筑业' },
+        { v: '14', t: '批发和零售业' }, { v: '15', t: '交通运输、仓储和邮政业' },
+        { v: '16', t: '住宿和餐饮业' }, { v: '17', t: '信息传输、软件和信息技术服务业' }
+    ],
     customerType: [{v:'0',t:'一类'},{v:'1',t:'二类'},{v:'2',t:'三类'},{v:'3',t:'四类'}],
     currency: [{v:'人民币',t:'人民币'},{v:'美元',t:'美元'}],
-    guaranty: [{v:'信用',t:'信用'},{v:'保证',t:'保证'},{v:'抵押',t:'抵押'},{v:'质押',t:'质押'}],
+    guaranty: [{v:'0',t:'信用'},{v:'1',t:'抵押'},{v:'2',t:'质押'},{v:'3',t:'保证'}],
     fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
-    dept: [{v:'利率室',t:'利率室'},{v:'同业室',t:'同业室'},{v:'托管室',t:'托管室'}],
+    dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
     rating: ['AAA+','AAA','AAA-','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BB','B','CCC','CC','C'],
     exercise: [{v:'0',t:'否'},{v:'1',t:'是'}],
-    bizType: [{v:'0',t:'国债'},{v:'1',t:'地方债'},{v:'2',t:'金融债'},{v:'3',t:'企业债'},{v:'4',t:'中期票据'},{v:'5',t:'短期融资券'},{v:'6',t:'资产支持证券'},{v:'7',t:'同业存单'},{v:'8',t:'货币市场工具'},{v:'9',t:'非标准化资产'},{v:'10',t:'股权'},{v:'11',t:'基金'},{v:'12',t:'其他'}],
+    bizType: [
+        { v: '0', t: '非金融企业类债券投资' }, { v: '1', t: '企业资产支持证券' },
+        { v: '2', t: '非交易类-产业基金' }, { v: '3', t: '非交易类-城镇化建设基金' },
+        { v: '4', t: '非交易类-同业资产收益权' }, { v: '5', t: '交易类-保险债权投资计划' },
+        { v: '6', t: '交易类-券商收益权凭证' }, { v: '7', t: '交易类-特定目的载体投资信用债' },
+        { v: '8', t: '交易类-债权融资计划' }, { v: '9', t: '金租通' },
+        { v: '10', t: '银证投融通' }, { v: '11', t: '债务融资工具(余额包销或持有)' },
+        { v: '12', t: '其他' }
+    ],
     status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
     ynNot: [{v:'0',t:'不涉及'},{v:'1',t:'是'}]
 };
+DICTS.bondType = DICTS.symbolStandard; // pool 表格/导出用 bondType 键
 function dictText(dic, v) {
     if (v === undefined || v === null || v === '') return '';
     var s = String(v);
@@ -260,6 +330,14 @@ function fmtDate(v) {
     return d.isValid() ? d.format('YYYY-MM-DD') : String(v);
 }
 
+// ECIF客户号：17 位数字（以 0 开头），手工只填后面的位，失焦自动前补零到 17 位
+function padEcif(v) {
+    var s = (v === undefined || v === null) ? '' : String(v).trim();
+    if (s === '') return '';
+    while (s.length < 17) s = '0' + s;
+    return s;
+}
+
 // iframe 弹窗：向父页面汇报内容高度 / 提交完成
 function notifyHeight() {
     try {
@@ -279,7 +357,9 @@ function closeSelf() {
 function downloadCsv(filename, headers, rows) {
     var q = function(v) {
         var s = (v === undefined || v === null) ? '' : String(v);
-        return '"' + s.replace(/"/g, '""') + '"';
+        // 不用 /"/g 正则字面量：display_writer 的去注释暂存会把含双引号的正则字面量跨段误吞，
+        // 导致字符串还原成 _MJS_S…_ 占位。split/join 等价且安全。
+        return '"' + s.split('"').join('""') + '"';
     };
     var lines = [headers.map(q).join(',')];
     rows.forEach(function(r) { lines.push(r.map(q).join(',')); });
@@ -292,6 +372,86 @@ function downloadCsv(filename, headers, rows) {
     a.click();
     document.body.removeChild(a);
     setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+}
+
+/* ── 真正的 .xlsx 导出（用平台自带 webroot/js/jszip.min.js 手工拼 OOXML）── */
+function xmlEscape(v) {
+    // split/join 代替 replace(/&/g 等正则字面量：display_writer 去注释会用含引号的正则字面量跨段误吞（见 downloadCsv 注）
+    return String(v)
+        .split('&').join('&amp;')
+        .split('<').join('&lt;')
+        .split('>').join('&gt;')
+        .split('"').join('&quot;')
+        .split('\n').join('&#10;');
+}
+function colName(c) { // 0-based → A,B,...,Z,AA,...
+    var s = ''; c = c + 1;
+    while (c > 0) { var m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); }
+    return s;
+}
+function xlsxCell(r, c, val) {
+    var ref = colName(c) + r;
+    var s = (val === undefined || val === null) ? '' : String(val);
+    if (s !== '' && /^-?\d+(\.\d+)?$/.test(s)) {
+        return '<c r="' + ref + '"><v>' + s + '</v></c>';
+    }
+    return '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + xmlEscape(s) + '</t></is></c>';
+}
+function ensureJSZip(cb, onErr) {
+    if (typeof JSZip !== 'undefined') { cb(); return; }
+    var s = document.createElement('script');
+    s.src = PATH.apiBase.replace('/decision', '') + '/js/jszip.min.js';
+    s.onload = function() { cb(); };
+    s.onerror = function() { if (onErr) onErr(); };
+    document.head.appendChild(s);
+}
+function downloadXlsx(filename, headers, rows) {
+    ensureJSZip(function() {
+        var i, j;
+        var rowXml = [];
+        var hs = [];
+        for (j = 0; j < headers.length; j++) hs.push(xlsxCell(1, j, headers[j]));
+        rowXml.push('<row r="1">' + hs.join('') + '</row>');
+        for (i = 0; i < rows.length; i++) {
+            var cs = [];
+            for (j = 0; j < rows[i].length; j++) cs.push(xlsxCell(i + 2, j, rows[i][j]));
+            rowXml.push('<row r="' + (i + 2) + '">' + cs.join('') + '</row>');
+        }
+        var sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' +
+            rowXml.join('') + '</sheetData></worksheet>';
+        var zip = new JSZip();
+        zip.file('[Content_Types].xml',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+            '<Default Extension="xml" ContentType="application/xml"/>' +
+            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+            '</Types>');
+        zip.file('_rels/.rels',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+            '</Relationships>');
+        zip.file('xl/workbook.xml',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+            '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>');
+        zip.file('xl/_rels/workbook.xml.rels',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+            '</Relationships>');
+        zip.file('xl/worksheets/sheet1.xml', sheetXml);
+        zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }).then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        });
+    }, function() { antd.message.error('Excel 导出库加载失败'); });
 }
 /* ===== 配置页：上存利率计算参数（原 calculate_config）===== */
 function App() {
@@ -339,7 +499,6 @@ function App() {
 
     return (
         <div style={{ padding: '20px 24px', paddingBottom: 20 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 16 }}>上存利率计算参数配置</h3>
             <Spin spinning={loading}>
                 <Form form={form} layout="vertical" autoComplete="off">
                     <Row gutter={16}>

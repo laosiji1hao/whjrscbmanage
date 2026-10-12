@@ -33,7 +33,7 @@
     }
   };
   var hideStyle = document.createElement("style");
-  hideStyle.innerHTML = ".fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}";
+  hideStyle.innerHTML = '.fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}[data-sentinel-button],[class*="sentinel-ant-float-btn"]{display:none!important;visibility:hidden!important;pointer-events:none!important}';
   document.head.appendChild(hideStyle);
   document.body.setAttribute(
     "style",
@@ -79,9 +79,57 @@
       whitespace: "不能输入空格"
     } },
     Empty: { description: "暂无数据" },
-    DatePicker: { placeholder: "请选择日期", rangePlaceholder: ["开始日期", "结束日期"] },
+    // antd v5 DatePicker 日历面板中文（月份/星期/操作钮），否则默认英文 August/Sunday
+    DatePicker: {
+      lang: {
+        locale: "zh-cn",
+        monthBeforeYear: false,
+        yearFormat: "YYYY年",
+        monthFormat: "M月",
+        dayFormat: "D",
+        cellDateFormat: "D",
+        fieldDateFormat: "YYYY-MM-DD",
+        fieldDateTimeFormat: "YYYY-MM-DD HH:mm:ss",
+        fieldMonthFormat: "YYYY-MM",
+        fieldWeekFormat: "YYYY-wo",
+        fieldQuarterFormat: "YYYY-[Q]Q",
+        fieldYearFormat: "YYYY",
+        years: "年",
+        months: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+        monthsShort: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+        monthText: "月份",
+        quarterText: "季度",
+        today: "今天",
+        now: "此刻",
+        okText: "确定",
+        cancelText: "取消",
+        nextYear: "下一年",
+        prevYear: "上一年",
+        nextMonth: "下月",
+        prevMonth: "上月",
+        yearToday: "今年",
+        weekdays: ["日", "一", "二", "三", "四", "五", "六"],
+        weekdaysShort: ["日", "一", "二", "三", "四", "五", "六"],
+        weekdaysMin: ["日", "一", "二", "三", "四", "五", "六"],
+        firstDayOfWeek: 0
+      },
+      timePickerLocale: { placeholder: "请选择时间", rangePlaceholder: ["开始时间", "结束时间"] },
+      placeholder: "请选择日期",
+      rangePlaceholder: ["开始日期", "结束日期"]
+    },
     Select: { placeholder: "请选择" }
   };
+  try {
+    dayjs.locale("zh-cn", {
+      months: "一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月".split("_"),
+      monthsShort: "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split("_"),
+      weekdays: "星期日_星期一_星期二_星期三_星期四_星期五_星期六".split("_"),
+      weekdaysShort: "周日_周一_周二_周三_周四_周五_周六".split("_"),
+      weekdaysMin: "日_一_二_三_四_五_六".split("_"),
+      weekdaysParseExact: true
+    }, true);
+  } catch (e) {
+  }
   var iconBase = PATH.apiBase.replace("/decision", "/help/lib/antd/icons");
   var iconCache = {};
   (function() {
@@ -97,7 +145,8 @@
       "export",
       "download",
       "setting",
-      "user"
+      "user",
+      "exclamation-circle"
     ];
     names.forEach(function(name) {
       $.ajax({
@@ -236,6 +285,58 @@
       }
     };
   })();
+  var DICT_YN = [{ v: "0", t: "否" }, { v: "1", t: "是" }];
+  var DICTS = {
+    "yn": DICT_YN,
+    symbolStandard: [{ v: "0", t: "标准化业务" }, { v: "1", t: "非标准化业务" }],
+    greenTech: [{ v: "0", t: "绿色" }, { v: "1", t: "科技" }, { v: "2", t: "养老" }, { v: "3", t: "不涉及" }],
+    industry: [
+      { v: "0", t: "金融业" },
+      { v: "1", t: "房地产业" },
+      { v: "2", t: "租赁和商务服务业" },
+      { v: "3", t: "科学研究和技术服务业" },
+      { v: "4", t: "水利、环境和公共设施管理业" },
+      { v: "5", t: "居民服务、修理和其他服务业" },
+      { v: "6", t: "教育、卫生和社会工作" },
+      { v: "7", t: "文化、体育和娱乐业" },
+      { v: "8", t: "公共管理、社会保障和社会组织" },
+      { v: "9", t: "农、林、牧、渔业" },
+      { v: "10", t: "采矿业" },
+      { v: "11", t: "制造业" },
+      { v: "12", t: "电力、热力、燃气及水生产和供应业" },
+      { v: "13", t: "建筑业" },
+      { v: "14", t: "批发和零售业" },
+      { v: "15", t: "交通运输、仓储和邮政业" },
+      { v: "16", t: "住宿和餐饮业" },
+      { v: "17", t: "信息传输、软件和信息技术服务业" }
+    ],
+    customerType: [{ v: "0", t: "一类" }, { v: "1", t: "二类" }, { v: "2", t: "三类" }, { v: "3", t: "四类" }],
+    currency: [{ v: "人民币", t: "人民币" }, { v: "美元", t: "美元" }],
+    guaranty: [{ v: "0", t: "信用" }, { v: "1", t: "抵押" }, { v: "2", t: "质押" }, { v: "3", t: "保证" }],
+    fiveLevel: ["正常一档", "正常二档", "正常三档", "关注", "次级", "可疑", "损失"],
+    manageLine: [{ v: "金融市场部", t: "金融市场部" }],
+    dept: [{ v: "0", t: "同业室" }, { v: "1", t: "利率室" }, { v: "2", t: "汇率室" }, { v: "3", t: "同业营销管理室" }, { v: "4", t: "自负盈亏账户" }],
+    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BB", "B", "CCC", "CC", "C"],
+    exercise: [{ v: "0", t: "否" }, { v: "1", t: "是" }],
+    bizType: [
+      { v: "0", t: "非金融企业类债券投资" },
+      { v: "1", t: "企业资产支持证券" },
+      { v: "2", t: "非交易类-产业基金" },
+      { v: "3", t: "非交易类-城镇化建设基金" },
+      { v: "4", t: "非交易类-同业资产收益权" },
+      { v: "5", t: "交易类-保险债权投资计划" },
+      { v: "6", t: "交易类-券商收益权凭证" },
+      { v: "7", t: "交易类-特定目的载体投资信用债" },
+      { v: "8", t: "交易类-债权融资计划" },
+      { v: "9", t: "金租通" },
+      { v: "10", t: "银证投融通" },
+      { v: "11", t: "债务融资工具(余额包销或持有)" },
+      { v: "12", t: "其他" }
+    ],
+    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
+    ynNot: [{ v: "0", t: "不涉及" }, { v: "1", t: "是" }]
+  };
+  DICTS.bondType = DICTS.symbolStandard;
   function notifyHeight() {
     try {
       if (window.parent === window) return;
@@ -261,7 +362,7 @@
     const [updaterType, setUpdaterType] = React.useState("0");
     React.useEffect(function() {
       var q = new URLSearchParams(window.location.search);
-      setBusinessId(q.get("id") || "0");
+      setBusinessId(q.get("biz_uuid") || "");
       var ut = q.get("updaterType") || "0";
       setUpdaterType(ut);
       callData("org_options", [], function(rows) {
@@ -308,7 +409,7 @@
       }).catch(function() {
       });
     }
-    return /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 24px", paddingBottom: 24 } }, /* @__PURE__ */ React.createElement("h3", { style: { marginTop: 0, marginBottom: 16 } }, "编辑业务所属客户经理"), /* @__PURE__ */ React.createElement(Form, { form, layout: "vertical", autoComplete: "off" }, /* @__PURE__ */ React.createElement(Form.Item, { label: "归属机构", name: "dept1", rules: [{ required: true, message: "请选择归属机构" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择归属机构", options: orgOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { label: "客户经理", name: "person1", rules: [{ required: true, message: "请选择客户经理" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择客户经理", options: mgrOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "变更申请")))));
+    return /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 24px", paddingBottom: 24 } }, /* @__PURE__ */ React.createElement(Form, { form, layout: "vertical", autoComplete: "off" }, /* @__PURE__ */ React.createElement(Form.Item, { label: "归属机构", name: "dept1", rules: [{ required: true, message: "请选择归属机构" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择归属机构", options: orgOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { label: "客户经理", name: "person1", rules: [{ required: true, message: "请选择客户经理" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择客户经理", options: mgrOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "变更申请")))));
   }
   ReactDOM.createRoot(document.getElementById("app-root")).render(
     React.createElement(

@@ -6,7 +6,16 @@
 function App() {
     var { Table, Button, Input, Select, Space, Modal } = antd;
     var [mode, setMode] = React.useState(function() {
-        try { return new URLSearchParams(window.location.search).get('mode') || 'view'; } catch (e) { return 'view'; }
+        try {
+            var qm = new URLSearchParams(window.location.search).get('mode');
+            if (qm === 'view' || qm === 'manager') return qm;
+            // 菜单挂载只能选 cpt、不能带参数 → 不同角色挂不同物理 cpt，
+            // gen_pages 会对 business_pool_view / business_pool_manager 注入固定 WINDOW_POOL_MODE
+            if (typeof WINDOW_POOL_MODE !== 'undefined' && (WINDOW_POOL_MODE === 'view' || WINDOW_POOL_MODE === 'manager')) {
+                return WINDOW_POOL_MODE;
+            }
+            return 'view';
+        } catch (e) { return 'view'; }
     });
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
@@ -16,6 +25,8 @@ function App() {
     const [custName, setCustName] = React.useState('');
     const [bizName, setBizName] = React.useState('');
     const [status, setStatus] = React.useState('');
+    const [custOpts, setCustOpts] = React.useState([]);
+    const [bizOpts, setBizOpts] = React.useState([]);
     const [auditMap, setAuditMap] = React.useState({});
     const [modal, setModal] = React.useState({ open: false, url: '', title: '', width: 1000 });
 
@@ -63,6 +74,16 @@ function App() {
             (rows || []).forEach(function(r) { m[r.bond_code] = r.approval_id; });
             setAuditMap(m);
         }, null);
+        // 筛选下拉数据：融资人名称 / 项目债券名称（DISTINCT）
+        callData('pool_filter_opt', [], function(rows) {
+            var c = [], b = [], seenC = {}, seenB = {};
+            (rows || []).forEach(function(r) {
+                var cn = r.customer_name, bn = r.biz_name;
+                if (bn && !seenB[bn]) { seenB[bn] = 1; b.push({ value: bn, label: bn }); }
+                if (cn && !seenC[cn]) { seenC[cn] = 1; c.push({ value: cn, label: cn }); }
+            });
+            setCustOpts(c); setBizOpts(b);
+        }, null);
         reload(1, pageSize);
     }, []);
 
@@ -85,17 +106,17 @@ function App() {
         });
     }
 
-    function actComplete(r) { openDialog('business_form', { mode: 'edit', id: r.id }, '编辑业务信息', 1200); }
-    function actInstallment(r) { openDialog('business_form', { mode: 'installment', id: r.id }, '创建分期业务', 1200); }
+    function actComplete(r) { openDialog('business_form', { mode: 'edit', biz_uuid: r.biz_uuid }, '编辑业务信息', 1200); }
+    function actInstallment(r) { openDialog('business_form', { mode: 'installment', biz_uuid: r.biz_uuid }, '创建分期业务', 1200); }
     function actChangeMgr(r) {
         if (gated(r)) return;
         if (String(r.status) !== '3') { antd.message.warning('只有生效中的业务才能变更'); return; }
-        openDialog('manager_change', { id: r.id, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务所属客户经理', 600);
+        openDialog('manager_change', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务所属客户经理', 600);
     }
     function actEdit(r) {
         if (gated(r)) return;
         if (String(r.status) !== '3') { antd.message.warning('只有生效中的业务才能编辑'); return; }
-        openDialog('business_look', { id: r.id, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
+        openDialog('business_look', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
     }
     function actStop(r) {
         if (gated(r)) return;
@@ -103,7 +124,7 @@ function App() {
         Modal.confirm({
             title: '提示', content: '确认中止业务?', okText: '确定', cancelText: '取消',
             onOk: function() {
-                CLIENT.call('226009', { bondCode: r.bond_code, terminator: CUR_USER, updaterType: IS_MANAGER ? '1' : '0' }, function() {
+                CLIENT.call('226009', { businessId: r.biz_uuid, bondCode: r.bond_code, terminator: CUR_USER, updaterType: IS_MANAGER ? '1' : '0' }, function() {
                     try { window.parent.FR.Msg.toast('中止业务流程审批中'); } catch (e) {}
                     reload(current, pageSize);
                 }, null);
@@ -111,6 +132,7 @@ function App() {
         });
     }
     function actConfig() { openDialog('config', { id: 0 }, '配置计算参数', 700); }
+    function actAdd() { openDialog('business_form', { mode: 'add', biz_uuid: '' }, '新增业务信息', 1200); }
 
     function handlePageChange(page, size) { setCurrent(page); setPageSize(size); reload(page, size); }
     function handleSearch() { setCurrent(1); reload(1, pageSize); }
@@ -185,7 +207,7 @@ function App() {
             var body = rows.map(function(r, i) {
                 return [i + 1].concat(cols.map(function(c) { return expVal(r, c[1], c[2]); }));
             });
-            downloadCsv('金市业务_' + dayjs().format('YYYYMMDDHHmmss') + '.csv', headers, body);
+            downloadXlsx('金市业务_' + dayjs().format('YYYYMMDDHHmmss') + '.xlsx', headers, body);
         }, function() { setLoading(false); });
     }
 
@@ -229,14 +251,15 @@ function App() {
     return (
         <div style={{ padding: '16px', background: '#f5f5f5', minHeight: '100vh' }}>
             <div style={{ background: '#fff', padding: '16px 24px', borderRadius: '8px' }}>
-                <h2 style={{ margin: '0 0 4px' }}>金市业务{IS_MANAGER ? '（管理）' : ''}</h2>
                 <div style={{ color: '#888', marginBottom: 16 }}>当前查询结果条数为：{total}</div>
                 <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <Space wrap>
                         <span>融资人名称:</span>
-                        <Input onChange={function(e) { setCustName(e.target.value); }} value={custName} style={{ width: 180 }} placeholder="客户名称" />
+                        <Select showSearch allowClear placeholder="全部" style={{ width: 180 }} value={custName || undefined}
+                            onChange={function(v) { setCustName(v || ''); }} options={custOpts} optionFilterProp="label" />
                         <span>项目/债券名称:</span>
-                        <Input onChange={function(e) { setBizName(e.target.value); }} value={bizName} style={{ width: 180 }} placeholder="项目/债券名称" />
+                        <Select showSearch allowClear placeholder="全部" style={{ width: 180 }} value={bizName || undefined}
+                            onChange={function(v) { setBizName(v || ''); }} options={bizOpts} optionFilterProp="label" />
                         {!IS_MANAGER && (
                             <React.Fragment>
                                 <span>状态:</span>
@@ -246,6 +269,9 @@ function App() {
                         )}
                         <Button type="primary" icon={icon('/outlined/search.svg')} onClick={handleSearch}>查询</Button>
                         <Button icon={icon('/outlined/reload.svg')} onClick={handleReset}>重置</Button>
+                        {!IS_MANAGER && (
+                            <Button type="primary" icon={icon('/outlined/plus.svg')} onClick={actAdd}>新增业务</Button>
+                        )}
                     </Space>
                     <Space>
                         <Button icon={icon('/outlined/export.svg')} onClick={handleExport}>导出</Button>

@@ -2,6 +2,7 @@ create table bus_bond_business
 (
     id                     bigint auto_increment comment '自增主键'
         primary key,
+    biz_uuid               varchar(36)                          not null comment '业务唯一键UUID(32位无横线) 区别于自增id与债券编号',
     bond_code              varchar(50)                            null comment '债券编号或内部编号 定时同步初值为空 后续业务流程填写',
     apply_no               varchar(60)                            null comment '申请表编号 用于债同步去重和关联',
     ecif_customer_no       varchar(20)                            null comment 'ECIF客户编号',
@@ -70,7 +71,9 @@ create table bus_bond_business
     constraint uk_apply_no
         unique (apply_no),
     constraint uk_bond_code
-        unique (bond_code)
+        unique (bond_code),
+    constraint uk_biz_uuid
+        unique (biz_uuid)
 )
     comment '债券业务台账主表';
 

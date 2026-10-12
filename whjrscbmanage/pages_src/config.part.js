@@ -44,7 +44,6 @@ function App() {
 
     return (
         <div style={{ padding: '20px 24px', paddingBottom: 20 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 16 }}>上存利率计算参数配置</h3>
             <Spin spinning={loading}>
                 <Form form={form} layout="vertical" autoComplete="off">
                     <Row gutter={16}>

@@ -21,14 +21,14 @@ function App() {
         fetchList('');
     }, []);
 
-    function openForm(id) {
-        var q = '&mode=' + (id ? 'edit' : 'add') + '&id=' + encodeURIComponent(id || '0');
+    function openForm(uuid) {
+        var q = '&mode=' + (uuid ? 'edit' : 'add') + '&biz_uuid=' + encodeURIComponent(uuid || '');
         setModal({
             open: true,
             url: PATH.apiBase + '/view/report?op=write&viewlet=' +
                  PATH.getTemplatePath('business_form.cpt') + q,
-            title: id ? '编辑业务信息' : '新增业务信息',
-            width: id ? 1200 : 1200
+            title: uuid ? '编辑业务信息' : '新增业务信息',
+            width: uuid ? 1200 : 1200
         });
     }
 
@@ -60,7 +60,7 @@ function App() {
         { title: '状态', dataIndex: 'status', width: 90, render: function(v) { return statusText(v); } },
         { title: '创建时间', dataIndex: 'create_time', width: 170, render: function(v) { return fmtDate(v); } },
         { title: '操作', key: '__act', width: 90, fixed: 'right', render: function(_, r) {
-            return React.createElement(Button, { size: 'small', type: 'link', onClick: function() { openForm(r.id); } }, '编辑');
+            return React.createElement(Button, { size: 'small', type: 'link', onClick: function() { openForm(r.biz_uuid); } }, '编辑');
         } }
     ];
 
@@ -78,7 +78,7 @@ function App() {
                         <Button type="primary" icon={icon('/outlined/search.svg')} onClick={handleSearch}>查询</Button>
                         <Button icon={icon('/outlined/reload.svg')} onClick={handleReset}>重置</Button>
                     </Space>
-                    <Button type="primary" icon={icon('/outlined/plus.svg')} onClick={function() { openForm(0); }}>新增业务</Button>
+                    <Button type="primary" icon={icon('/outlined/plus.svg')} onClick={function() { openForm(''); }}>新增业务</Button>
                 </div>
 
                 <Table rowKey="id" loading={loading} columns={columns} dataSource={data} size="middle"

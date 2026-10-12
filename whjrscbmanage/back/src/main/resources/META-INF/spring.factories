@@ -1,0 +1,2 @@
+org.springframework.boot.SpringApplicationRunListener=com.hxb.iibs.wuhan.config.CustomSpringApplicationRunListener
+#org.springframework.boot.env.EnvironmentPostProcessor=CustomEnvironmentPostProcessor

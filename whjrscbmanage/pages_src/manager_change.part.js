@@ -12,7 +12,7 @@ function App() {
 
     React.useEffect(function() {
         var q = new URLSearchParams(window.location.search);
-        setBusinessId(q.get('id') || '0');
+        setBusinessId(q.get('biz_uuid') || '');
         var ut = q.get('updaterType') || '0';
         setUpdaterType(ut);
         callData('org_options', [], function(rows) {
@@ -54,7 +54,6 @@ function App() {
 
     return (
         <div style={{ padding: '20px 24px', paddingBottom: 24 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 16 }}>编辑业务所属客户经理</h3>
             <Form form={form} layout="vertical" autoComplete="off">
                 <Form.Item label="归属机构" name="dept1" rules={[{ required: true, message: '请选择归属机构' }]}>
                     <Select placeholder="请选择归属机构" options={orgOpts} showSearch optionFilterProp="label" />

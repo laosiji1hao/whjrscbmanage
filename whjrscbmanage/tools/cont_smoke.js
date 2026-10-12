@@ -6,21 +6,21 @@ const BASE = 'http://localhost:8075/webroot';
 
 const PAGES = [
   ['business_list', {}],
-  ['business_pool', { mode: 'view' }],
-  ['business_pool', { mode: 'manager' }],
-  ['business_form', { mode: 'add', id: '0' }],
-  ['business_form', { mode: 'edit', id: '5' }],
-  ['business_form', { mode: 'installment', id: '5' }],
+  ['business_pool_view', {}],
+  ['business_pool_manager', {}],
+  ['business_form', { mode: 'add', biz_uuid: '' }],
+  ['business_form', { mode: 'edit', biz_uuid: 'a3b3c3d3000000000000000000000005' }],
+  ['business_form', { mode: 'installment', biz_uuid: 'a3b3c3d3000000000000000000000005' }],
   ['installment_ment', { bond_code: 'BC000002', type: '0' }],
-  ['business_look', { id: '5', updaterType: '0' }],
-  ['manager_change', { id: '5', updaterType: '0' }],
+  ['business_look', { biz_uuid: 'a3b3c3d3000000000000000000000005', updaterType: '0' }],
+  ['manager_change', { biz_uuid: 'a3b3c3d3000000000000000000000005', updaterType: '0' }],
   ['config', {}]
 ];
 const IGNORE = /qrcode|CryptoJS|BI is not defined|plugin\.page\.table|plugin\.model\.page\.table|defaultsimple|constant:|font:|Failed to load resource/;
 
 (async () => {
   const browser = await chromium.launch();
-  const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  const ctx = await browser.newContext({ viewport: { width: 1900, height: 950 } });
   const page = await ctx.newPage();
   await login(page, BASE);
   const errors = [];
@@ -31,7 +31,7 @@ const IGNORE = /qrcode|CryptoJS|BI is not defined|plugin\.page\.table|plugin\.mo
   for (const [name, params] of PAGES) {
     errors.length = 0;
     const qs = new URLSearchParams(params).toString();
-    const url = BASE + '/decision/view/report?op=write&reportlet=whjrscbmanage/pages/' + name + '.cpt' + (qs ? '&' + qs : '') + '&t=' + Date.now();
+    const url = BASE + '/decision/view/report?op=write&reportlet=busi_center/Finance_market_dept/whjrscbmange/pages/' + name + '.cpt' + (qs ? '&' + qs : '') + '&t=' + Date.now();
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForSelector('#app-root > *', { timeout: 15000 });

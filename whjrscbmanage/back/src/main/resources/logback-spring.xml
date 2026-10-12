@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true">
+    <!--读取配置中心的属性-->
+    <springProperty scop="context" name="app_name" source="spring.application.name" defaultValue="whxxx"/>
+    <springProperty scop="context" name="log_level" source="app.log.level" defaultValue="INFO"/>
+    <!--日志地址-->
+    <property name="log.path" value="/home/busi_center/whyanghuan/workspace/whjsmanager/logs"/>
+
+    <!-- 日志格式 正常-->
+    <property name="LOG_PATTERN_NORMAL" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread] %logger{36} [%file:%line] %msg%n" />
+
+    <!-- console控制台 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN_NORMAL}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Log file debug output -->
+    <appender name="logFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/${app_name}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN_NORMAL}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Log file error output -->
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/${app_name}.%d{yyyy-MM-dd}.%i.err</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN_NORMAL}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- 打印 Mybatis SQL 日志 -->
+    <logger name="com.hxb.iibs.wuhan.mapper" level="TRACE"/>
+
+    <!-- Level: ALL,TRACE,DEBUG,INFO,WARN,ERROR,OFF -->
+    <root level="${log_level}">
+        <appender-ref ref="console"/>
+        <appender-ref ref="logFile"/>
+        <appender-ref ref="error"/>
+    </root>
+
+</configuration>

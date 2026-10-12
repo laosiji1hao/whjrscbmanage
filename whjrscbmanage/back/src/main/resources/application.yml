@@ -1,0 +1,134 @@
+# Jackson 日期反序列化容错配置
+# 支持前端传入 "yyyy-MM-dd"、"yyyy-MM-dd HH:mm:ss"、或 "yyyy-MM-ddTHH:mm:ss" 三种格式
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  application:
+    name: whjrscbmanage
+  datasource:
+    dynamic:
+      primary: master
+      strict: true
+      datasource:
+        master:
+          driver-class-name: org.mariadb.jdbc.Driver
+          url: jdbc:mariadb://125.160.1.236:3306/whjrscbmanage?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: root
+          password: Wuhan@2024.
+        common:
+          driver-class-name: org.mariadb.jdbc.Driver
+          url: jdbc:mariadb://125.160.1.236:3306/common?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: root
+          password: Wuhan@2024.
+        busiMobile:
+          driver-class-name: org.mariadb.jdbc.Driver
+          url: jdbc:mariadb://125.160.1.236:3306/busi_mobile?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: root
+          password: Wuhan@2024.
+
+# 项目信息
+prj:
+  id: whjrscbmanage
+  name: 武汉分行金融市场部管理系统
+  productCode: P650000057
+
+# 应用端口及根路径
+server:
+  port: 9058
+  servlet:
+    context-path: /${prj.id}
+
+# 跨域配置（allowed-origins 支持通配符，如 http://localhost:*）
+# 注：CORS 由网关/Nginx 统一处理，这里注释掉避免重复设置导致浏览器报错
+# cors:
+#   allowed-origins: "*"
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+xxl:
+  job:
+    admin:
+      addresses: http://125.160.1.236:8989/xxl-job-admin
+    accessToken: Xxljob$%^&1234
+    executor:
+      appname: ${prj.id}
+      address:
+      ip:
+      port: 9999
+      logpath: /logs/${prj.id}
+      logretentiondays: 30
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: ${EUREKA_URL:http://103.160.210.75:8761/eureka/}
+
+# 公共服务相关配置
+common:
+  api:
+    head:
+      sysNo: 99999
+      appId: 650
+      branch: 1198
+      channel: 900
+      teller: 91199
+      trsOrgan: 1100
+      version: 1.0
+    token:
+
+#      TODO 新核心
+      url: http://103.160.215.62:9032/passport/token
+#      url: http://103.160.119.215:9032/passport/token
+      clientId: HZYSF@HXB.COM
+      clientSecret: O9$zK7p!biiIs^?S
+#    Todo 新核心
+    url: http://103.160.215.62:9032
+#    url: http://103.160.119.215:9032
+    code200115: /ini/api/acct
+    code200206: /ini/api/loanRepayPlan
+    code200203: /ini/api/wxWorkMsgSend
+    code200347: /ini/api/acctInfo
+    code200113: /ini/api/acctFlow
+    code200354: /ini/api/historyAcctFlow
+    code200328: /ini/api/corCusmInfo
+    code200696: /ini/api/paymentInfoInquiry
+
+# 数据工厂（cms_no_td_info）
+datafactory:
+  url: http://125.1.129.76:8080
+  token: ${DATAFACTORY_TOKEN:AC7C0E7ADE7BE36C1458E04FC61FDC94276B794EE238919E35C135526CEECAA7}
+
+# 分布式文件系统 fstore
+fstore:
+  enabled: false
+  group: group1
+  tracker-list: 103.160.119.34:22122, 103.160.119.35:22122
+
+# 行权提醒配置
+bond:
+  remind:
+    days-ahead: 30          # 行权日前几天发送提醒
+    recipients: zhangsan,lisi,wangwu   # 企微OA，多人以逗号分隔
+
+# i助手相关配置
+iassist:
+  enabled: true
+  url: http://125.160.1.146:6160/fineReportDev/transferRequestData
+
+# GXP相关配置
+gxp:
+  url: http://125.160.1.236:9042
+
+# 项目相关配置
+temp:
+  dir: e:/temp
+
+hxb:
+  uscc: 91420000714666795T

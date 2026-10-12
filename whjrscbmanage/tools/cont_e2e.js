@@ -6,7 +6,9 @@ const { chromium } = require('playwright');
 const WS = process.env.FR_WORKSPACE || 'C:/Users/asus/.claude/plugins/marketplaces/fr-flow-v3';
 const { login } = require(WS + '/foundation/tools/api_tester/fr_login');
 const BASE = 'http://localhost:8075/webroot';
-const PAGE = n => BASE + '/decision/view/report?op=write&reportlet=whjrscbmanage/pages/' + n + '.cpt&t=' + Date.now();
+const U4 = 'a3b3c3d3000000000000000000000004';
+const U5 = 'a3b3c3d3000000000000000000000005';
+const PAGE = n => BASE + '/decision/view/report?op=write&reportlet=busi_center/Finance_market_dept/whjrscbmange/pages/' + n + '.cpt&t=' + Date.now();
 
 let bad = [];
 const ok = m => console.log('    ✔ ' + m);
@@ -38,7 +40,7 @@ async function typeText(frame, id, value) { await frame.locator('#' + id).fill(S
 async function setNum(frame, id, value) { await frame.locator('#' + id).fill(String(value)); await frame.locator('#' + id).press('Tab'); }
 async function queryPool(page, bondCode) {
     return await page.evaluate(async function(bc) {
-        var payload = { report_path: '/whjrscbmanage/data/whjrscbmanage_data.cpt',
+        var payload = { report_path: 'busi_center/Finance_market_dept/whjrscbmange/data/whjrscbmanage_data.cpt',
             datasource_name: 'pool_list_mine', page_number: -1, page_size: -1,
             parameters: [{ name: 'p_operator', type: 'String', value: 'admin' },
                          { name: 'p_customer_name', type: 'String', value: '' },
@@ -52,21 +54,21 @@ async function queryPool(page, bondCode) {
         return j.data.filter(function(x) { return x.bond_code === bc; });
     }, bondCode);
 }
-async function queryBizById(page, id) {
+async function queryBizByUuid(page, uuid) {
     return await page.evaluate(async function(bid) {
-        var payload = { report_path: '/whjrscbmanage/data/whjrscbmanage_data.cpt',
+        var payload = { report_path: 'busi_center/Finance_market_dept/whjrscbmange/data/whjrscbmanage_data.cpt',
             datasource_name: 'get_business', page_number: -1, page_size: -1,
-            parameters: [{ name: 'p_id', type: 'String', value: String(bid) }] };
+            parameters: [{ name: 'p_biz_uuid', type: 'String', value: String(bid) }] };
         var r = await fetch('/webroot/decision/api/data', { method: 'POST',
             headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         var j = await r.json();
         return j.data || [];
-    }, id);
+    }, uuid);
 }
 
 (async () => {
     const browser = await chromium.launch();
-    const ctx = await browser.newContext({ viewport: { width: 1500, height: 950 } });
+    const ctx = await browser.newContext({ viewport: { width: 1900, height: 950 } });
     const page = await ctx.newPage();
     await login(page, BASE);
 
@@ -141,18 +143,18 @@ async function queryBizById(page, id) {
 
     // ═══ 流程 B：中止（226009）════
     console.log('【流程B 中止业务】');
-    await page.goto(PAGE('business_pool') + '&mode=view', { waitUntil: 'domcontentloaded' });
+    await page.goto(PAGE('business_pool_view'), { waitUntil: 'domcontentloaded' });
     await page.locator('#app-root').waitFor({ timeout: 15000 });
     await btn(page.locator('.ant-table-row:has-text("BC000001")'), '中止').first().click();
     await btn(page.locator('.ant-modal:has-text("确认中止业务")'), '确定').click();
     await page.waitForTimeout(2500);
-    const e1 = await queryBizById(page, 4);
+    const e1 = await queryBizByUuid(page, U4);
     if (e1.length && String(e1[0].status) === '5') ok('中止生效 status=5');
     else fail('中止未生效 status=' + (e1[0] && e1[0].status));
 
     // ═══ 流程 D：变更客户经理（226008）════（先做：226008 只落空 bondCode 的流，不阻塞后续变更申请）
     console.log('【流程D 变更客户经理】');
-    await page.goto(PAGE('business_pool') + '&mode=view', { waitUntil: 'domcontentloaded' });
+    await page.goto(PAGE('business_pool_view'), { waitUntil: 'domcontentloaded' });
     await page.locator('#app-root').waitFor({ timeout: 15000 });
     await page.locator('.ant-table-row:has-text("BC000002")').locator('button:has-text("变更客户经理")').first().click();
     await page.locator('iframe#poolFrame').waitFor({ timeout: 15000 });
@@ -162,14 +164,14 @@ async function queryBizById(page, id) {
     await pick(mgr, 'person1', 'cm001');
     await mgr.locator('button:has-text("变更申请")').click();
     await page.waitForTimeout(2500);
-    const d = await queryBizById(page, 5);
+    const d = await queryBizByUuid(page, U5);
     if (d.length && String(d[0].creator) === 'cm001') ok('客户经理变更落库 creator=cm001');
     else fail('换经理落库异常 creator=' + (d[0] && d[0].creator));
 
     // ═══ 流程 C：查看/变更申请（226007；226007 会给 BC000002 落审批流 → 必须放 D 之后；
     // D 已把 creator 换成 cm001 → 个人池看不见，用 manager 全景池跑）════
     console.log('【流程C 查看/变更申请】');
-    await page.goto(PAGE('business_pool') + '&mode=manager', { waitUntil: 'domcontentloaded' });
+    await page.goto(PAGE('business_pool_manager'), { waitUntil: 'domcontentloaded' });
     await page.locator('#app-root').waitFor({ timeout: 15000 });
     await btn(page.locator('.ant-table-row:has-text("BC000002")'), '编辑').first().click();
     await page.locator('iframe#poolFrame').waitFor({ timeout: 15000 });
@@ -181,7 +183,7 @@ async function queryBizById(page, id) {
     await page.waitForTimeout(500);
     await btn(look, '确定').click();
     await page.waitForTimeout(3000);
-    const c = await queryBizById(page, 5);
+    const c = await queryBizByUuid(page, U5);
     if (c.length && String(c[0].biz_name).indexOf('变更') !== -1 && String(c[0].is_passage) === '1') ok('变更申请落库（biz_name+is_passage）');
     else fail('变更申请落库异常 ' + (c[0] && c[0].biz_name));
 
@@ -195,7 +197,7 @@ async function queryBizById(page, id) {
     const cfg = await page.evaluate(async function() {
         var r = await fetch('/webroot/decision/api/data', { method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ report_path: '/whjrscbmanage/data/whjrscbmanage_data.cpt',
+            body: JSON.stringify({ report_path: 'busi_center/Finance_market_dept/whjrscbmange/data/whjrscbmanage_data.cpt',
                 datasource_name: 'config_get', page_number: -1, page_size: -1, parameters: [] }) });
         var j = await r.json();
         return j.data && j.data[0];

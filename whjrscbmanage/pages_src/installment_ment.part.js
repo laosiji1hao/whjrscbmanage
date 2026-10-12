@@ -12,7 +12,23 @@ function App() {
         var q = new URLSearchParams(window.location.search);
         var bc = q.get('bond_code') || '';
         setBondCode(bc);
-        if (bc) {
+        // 父页已填的回显 JSON（[{installmentTime, installmentAmount}]）优先，其次按债券查库
+        var initRaw = q.get('initial') || '';
+        var initRows = [];
+        if (initRaw) {
+            try { var parsed = JSON.parse(initRaw); if (Array.isArray(parsed)) initRows = parsed; } catch (e) {}
+        }
+        if (initRows.length) {
+            setRows(initRows.map(function(x, i) {
+                var d = String(x.installmentTime || '').slice(0, 10);
+                return {
+                    key: 'ini_' + i + '_' + Date.now(),
+                    sort: i + 1,
+                    repayment_date: d && dayjs(d).isValid() ? dayjs(d) : null,
+                    repayment_amount: (x.installmentAmount === undefined || x.installmentAmount === null) ? null : Number(x.installmentAmount)
+                };
+            }));
+        } else if (bc) {
             setLoading(true);
             callData('schedule_by_bond', [{ name: 'p_bond_code', type: 'String', value: bc }], function(data) {
                 setLoading(false);
@@ -64,6 +80,7 @@ function App() {
               return React.createElement(DatePicker, {
                   value: r.repayment_date,
                   style: { width: '100%' },
+                  placeholder: '请选择日期',
                   onChange: function(v) {
                       setRows(function(prev) { return prev.map(function(x) { return x.key === r.key ? Object.assign({}, x, { repayment_date: v }) : x; }); });
                   }
@@ -90,7 +107,7 @@ function App() {
 
     return (
         <div style={{ padding: '16px 20px', paddingBottom: 20, maxWidth: 640 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 12 }}>还款计划<span style={{ fontWeight: 'normal', fontSize: 12, color: '#888', marginLeft: 8 }}>债券编号：{bondCode || '（新增申报未生成）'}</span></h3>
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>债券编号：{bondCode || '（新增申报未生成）'}</div>
             <Table rowKey="key" loading={loading} columns={columns} dataSource={rows} size="small"
                 pagination={false} bordered scroll={{ x: 560 }}
                 locale={{ emptyText: '暂无还款计划，请点击「新增行」录入' }} />

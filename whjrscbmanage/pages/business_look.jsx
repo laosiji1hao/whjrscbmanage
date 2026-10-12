@@ -24,7 +24,9 @@ var hideStyle = document.createElement('style');
 hideStyle.innerHTML =
     '.fr-report{position:absolute!important;left:-9999px!important;visibility:hidden!important}' +
     '.content-container,.fr-content,.reportPane{height:0!important;overflow:hidden!important;pointer-events:none!important}' +
-    'body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}';
+    'body>.textbox-container,body>#textboxContainer,body>.widget-container{display:none!important}' +
+    /* 平台注入的 sentinel 告警浮球（Alert 图标、可拖拽，加载时渲染在报表文档上）——本项目不展示 */
+    '[data-sentinel-button],[class*="sentinel-ant-float-btn"]{display:none!important;visibility:hidden!important;pointer-events:none!important}';
 document.head.appendChild(hideStyle);
 document.body.setAttribute('style',
     'margin:0;padding:0;min-height:100vh;box-sizing:border-box;overflow-y:auto;');
@@ -51,16 +53,65 @@ var zhCN = {
         default: '字段验证错误 ${label}', required: '请输入 ${label}',
         enum: '${label} 必须是其中一个', whitespace: '不能输入空格' } },
     Empty: { description: '暂无数据' },
-    DatePicker: { placeholder: '请选择日期', rangePlaceholder: ['开始日期', '结束日期'] },
+    // antd v5 DatePicker 日历面板中文（月份/星期/操作钮），否则默认英文 August/Sunday
+    DatePicker: {
+        lang: {
+            locale: 'zh-cn',
+            monthBeforeYear: false,
+            yearFormat: 'YYYY年',
+            monthFormat: 'M月',
+            dayFormat: 'D',
+            cellDateFormat: 'D',
+            fieldDateFormat: 'YYYY-MM-DD',
+            fieldDateTimeFormat: 'YYYY-MM-DD HH:mm:ss',
+            fieldMonthFormat: 'YYYY-MM',
+            fieldWeekFormat: 'YYYY-wo',
+            fieldQuarterFormat: 'YYYY-[Q]Q',
+            fieldYearFormat: 'YYYY',
+            years: '年',
+            months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+            monthsShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+            monthText: '月份',
+            quarterText: '季度',
+            today: '今天',
+            now: '此刻',
+            okText: '确定',
+            cancelText: '取消',
+            nextYear: '下一年',
+            prevYear: '上一年',
+            nextMonth: '下月',
+            prevMonth: '上月',
+            yearToday: '今年',
+            weekdays: ['日', '一', '二', '三', '四', '五', '六'],
+            weekdaysShort: ['日', '一', '二', '三', '四', '五', '六'],
+            weekdaysMin: ['日', '一', '二', '三', '四', '五', '六'],
+            firstDayOfWeek: 0
+        },
+        timePickerLocale: { placeholder: '请选择时间', rangePlaceholder: ['开始时间', '结束时间'] },
+        placeholder: '请选择日期',
+        rangePlaceholder: ['开始日期', '结束日期']
+    },
     Select: { placeholder: '请选择' }
 };
+
+// 注册并启用 dayjs 中文 locale（无需 locale 文件；antd DatePicker 星期行/月份读全局 dayjs locale）
+try {
+    dayjs.locale('zh-cn', {
+        months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split('_'),
+        monthsShort: '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'),
+        weekdays: '星期日_星期一_星期二_星期三_星期四_星期五_星期六'.split('_'),
+        weekdaysShort: '周日_周一_周二_周三_周四_周五_周六'.split('_'),
+        weekdaysMin: '日_一_二_三_四_五_六'.split('_'),
+        weekdaysParseExact: true
+    }, true);
+} catch (e) {}
 
 // 图标：从 help/lib/antd/icons/ 同步加载并缓存，内联渲染
 var iconBase = PATH.apiBase.replace('/decision', '/help/lib/antd/icons');
 var iconCache = {};
 (function() {
     var names = ['search', 'plus', 'reload', 'edit', 'delete', 'close', 'check', 'filter',
-                 'export', 'download', 'setting', 'user'];
+                 'export', 'download', 'setting', 'user', 'exclamation-circle'];
     names.forEach(function(name) {
         $.ajax({
             url: iconBase + '/outlined/' + name + '.svg',
@@ -209,19 +260,38 @@ var DICTS = {
     'yn': DICT_YN,
     symbolStandard: [{v:'0',t:'标准化业务'},{v:'1',t:'非标准化业务'}],
     greenTech: [{v:'0',t:'绿色'},{v:'1',t:'科技'},{v:'2',t:'养老'},{v:'3',t:'不涉及'}],
-    industry: [{v:'0',t:'货币金融服务'},{v:'1',t:'资本市场服务'},{v:'2',t:'保险业'},{v:'3',t:'其他金融业'}],
+    industry: [
+        { v: '0', t: '金融业' }, { v: '1', t: '房地产业' },
+        { v: '2', t: '租赁和商务服务业' }, { v: '3', t: '科学研究和技术服务业' },
+        { v: '4', t: '水利、环境和公共设施管理业' }, { v: '5', t: '居民服务、修理和其他服务业' },
+        { v: '6', t: '教育、卫生和社会工作' }, { v: '7', t: '文化、体育和娱乐业' },
+        { v: '8', t: '公共管理、社会保障和社会组织' }, { v: '9', t: '农、林、牧、渔业' },
+        { v: '10', t: '采矿业' }, { v: '11', t: '制造业' },
+        { v: '12', t: '电力、热力、燃气及水生产和供应业' }, { v: '13', t: '建筑业' },
+        { v: '14', t: '批发和零售业' }, { v: '15', t: '交通运输、仓储和邮政业' },
+        { v: '16', t: '住宿和餐饮业' }, { v: '17', t: '信息传输、软件和信息技术服务业' }
+    ],
     customerType: [{v:'0',t:'一类'},{v:'1',t:'二类'},{v:'2',t:'三类'},{v:'3',t:'四类'}],
     currency: [{v:'人民币',t:'人民币'},{v:'美元',t:'美元'}],
-    guaranty: [{v:'信用',t:'信用'},{v:'保证',t:'保证'},{v:'抵押',t:'抵押'},{v:'质押',t:'质押'}],
+    guaranty: [{v:'0',t:'信用'},{v:'1',t:'抵押'},{v:'2',t:'质押'},{v:'3',t:'保证'}],
     fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
-    dept: [{v:'利率室',t:'利率室'},{v:'同业室',t:'同业室'},{v:'托管室',t:'托管室'}],
+    dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
     rating: ['AAA+','AAA','AAA-','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BB','B','CCC','CC','C'],
     exercise: [{v:'0',t:'否'},{v:'1',t:'是'}],
-    bizType: [{v:'0',t:'国债'},{v:'1',t:'地方债'},{v:'2',t:'金融债'},{v:'3',t:'企业债'},{v:'4',t:'中期票据'},{v:'5',t:'短期融资券'},{v:'6',t:'资产支持证券'},{v:'7',t:'同业存单'},{v:'8',t:'货币市场工具'},{v:'9',t:'非标准化资产'},{v:'10',t:'股权'},{v:'11',t:'基金'},{v:'12',t:'其他'}],
+    bizType: [
+        { v: '0', t: '非金融企业类债券投资' }, { v: '1', t: '企业资产支持证券' },
+        { v: '2', t: '非交易类-产业基金' }, { v: '3', t: '非交易类-城镇化建设基金' },
+        { v: '4', t: '非交易类-同业资产收益权' }, { v: '5', t: '交易类-保险债权投资计划' },
+        { v: '6', t: '交易类-券商收益权凭证' }, { v: '7', t: '交易类-特定目的载体投资信用债' },
+        { v: '8', t: '交易类-债权融资计划' }, { v: '9', t: '金租通' },
+        { v: '10', t: '银证投融通' }, { v: '11', t: '债务融资工具(余额包销或持有)' },
+        { v: '12', t: '其他' }
+    ],
     status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
     ynNot: [{v:'0',t:'不涉及'},{v:'1',t:'是'}]
 };
+DICTS.bondType = DICTS.symbolStandard; // pool 表格/导出用 bondType 键
 function dictText(dic, v) {
     if (v === undefined || v === null || v === '') return '';
     var s = String(v);
@@ -260,6 +330,14 @@ function fmtDate(v) {
     return d.isValid() ? d.format('YYYY-MM-DD') : String(v);
 }
 
+// ECIF客户号：17 位数字（以 0 开头），手工只填后面的位，失焦自动前补零到 17 位
+function padEcif(v) {
+    var s = (v === undefined || v === null) ? '' : String(v).trim();
+    if (s === '') return '';
+    while (s.length < 17) s = '0' + s;
+    return s;
+}
+
 // iframe 弹窗：向父页面汇报内容高度 / 提交完成
 function notifyHeight() {
     try {
@@ -279,7 +357,9 @@ function closeSelf() {
 function downloadCsv(filename, headers, rows) {
     var q = function(v) {
         var s = (v === undefined || v === null) ? '' : String(v);
-        return '"' + s.replace(/"/g, '""') + '"';
+        // 不用 /"/g 正则字面量：display_writer 的去注释暂存会把含双引号的正则字面量跨段误吞，
+        // 导致字符串还原成 _MJS_S…_ 占位。split/join 等价且安全。
+        return '"' + s.split('"').join('""') + '"';
     };
     var lines = [headers.map(q).join(',')];
     rows.forEach(function(r) { lines.push(r.map(q).join(',')); });
@@ -293,12 +373,92 @@ function downloadCsv(filename, headers, rows) {
     document.body.removeChild(a);
     setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
+
+/* ── 真正的 .xlsx 导出（用平台自带 webroot/js/jszip.min.js 手工拼 OOXML）── */
+function xmlEscape(v) {
+    // split/join 代替 replace(/&/g 等正则字面量：display_writer 去注释会用含引号的正则字面量跨段误吞（见 downloadCsv 注）
+    return String(v)
+        .split('&').join('&amp;')
+        .split('<').join('&lt;')
+        .split('>').join('&gt;')
+        .split('"').join('&quot;')
+        .split('\n').join('&#10;');
+}
+function colName(c) { // 0-based → A,B,...,Z,AA,...
+    var s = ''; c = c + 1;
+    while (c > 0) { var m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); }
+    return s;
+}
+function xlsxCell(r, c, val) {
+    var ref = colName(c) + r;
+    var s = (val === undefined || val === null) ? '' : String(val);
+    if (s !== '' && /^-?\d+(\.\d+)?$/.test(s)) {
+        return '<c r="' + ref + '"><v>' + s + '</v></c>';
+    }
+    return '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + xmlEscape(s) + '</t></is></c>';
+}
+function ensureJSZip(cb, onErr) {
+    if (typeof JSZip !== 'undefined') { cb(); return; }
+    var s = document.createElement('script');
+    s.src = PATH.apiBase.replace('/decision', '') + '/js/jszip.min.js';
+    s.onload = function() { cb(); };
+    s.onerror = function() { if (onErr) onErr(); };
+    document.head.appendChild(s);
+}
+function downloadXlsx(filename, headers, rows) {
+    ensureJSZip(function() {
+        var i, j;
+        var rowXml = [];
+        var hs = [];
+        for (j = 0; j < headers.length; j++) hs.push(xlsxCell(1, j, headers[j]));
+        rowXml.push('<row r="1">' + hs.join('') + '</row>');
+        for (i = 0; i < rows.length; i++) {
+            var cs = [];
+            for (j = 0; j < rows[i].length; j++) cs.push(xlsxCell(i + 2, j, rows[i][j]));
+            rowXml.push('<row r="' + (i + 2) + '">' + cs.join('') + '</row>');
+        }
+        var sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' +
+            rowXml.join('') + '</sheetData></worksheet>';
+        var zip = new JSZip();
+        zip.file('[Content_Types].xml',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+            '<Default Extension="xml" ContentType="application/xml"/>' +
+            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+            '</Types>');
+        zip.file('_rels/.rels',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+            '</Relationships>');
+        zip.file('xl/workbook.xml',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+            '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>');
+        zip.file('xl/_rels/workbook.xml.rels',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+            '</Relationships>');
+        zip.file('xl/worksheets/sheet1.xml', sheetXml);
+        zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }).then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        });
+    }, function() { antd.message.error('Excel 导出库加载失败'); });
+}
 /* ===== 查看我的申报 / 变更申请（原 my_business_pc_look ± busimanage）=====
  * URL 参数：id=业务主键；updaterType=1 表示业务管理岗（保存 226007 携带）
  * 保存 226007 —— "申请变更业务信息审批中"
  */
 function App() {
-    var { Form, Input, InputNumber, Select, Button, Space, Row, Col, Spin, Modal, DatePicker } = antd;
+    var { Form, Input, InputNumber, Select, Button, Space, Row, Col, Spin, Modal, DatePicker, Tooltip } = antd;
     const [form] = Form.useForm();
     const [loading, setLoading] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
@@ -314,6 +474,14 @@ function App() {
     const [showExDate, setShowExDate] = React.useState(false);
     const [planModal, setPlanModal] = React.useState({ open: false, url: '' });
     const loadingRef = React.useRef(false);
+    var cfgRef = { coupon_rate: 0, vat: 0, surcharge: 0, ready: false };
+    var needUpperInit = false; // 等 config 就绪后再算初始上存利率（避免加载竞态算出 0）
+    function initUpperWhenReady() {
+        if (cfgRef.ready && needUpperInit) {
+            needUpperInit = false;
+            form.setFieldsValue({ upper_storage_rate: six(num(cfgRef.coupon_rate) - num(cfgRef.vat) - num(cfgRef.surcharge)) });
+        }
+    }
 
     function outtext(v) { return v === undefined || v === null ? '' : String(v); }
     function pickDay(v) {
@@ -330,21 +498,34 @@ function App() {
         if (n === undefined || n === null || n === '' || isNaN(Number(n))) return null;
         return parseFloat(Number(n).toFixed(6));
     }
+    // 币种折算（人民币×1 / 美元×6.8）；look 版只折算 rmb_amount，不写 balance
+    function convertAmount(currency, amt) {
+        if (amt === null || amt === undefined || amt === '') return null;
+        var val = Number(amt);
+        if (isNaN(val)) return null;
+        if (String(currency) === '美元') return Number((val * 6.8).toFixed(2));
+        return Number(val.toFixed(2));
+    }
 
     React.useEffect(function() {
         var q = new URLSearchParams(window.location.search);
-        var id = q.get('id') || '0';
+        var id = q.get('biz_uuid') || '';
         setRecordId(id);
         setUpdaterType(q.get('updaterType') || '0');
         loadingRef.current = true;
         callData('config_get', [], function(rows) {
             if (rows && rows.length) {
                 var c = rows[0];
-                setCfg({ coupon_rate: num(c.coupon_rate) || 0, vat: num(c.vat) || 0, surcharge: num(c.surcharge) || 0 });
+                cfgRef.coupon_rate = num(c.coupon_rate) || 0;
+                cfgRef.vat = num(c.vat) || 0;
+                cfgRef.surcharge = num(c.surcharge) || 0;
+                cfgRef.ready = true;
+                setCfg({ coupon_rate: cfgRef.coupon_rate, vat: cfgRef.vat, surcharge: cfgRef.surcharge });
+                initUpperWhenReady();
             }
         }, null);
         if (id && id !== '0') {
-            callData('get_business', [{ name: 'p_id', type: 'String', value: id }], function(rows) {
+            callData('get_business', [{ name: 'p_biz_uuid', type: 'String', value: id }], function(rows) {
                 loadingRef.current = false;
                 setLoading(false);
                 if (!rows || !rows.length) { antd.message.error('记录不存在'); return; }
@@ -381,14 +562,15 @@ function App() {
                 setShowExDate(String(d.exercise_flag || '0') === '1');
                 setShowPassage(String(d.is_passage || '0') === '1');
                 if (String(d.is_passage || '0') !== '1') {
-                    form.setFieldsValue({ upper_storage_rate: six(num(cfg.coupon_rate) - num(cfg.vat) - num(cfg.surcharge)) });
+                    needUpperInit = true;
+                    initUpperWhenReady();
                 }
             });
         } else {
             loadingRef.current = false;
             setLoading(false);
         }
-        callData('schedule_of_business', [{ name: 'p_id', type: 'String', value: id }], function(rows) {
+        callData('schedule_of_business', [{ name: 'p_biz_uuid', type: 'String', value: id }], function(rows) {
             if (rows && rows.length) {
                 setInstDetail(rows[0].repayment_info || '');
                 setInstJson(rows[0].installment_list || '[]');
@@ -403,10 +585,14 @@ function App() {
     React.useEffect(function() {
         function handler(e) {
             var d = e.data;
-            if (!d || d.type !== 'fr_inst_plan') return;
-            setPlanModal({ open: false, url: '' });
-            setInstDetail(d.result || '');
-            setInstJson(d.json || '[]');
+            if (!d) return;
+            if (d.type === 'fr_inst_plan') {
+                setPlanModal({ open: false, url: '' });
+                setInstDetail(d.result || '');
+                setInstJson(d.json || '[]');
+            } else if (d.type === 'fr_form_saved') {
+                setPlanModal({ open: false, url: '' }); // 还款计划弹窗点「关闭」关掉本弹窗
+            }
         }
         window.addEventListener('message', handler);
         return function() { window.removeEventListener('message', handler); };
@@ -431,7 +617,53 @@ function App() {
             open: true,
             url: PATH.apiBase + '/view/report?op=write&viewlet=' +
                  PATH.getTemplatePath('installment_ment.cpt') +
-                 '&bond_code=' + encodeURIComponent(bc) + '&type=1'
+                 '&bond_code=' + encodeURIComponent(bc) + '&type=1' +
+                 '&initial=' + encodeURIComponent(instJson)
+        });
+    }
+
+    // ECIF 客户编号 → ECIF客户号＋融资人名称（226010，与 form 同逻辑）
+    function ecifQuery(custNo) {
+        if (!custNo) return;
+        CLIENT.call('226010', { custNo: outtext(custNo) }, function(data) {
+            var f = data || {};
+            var curE = outtext(form.getFieldValue('ecif_customer_no'));
+            var curN = outtext(form.getFieldValue('customer_name'));
+            var ne = f.ecifCustomerNo === undefined || f.ecifCustomerNo === null ? '' : String(f.ecifCustomerNo);
+            var nn = f.customerName === undefined || f.customerName === null ? '' : String(f.customerName);
+            if (ne === '') {
+                if (curE !== '') antd.message.warning('该客户编号查询的ECIF客户号不存在');
+            } else if (curE !== '' && curE !== ne) {
+                antd.Modal.confirm({ title: '提示',
+                    content: 'ECIF客户号已在页面上填写为【' + curE + '】，与查询结果【' + ne + '】不一致，是否以此为准？',
+                    okText: '确定', cancelText: '取消',
+                    onOk: function() { form.setFieldsValue({ ecif_customer_no: ne }); } });
+            } else {
+                form.setFieldsValue({ ecif_customer_no: ne });
+            }
+            if (nn === '') {
+                if (curN !== '') antd.message.warning('该客户编号查询的客户名称不存在');
+            } else if (curN !== '' && curN !== nn) {
+                antd.Modal.confirm({ title: '提示',
+                    content: '客户名称已在页面上填写为【' + curN + '】，与查询结果【' + nn + '】不一致，是否以此为准？',
+                    okText: '确定', cancelText: '取消',
+                    onOk: function() { form.setFieldsValue({ customer_name: nn }); } });
+            } else {
+                form.setFieldsValue({ customer_name: nn });
+            }
+        }, null);
+    }
+
+    // 账号可用性校验（226014）
+    function checkAccount(name, acct) {
+        if (!acct) return;
+        CLIENT.call('226014', { acctNo: outtext(acct) }, function(data) {
+            if (data && data.status !== 'AS00') {
+                antd.message.warning('该账号不可用，查询结果为' + (data.statusTxt || data.status));
+                form.setFieldsValue({ [name]: '' });
+            }
+        }, function() {
+            form.setFieldsValue({ [name]: '' });
         });
     }
 
@@ -516,11 +748,19 @@ function App() {
 
     return (
         <div style={{ padding: '16px 24px', paddingBottom: 16 }}>
-            <h3 style={{ marginTop: 0, marginBottom: 12 }}>查看/编辑业务信息（变更申请）</h3>
             <Spin spinning={loading}>
                 <Form form={form} layout="vertical" autoComplete="off"
                     onValuesChange={function(changed) {
                         if (loadingRef.current) return;
+                        if (changed.installment_flag !== undefined && String(changed.installment_flag) !== '1') {
+                            setInstDetail('');
+                            setInstJson('');
+                        }
+                        if (changed.orig_amount !== undefined || changed.currency !== undefined) {
+                            var amt2 = changed.orig_amount !== undefined ? changed.orig_amount : form.getFieldValue('orig_amount');
+                            var cur2 = changed.currency !== undefined ? changed.currency : form.getFieldValue('currency');
+                            form.setFieldsValue({ rmb_amount: convertAmount(cur2, amt2) });
+                        }
                         if (changed.is_passage !== undefined) {
                             var pv = String(changed.is_passage);
                             setShowPassage(pv === '1');
@@ -555,72 +795,72 @@ function App() {
                         setTimeout(notifyHeight, 50);
                     }}>
                     <Row gutter={16}>
-                        <Col span={8}><Form.Item label="标准/非标准业务" name="bond_type" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.symbolStandard)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="客户编号" name="customer_no" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="ECIF客户号" name="ecif_customer_no"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="融资人名称" name="customer_name" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="项目/债券名称" name="biz_name"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="债券编号" name="bond_code"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否绿色/科技/养老/不涉及" name="green_tech_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.greenTech)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="外部信用评级" name="ext_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="外部信用评级日期" name="ext_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="外部评级机构" name="rating_agency"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="内部评级" name="int_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="内部评级日期" name="int_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="主承销商" name="lead_underwriter"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否有通道费" name="is_passage"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="标准/非标准业务" name="bond_type" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.symbolStandard)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label={<span>客户编号<Tooltip title="填写信贷系统客户编号，个人以P开头，企业以C开头"><span style={{ marginLeft: 4, color: '#faad14', cursor: 'help' }}>{icon('/outlined/exclamation-circle.svg')}</span></Tooltip></span>} name="customer_no" rules={[{ required: true, message: '请输入' }]}><Input placeholder="客户编号（失焦自动查ECIF）" onBlur={function(e) { ecifQuery(e.target.value); }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="ECIF客户号" name="ecif_customer_no"><Input placeholder="填后 17 位，失焦自动补零" onBlur={function(e) { form.setFieldsValue({ ecif_customer_no: padEcif(e.target.value) }); }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="融资人名称" name="customer_name" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="项目/债券名称" name="biz_name"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="债券编号" name="bond_code"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否绿色/科技/养老/不涉及" name="green_tech_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.greenTech)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="外部信用评级" name="ext_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="外部信用评级日期" name="ext_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="外部评级机构" name="rating_agency"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="内部评级" name="int_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="内部评级日期" name="int_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="主承销商" name="lead_underwriter"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否有通道费" name="is_passage"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showPassage && (
-                            <Col span={8}><Form.Item label="通道费金额(%)" name="passage_amount"><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="通道费金额(%)" name="passage_amount"><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
                         )}
-                        <Col span={8}><Form.Item label="上存利率(%)" name="upper_storage_rate" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="行业分类" name="industry" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.industry)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="客户分类" name="customer_type"><Select {...sel(DICTS.customerType)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否我行预警客户" name="alert_customer"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="业务品种" name="biz_type"><Select {...sel(DICTS.bizType)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="发放日" name="start_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="到期日" name="mature_date"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="币种" name="currency" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.currency)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="初始金额" name="orig_amount" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="初始金额（折人民币）" name="rmb_amount"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="业务余额（折人民币）" name="balance"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="投资利率（%）" name="invest_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="价值转移利率（%）" name="transfer_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="担保情况" name="guarantee_info"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否逾欠/违约" name="breach_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="五级分类" name="five_level_class"><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否涉及分期还款" name="installment_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="还款计划"><Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button></Form.Item></Col>
-                        <Col span={8}><Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否我行承销" name="our_bank_underwrite"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="约定资金用途" name="agreed_usage" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="所属管理条线" name="manage_line"><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="对应处室" name="dept"><Select {...sel(DICTS.dept)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否存在资金发放/募集账户账号" name="fund_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="上存利率(%)" name="upper_storage_rate" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="行业分类" name="industry" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.industry)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="客户分类" name="customer_type"><Select {...sel(DICTS.customerType)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否我行预警客户" name="alert_customer"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="业务品种" name="biz_type"><Select {...sel(DICTS.bizType)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="发放日" name="start_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="到期日" name="mature_date"><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="币种" name="currency" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.currency)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="初始金额" name="orig_amount" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="初始金额（折人民币）" name="rmb_amount"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="业务余额（折人民币）" name="balance"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="投资利率（%）" name="invest_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="价值转移利率（%）" name="transfer_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="担保情况" name="guarantee_info"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否逾欠/违约" name="breach_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="五级分类" name="five_level_class"><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否涉及分期还款" name="installment_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="还款计划"><Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button></Form.Item></Col>
+                        <Col span={12}><Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否我行承销" name="our_bank_underwrite"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="约定资金用途" name="agreed_usage" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="所属管理条线" name="manage_line"><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="对应处室" name="dept"><Select {...sel(DICTS.dept)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在资金发放/募集账户账号" name="fund_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showFund && (
-                            <Col span={8}><Form.Item label="资金发放/募集账户账号" name="fund_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="资金发放/募集账户账号" name="fund_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input placeholder="失焦校验账号可用性" onBlur={function(e) { checkAccount('fund_account', e.target.value); }} /></Form.Item></Col>
                         )}
-                        <Col span={8}><Form.Item label="是否存在资金监管/回款专户账号" name="supervise_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在资金监管/回款专户账号" name="supervise_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showSuper && (
-                            <Col span={8}><Form.Item label="资金监管/回款专户账号" name="supervise_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="资金监管/回款专户账号" name="supervise_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input placeholder="失焦校验账号可用性" onBlur={function(e) { checkAccount('supervise_account', e.target.value); }} /></Form.Item></Col>
                         )}
-                        <Col span={8}><Form.Item label="是否涉及我行资金监管" name="fund_used_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="我行监管资金是否已使用完毕" name="fund_used_up"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="支用检查情况" name="drawdown_check"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="批复号" name="remark_number"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="批复管理要求" name="remark"><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否存在金融市场部批复管理要求" name="js_remark_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否涉及我行资金监管" name="fund_used_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="我行监管资金是否已使用完毕" name="fund_used_up"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="支用检查情况" name="drawdown_check"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="批复号" name="remark_number"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="批复管理要求" name="remark"><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在金融市场部批复管理要求" name="js_remark_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showJs && (
-                            <Col span={8}><Form.Item label="金融市场部批复管理要求" name="js_remark" rules={[{ required: true, message: '金融市场部批复管理要求不允许为空' }]}><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="金融市场部批复管理要求" name="js_remark" rules={[{ required: true, message: '金融市场部批复管理要求不允许为空' }]}><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
                         )}
-                        <Col span={8}><Form.Item label="实地检查频率（月）" name="inspect_freq"><Input /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否原资产管理部回表业务" name="is_original_am"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="是否行权" name="exercise_flag"><Select {...sel(DICTS.exercise)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="实地检查频率（月）" name="inspect_freq"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否原资产管理部回表业务" name="is_original_am"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否行权" name="exercise_flag"><Select {...sel(DICTS.exercise)} /></Form.Item></Col>
                         {showExDate && (
-                            <Col span={8}><Form.Item label="行权日期" name="exercise_date"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="行权日期" name="exercise_date"><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
                         )}
-                        <Col span={8}><Form.Item label="所属客户经理" name="creator"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="所属机构" name="org_name"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={8}><Form.Item label="投后检查实施人员岗位" name="inspector_post"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="所属客户经理" name="creator"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="所属机构" name="org_name"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="投后检查实施人员岗位" name="inspector_post"><Input /></Form.Item></Col>
                     </Row>
                     <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

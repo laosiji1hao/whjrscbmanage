@@ -9,6 +9,7 @@ import json
 import re
 import sys
 import threading
+import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pymysql
@@ -60,15 +61,16 @@ def upsert_installment(cur, bond_code, install_json, applicant_oa=None):
 def save_business(business_id, b, op):
     cur = conn().cursor()
     if business_id in ("", "0", None):
-        cur.execute("INSERT INTO bus_bond_business (bond_code, ecif_customer_no, customer_no, customer_name, biz_name, "
+        _biz_uuid = uuid.uuid4().hex
+        cur.execute("INSERT INTO bus_bond_business (biz_uuid, bond_code, ecif_customer_no, customer_no, customer_name, biz_name, "
                     "bond_type, green_tech_flag, ext_rating, ext_rating_date, rating_agency, int_rating, int_rating_date, "
                     "industry, customer_type, start_date, mature_date, currency, orig_amount, rmb_amount, balance, "
                     "invest_rate, transfer_rate, guarantee_info, installment_flag, installment_plan, our_bank_underwrite, "
                     "agreed_usage, fund_account, fund_account_flag, supervise_account, supervise_account_flag, "
                     "drawdown_check, exercise_flag, exercise_date, remark, js_remark, js_remark_flag, inspect_freq, "
                     "inspector_post, creator, org_code, org_name, status, remark_number, lead_underwriter) "
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,1,%s,%s)",
-                    (esc(b.get("bondCode")), esc(b.get("ecifCustomerNo")), esc(b.get("customerNo")),
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,1,%s,%s)",
+                    (_biz_uuid, esc(b.get("bondCode")), esc(b.get("ecifCustomerNo")), esc(b.get("customerNo")),
                      esc(b.get("customerName")), esc(b.get("bizName")), esc(b.get("bondType")),
                      esc(b.get("greenTechFlag")), esc(b.get("extRating")), esc(b.get("extRatingDate")),
                      esc(b.get("ratingAgency")), esc(b.get("intRating")), esc(b.get("intRatingDate")),
@@ -88,7 +90,7 @@ def save_business(business_id, b, op):
         with conn().cursor() as c2:
             add_flow(c2, b.get("bondCode") or "", op, "biz_declare", b)
             upsert_installment(c2, b.get("bondCode"), b.get("installment"))
-        return {"businessId": str(new_id)}
+        return {"businessId": _biz_uuid}
     # UPDATE
     fields = []
     vals = []
@@ -116,19 +118,19 @@ def save_business(business_id, b, op):
             vals.append(b[k])
     fields.append("status=1")
     fields.append("update_time=NOW()")
-    vals.append(int(business_id))
+    vals.append(business_id)
     with conn().cursor() as cur:
         if fields:
-            cur.execute("UPDATE bus_bond_business SET %s WHERE id=%%s" % ", ".join(fields), vals)
+            cur.execute("UPDATE bus_bond_business SET %s WHERE biz_uuid=%%s" % ", ".join(fields), vals)
         add_flow(cur, b.get("bondCode") or "", op, "biz_update", b)
         if insert:
-            cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE id=%s", (insert, int(business_id)))
+            cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s", (insert, business_id))
             upsert_installment(cur, b.get("bondCode"), insert)
         row = None
         if b.get("bondCode"):
-            cur.execute("SELECT id, bond_code FROM bus_bond_business WHERE id=%s", (int(business_id),))
+            cur.execute("SELECT id, bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
             row = cur.fetchone()
-    return {"businessId": str(business_id)}
+    return {"businessId": business_id}
 
 
 def change_business(business_id, b, op):
@@ -158,47 +160,65 @@ def change_business(business_id, b, op):
             fields.append("%s=%%s" % col)
             vals.append(b[k])
     fields.append("update_time=NOW()")
-    vals.append(int(business_id))
+    vals.append(business_id)
     with conn().cursor() as cur:
+        # 改号联动：记录旧 bond_code，改号后同步还款计划表与审批流表
+        old_bond = None
+        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+        r0 = cur.fetchone()
+        old_bond = r0[0] if r0 else None
+        new_bond = b.get("bondCode") or old_bond
         if fields:
-            cur.execute("UPDATE bus_bond_business SET %s WHERE id=%%s" % ", ".join(fields), vals)
+            cur.execute("UPDATE bus_bond_business SET %s WHERE biz_uuid=%%s" % ", ".join(fields), vals)
+        if old_bond and new_bond and old_bond != new_bond:
+            cur.execute("UPDATE bus_repayment_schedule SET bond_code=%s WHERE bond_code=%s", (new_bond, old_bond))
+            cur.execute("UPDATE iassist_flow_data SET business_no=%s WHERE business_no=%s", (new_bond, old_bond))
         if b.get("installment"):
-            cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE id=%s",
-                        (b.get("installment"), int(business_id)))
-            cur.execute("SELECT bond_code FROM bus_bond_business WHERE id=%s", (int(business_id),))
-            row = cur.fetchone()
-            upsert_installment(cur, row[0] if row else None, b.get("installment"))
+            cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s",
+                        (b.get("installment"), business_id))
+            upsert_installment(cur, new_bond, b.get("installment"))
         flow = dict(b)
         flow.pop("operate", None)
-        add_flow(cur, b.get("bondCode") or "", op, "biz_change", b)
-    return {"businessId": str(business_id)}
+        add_flow(cur, new_bond or "", op, "biz_change", b)
+    return {"businessId": business_id}
 
 
 def change_manager(business_id, b, op):
     with conn().cursor() as cur:
-        cur.execute("SELECT creator, org_code, org_name FROM bus_bond_business WHERE id=%s", (int(business_id),))
+        cur.execute("SELECT id, creator, org_code, org_name FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
         row = cur.fetchone()
-        old_handler = row[0] if row else None
-        old_org_code = row[1] if row else None
-        old_org_name = row[2] if row else None
-        cur.execute("UPDATE bus_bond_business SET creator=%s, org_code=%s, org_name=%s, update_time=NOW() WHERE id=%s",
-                    (b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"), int(business_id)))
+        rid = row[0] if row else None
+        old_handler = row[1] if row else None
+        old_org_code = row[2] if row else None
+        old_org_name = row[3] if row else None
+        cur.execute("UPDATE bus_bond_business SET creator=%s, org_code=%s, org_name=%s, update_time=NOW() WHERE biz_uuid=%s",
+                    (b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"), business_id))
         cur.execute("INSERT INTO bus_manager_change_history (business_id, old_handler, old_org_code, old_org_name, "
                     "new_handler, new_org_code, new_org_name, change_reason, applicant_oa) "
                     "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                    (int(business_id), old_handler or "", old_org_code or "", old_org_name,
+                    (rid, old_handler or "", old_org_code or "", old_org_name,
                      b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"),
                      b.get("changeReason"), b.get("creator") or op))
         add_flow(cur, "", op, "biz_mgr_change", b)
     return {}
 
 
-def terminate_business(bond_code, op, updater_type):
+def terminate_business(business_id, op, updater_type, bond_code=None):
     with conn().cursor() as cur:
+        # 优先按 biz_uuid 定位；无则退回按 bond_code
+        bc = bond_code
+        if business_id:
+            cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+            r0 = cur.fetchone()
+            if r0:
+                bc = r0[0]
+        # 列名走白名单格式化（%s 会把列名也引成字符串，导致恒假），值走参数化
+        col = "biz_uuid" if business_id else "bond_code"
+        val = business_id if business_id else (bc or "")
         cur.execute("UPDATE bus_bond_business SET status=5, termination_reason='中止', update_time=NOW() "
-                    "WHERE bond_code=%s", (bond_code,))
-        add_flow(cur, bond_code, op, "biz_terminate", {"bondCode": bond_code, "terminator": op,
-                                                       "updaterType": updater_type})
+                    "WHERE %s=%%s" % col, (val,))
+        add_flow(cur, bc or "", op, "biz_terminate", {"bondCode": bc, "terminator": op,
+                                                      "updaterType": updater_type})
     return {}
 
 
@@ -227,8 +247,8 @@ def handle(data):
         return change_business(body.get("businessId"), body, op)
     if code == "226008":  # 客户经理变更
         return change_manager(body.get("businessId"), body, op)
-    if code == "226009":  # 中止
-        return terminate_business(body.get("bondCode"), op, body.get("updaterType"))
+    if code == "226009":  # 中止（按 biz_uuid）
+        return terminate_business(body.get("businessId"), op, body.get("updaterType"), body.get("bondCode"))
     return {"error": "unknown code " + code}
 
 
