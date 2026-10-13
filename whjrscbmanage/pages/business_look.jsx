@@ -277,7 +277,7 @@ var DICTS = {
     fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
     dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
-    rating: ['AAA+','AAA','AAA-','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BB','B','CCC','CC','C'],
+    rating: ['AAA+', 'AAA', 'AAA-', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+'],
     exercise: [{v:'0',t:'否'},{v:'1',t:'是'}],
     bizType: [
         { v: '0', t: '非金融企业类债券投资' }, { v: '1', t: '企业资产支持证券' },
@@ -288,7 +288,7 @@ var DICTS = {
         { v: '10', t: '银证投融通' }, { v: '11', t: '债务融资工具(余额包销或持有)' },
         { v: '12', t: '其他' }
     ],
-    status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
+    status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'新增审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
     ynNot: [{v:'0',t:'不涉及'},{v:'1',t:'是'}]
 };
 DICTS.bondType = DICTS.symbolStandard; // pool 表格/导出用 bondType 键
@@ -334,8 +334,28 @@ function fmtDate(v) {
 function padEcif(v) {
     var s = (v === undefined || v === null) ? '' : String(v).trim();
     if (s === '') return '';
+    if (!/^\d+$/.test(s)) return s; // 非纯数字（如 226010 回填带前缀的值）不补零，避免误改成 000…前缀
     while (s.length < 17) s = '0' + s;
     return s;
+}
+
+// 还款计划并入主表：读取 bus_bond_business.installment_plan（JSON 数组）→ {json, detail}
+// 兼容历史人读串（"还款时间:x,还款金额:y;…"）与空值
+function planFromStore(t) {
+    var j = (t === undefined || t === null) ? '' : String(t).trim();
+    if (j && j.charAt(0) === '[') {
+        try {
+            var arr = JSON.parse(j);
+            if (Array.isArray(arr)) {
+                var s = arr.map(function(x) {
+                    return '还款时间:' + (x.installmentTime || x.repayment_date || '') +
+                           ',还款金额:' + (x.installmentAmount || x.repayment_amount || '');
+                }).join(';');
+                return { json: j, detail: s };
+            }
+        } catch (e) {}
+    }
+    return { json: (j && j !== '[]') ? j : '', detail: j };
 }
 
 // iframe 弹窗：向父页面汇报内容高度 / 提交完成
@@ -472,6 +492,7 @@ function App() {
     const [showSuper, setShowSuper] = React.useState(false);
     const [showJs, setShowJs] = React.useState(false);
     const [showExDate, setShowExDate] = React.useState(false);
+    const [showInstall, setShowInstall] = React.useState(false); // 分期=否时隐藏还款计划区
     const [planModal, setPlanModal] = React.useState({ open: false, url: '' });
     const loadingRef = React.useRef(false);
     var cfgRef = { coupon_rate: 0, vat: 0, surcharge: 0, ready: false };
@@ -560,22 +581,21 @@ function App() {
                 setShowSuper(String(d.supervise_account_flag || '0') === '1');
                 setShowJs(String(d.js_remark_flag || '0') === '1');
                 setShowExDate(String(d.exercise_flag || '0') === '1');
+                setShowInstall(String(d.installment_flag || '0') === '1');
                 setShowPassage(String(d.is_passage || '0') === '1');
                 if (String(d.is_passage || '0') !== '1') {
                     needUpperInit = true;
                     initUpperWhenReady();
                 }
+                // 还款计划并入主表：从 installment_plan(JSON) 解析回显（不再查独立表）
+                var pl = planFromStore(d.installment_plan);
+                setInstJson(pl.json);
+                setInstDetail(pl.detail);
             });
         } else {
             loadingRef.current = false;
             setLoading(false);
         }
-        callData('schedule_of_business', [{ name: 'p_biz_uuid', type: 'String', value: id }], function(rows) {
-            if (rows && rows.length) {
-                setInstDetail(rows[0].repayment_info || '');
-                setInstJson(rows[0].installment_list || '[]');
-            }
-        }, null);
         setTimeout(notifyHeight, 50);
     }, []);
 
@@ -752,9 +772,12 @@ function App() {
                 <Form form={form} layout="vertical" autoComplete="off"
                     onValuesChange={function(changed) {
                         if (loadingRef.current) return;
-                        if (changed.installment_flag !== undefined && String(changed.installment_flag) !== '1') {
-                            setInstDetail('');
-                            setInstJson('');
+                        if (changed.installment_flag !== undefined) {
+                            setShowInstall(String(changed.installment_flag) === '1');
+                            if (String(changed.installment_flag) !== '1') {
+                                setInstDetail('');
+                                setInstJson('');
+                            }
                         }
                         if (changed.orig_amount !== undefined || changed.currency !== undefined) {
                             var amt2 = changed.orig_amount !== undefined ? changed.orig_amount : form.getFieldValue('orig_amount');
@@ -829,8 +852,12 @@ function App() {
                         <Col span={12}><Form.Item label="是否逾欠/违约" name="breach_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="五级分类" name="five_level_class"><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="是否涉及分期还款" name="installment_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        {showInstall && (
+                        <React.Fragment>
                         <Col span={12}><Form.Item label="还款计划"><Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button></Form.Item></Col>
                         <Col span={12}><Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item></Col>
+                        </React.Fragment>
+                        )}
                         <Col span={12}><Form.Item label="是否我行承销" name="our_bank_underwrite"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="约定资金用途" name="agreed_usage" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
                         <Col span={12}><Form.Item label="所属管理条线" name="manage_line"><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>

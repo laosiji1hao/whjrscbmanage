@@ -51,7 +51,6 @@
   var appRoot = document.createElement("div");
   appRoot.id = "app-root";
   document.body.insertBefore(appRoot, document.body.firstChild);
-  var DATA_CPT = "whjrscbmanage_data.cpt";
   var CLOUD_FALLBACK = { cloudUrl: "http://localhost:9058", prjId: "whjrscbmanage" };
   var zhCN = {
     locale: "zh-cn",
@@ -179,44 +178,6 @@
       return "";
     }
   })();
-  function identityParams() {
-    return [
-      { name: "p_operator", type: "String", value: CUR_USER },
-      { name: "user_name", type: "String", value: CUR_USER }
-    ];
-  }
-  function callData(dsName, params, onOk, onErr) {
-    $.ajax({
-      url: PATH.apiBase + "/api/data",
-      type: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
-        report_path: PATH.getDataTemplate(DATA_CPT),
-        datasource_name: dsName,
-        page_number: -1,
-        page_size: -1,
-        parameters: (params || []).concat(identityParams())
-      }),
-      success: function(res) {
-        if (typeof res === "string") {
-          try {
-            res = JSON.parse(res);
-          } catch (e) {
-          }
-        }
-        if (!res || res.err_code !== 0) {
-          antd.message.error(res && res.err_msg || "操作失败");
-          if (onErr) onErr(res);
-          return;
-        }
-        if (onOk) onOk(res.data || []);
-      },
-      error: function(xhr, status, error) {
-        antd.message.error("网络错误：" + error);
-        if (onErr) onErr(null);
-      }
-    });
-  }
   var CLIENT = (function() {
     function text(v) {
       if (v === null || v === void 0) return "";
@@ -325,7 +286,7 @@
     fiveLevel: ["正常一档", "正常二档", "正常三档", "关注", "次级", "可疑", "损失"],
     manageLine: [{ v: "金融市场部", t: "金融市场部" }],
     dept: [{ v: "0", t: "同业室" }, { v: "1", t: "利率室" }, { v: "2", t: "汇率室" }, { v: "3", t: "同业营销管理室" }, { v: "4", t: "自负盈亏账户" }],
-    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BB", "B", "CCC", "CC", "C"],
+    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+"],
     exercise: [{ v: "0", t: "否" }, { v: "1", t: "是" }],
     bizType: [
       { v: "0", t: "非金融企业类债券投资" },
@@ -342,7 +303,7 @@
       { v: "11", t: "债务融资工具(余额包销或持有)" },
       { v: "12", t: "其他" }
     ],
-    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
+    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "新增审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
     ynNot: [{ v: "0", t: "不涉及" }, { v: "1", t: "是" }]
   };
   DICTS.bondType = DICTS.symbolStandard;
@@ -389,21 +350,6 @@
             repayment_amount: x.installmentAmount === void 0 || x.installmentAmount === null ? null : Number(x.installmentAmount)
           };
         }));
-      } else if (bc) {
-        setLoading(true);
-        callData("schedule_by_bond", [{ name: "p_bond_code", type: "String", value: bc }], function(data) {
-          setLoading(false);
-          setRows((data || []).map(function(r, i) {
-            return {
-              key: i + "_" + r.id,
-              sort: r.sort,
-              repayment_date: r.repayment_date ? dayjs(String(r.repayment_date).slice(0, 10)) : null,
-              repayment_amount: r.repayment_amount !== void 0 && r.repayment_amount !== null ? Number(r.repayment_amount) : null
-            };
-          }));
-        }, function() {
-          setLoading(false);
-        });
       }
       setTimeout(notifyHeight, 50);
     }, []);

@@ -277,7 +277,7 @@ var DICTS = {
     fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
     dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
-    rating: ['AAA+','AAA','AAA-','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BB','B','CCC','CC','C'],
+    rating: ['AAA+', 'AAA', 'AAA-', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+'],
     exercise: [{v:'0',t:'否'},{v:'1',t:'是'}],
     bizType: [
         { v: '0', t: '非金融企业类债券投资' }, { v: '1', t: '企业资产支持证券' },
@@ -288,7 +288,7 @@ var DICTS = {
         { v: '10', t: '银证投融通' }, { v: '11', t: '债务融资工具(余额包销或持有)' },
         { v: '12', t: '其他' }
     ],
-    status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
+    status: [{v:'0',t:'未完善'},{v:'1',t:'审核中'},{v:'2',t:'新增审核失败'},{v:'3',t:'生效中'},{v:'4',t:'已过期'},{v:'5',t:'已中止'}],
     ynNot: [{v:'0',t:'不涉及'},{v:'1',t:'是'}]
 };
 DICTS.bondType = DICTS.symbolStandard; // pool 表格/导出用 bondType 键
@@ -334,8 +334,28 @@ function fmtDate(v) {
 function padEcif(v) {
     var s = (v === undefined || v === null) ? '' : String(v).trim();
     if (s === '') return '';
+    if (!/^\d+$/.test(s)) return s; // 非纯数字（如 226010 回填带前缀的值）不补零，避免误改成 000…前缀
     while (s.length < 17) s = '0' + s;
     return s;
+}
+
+// 还款计划并入主表：读取 bus_bond_business.installment_plan（JSON 数组）→ {json, detail}
+// 兼容历史人读串（"还款时间:x,还款金额:y;…"）与空值
+function planFromStore(t) {
+    var j = (t === undefined || t === null) ? '' : String(t).trim();
+    if (j && j.charAt(0) === '[') {
+        try {
+            var arr = JSON.parse(j);
+            if (Array.isArray(arr)) {
+                var s = arr.map(function(x) {
+                    return '还款时间:' + (x.installmentTime || x.repayment_date || '') +
+                           ',还款金额:' + (x.installmentAmount || x.repayment_amount || '');
+                }).join(';');
+                return { json: j, detail: s };
+            }
+        } catch (e) {}
+    }
+    return { json: (j && j !== '[]') ? j : '', detail: j };
 }
 
 // iframe 弹窗：向父页面汇报内容高度 / 提交完成
@@ -571,8 +591,13 @@ function App() {
     }
     function actEdit(r) {
         if (gated(r)) return;
-        if (String(r.status) !== '3') { antd.message.warning('只有生效中的业务才能编辑'); return; }
-        openDialog('business_look', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
+        if (String(r.status) !== '3' && String(r.status) !== '2') { antd.message.warning('只有生效中或新增审核失败的业务才能编辑'); return; }
+        if (String(r.status) === '2') {
+            // 新增审核失败/被否决：打开申报表单，在被否决基础上修改后重新发起新增申请
+            openDialog('business_form', { mode: 'edit', biz_uuid: r.biz_uuid }, '编辑业务信息（重新申报）', 1200);
+        } else {
+            openDialog('business_look', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
+        }
     }
     function actStop(r) {
         if (gated(r)) return;

@@ -26,7 +26,7 @@
             "type": "string"
           }
         ],
-        "sql": "SELECT b.id, b.biz_uuid, b.bond_code, b.customer_no, b.customer_name, b.biz_name, b.bond_type, b.green_tech_flag, b.status, b.create_time, b.update_time FROM whjrscbmanage.bus_bond_business b WHERE b.status = 0 AND b.creator = '${p_operator}' AND ('' = '${p_customer_name}' OR b.customer_name = '${p_customer_name}') ORDER BY b.id DESC"
+        "sql": "SELECT b.id, b.biz_uuid, b.bond_code, b.customer_no, b.customer_name, b.biz_name, b.bond_type, b.green_tech_flag, b.status, b.create_time, b.update_time FROM whjrscbmanage.bus_bond_business b WHERE b.status IN (0, 2) AND b.creator = '${p_operator}' AND ('' = '${p_customer_name}' OR b.customer_name = '${p_customer_name}') ORDER BY b.id DESC"
       },
       {
         "name": "declare_customer_opt",
@@ -38,7 +38,7 @@
             "type": "string"
           }
         ],
-        "sql": "SELECT DISTINCT b.customer_name FROM whjrscbmanage.bus_bond_business b WHERE b.status = 0 AND b.creator = '${p_operator}' AND b.customer_name IS NOT NULL ORDER BY b.customer_name"
+        "sql": "SELECT DISTINCT b.customer_name FROM whjrscbmanage.bus_bond_business b WHERE b.status IN (0, 2) AND b.creator = '${p_operator}' AND b.customer_name IS NOT NULL ORDER BY b.customer_name"
       },
       {
         "name": "get_business",

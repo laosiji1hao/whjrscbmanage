@@ -115,8 +115,13 @@ function App() {
     }
     function actEdit(r) {
         if (gated(r)) return;
-        if (String(r.status) !== '3') { antd.message.warning('只有生效中的业务才能编辑'); return; }
-        openDialog('business_look', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
+        if (String(r.status) !== '3' && String(r.status) !== '2') { antd.message.warning('只有生效中或新增审核失败的业务才能编辑'); return; }
+        if (String(r.status) === '2') {
+            // 新增审核失败/被否决：打开申报表单，在被否决基础上修改后重新发起新增申请
+            openDialog('business_form', { mode: 'edit', biz_uuid: r.biz_uuid }, '编辑业务信息（重新申报）', 1200);
+        } else {
+            openDialog('business_look', { biz_uuid: r.biz_uuid, updaterType: IS_MANAGER ? 1 : 0 }, '编辑业务信息', 1200);
+        }
     }
     function actStop(r) {
         if (gated(r)) return;

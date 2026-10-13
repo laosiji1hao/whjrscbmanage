@@ -12,7 +12,7 @@ function App() {
         var q = new URLSearchParams(window.location.search);
         var bc = q.get('bond_code') || '';
         setBondCode(bc);
-        // 父页已填的回显 JSON（[{installmentTime, installmentAmount}]）优先，其次按债券查库
+        // 还款计划已并入主表：只从父页回显 JSON（[{installmentTime, installmentAmount}]）初始化
         var initRaw = q.get('initial') || '';
         var initRows = [];
         if (initRaw) {
@@ -28,19 +28,6 @@ function App() {
                     repayment_amount: (x.installmentAmount === undefined || x.installmentAmount === null) ? null : Number(x.installmentAmount)
                 };
             }));
-        } else if (bc) {
-            setLoading(true);
-            callData('schedule_by_bond', [{ name: 'p_bond_code', type: 'String', value: bc }], function(data) {
-                setLoading(false);
-                setRows((data || []).map(function(r, i) {
-                    return {
-                        key: i + '_' + r.id,
-                        sort: r.sort,
-                        repayment_date: r.repayment_date ? dayjs(String(r.repayment_date).slice(0, 10)) : null,
-                        repayment_amount: r.repayment_amount !== undefined && r.repayment_amount !== null ? Number(r.repayment_amount) : null
-                    };
-                }));
-            }, function() { setLoading(false); });
         }
         setTimeout(notifyHeight, 50);
     }, []);

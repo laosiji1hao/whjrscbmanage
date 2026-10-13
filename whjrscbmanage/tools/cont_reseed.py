@@ -40,10 +40,11 @@ def main():
     cur.execute("DELETE FROM iassist_flow_data WHERE business_no <> '12312313' "
                 "OR business_no IS NULL OR business_no = ''")
     cur.execute("DELETE FROM bus_bond_business WHERE bond_code='E2E001'")
-    # 3.1) 恢复 BC000002 的还款计划种子 + installment_flag
-    cur.execute("INSERT INTO bus_repayment_schedule (bond_code, sort, repayment_date, repayment_amount, status) "
-                "VALUES ('BC000002',1,'2026-12-01',100000,2), ('BC000002',2,'2027-06-01',50000,2)")
-    cur.execute("UPDATE bus_bond_business SET installment_flag='1' WHERE id=5")
+    # 3.1) 恢复 BC000002 的还款计划种子（并入主表 installment_plan JSON）+ installment_flag
+    cur.execute(
+        "UPDATE bus_bond_business SET installment_flag='1', "
+        "installment_plan='[{\"installmentTime\":\"2026-12-01\",\"installmentAmount\":\"100000\"},{\"installmentTime\":\"2027-06-01\",\"installmentAmount\":\"50000\"}]' "
+        "WHERE id=5")
     print("测试残留清理完成（含恢复 BC000002 还款计划种子）")
     # 3.2) 固定种子行 biz_uuid（32 位，测试/smoke 引用稳定）
     fixed_uuids = {

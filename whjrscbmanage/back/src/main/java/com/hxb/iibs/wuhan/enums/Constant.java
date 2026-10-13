@@ -34,7 +34,7 @@ public interface Constant {
     class BizStatus {
         public static final int NOT_ENABLED = 0;  // 未完善，定时任务拉数后落库为此状态
         public static final int AUDITING    = 1;
-        public static final int REJECTED    = 2;
+        public static final int REJECTED    = 2;  // 新增申报被否决（仅新增流程产生；变更/换经理/中止被否不落到此状态）
         public static final int EFFECTIVE   = 3;
         public static final int EXPIRED    = 4;
         public static final int TERMINATED  = 5;

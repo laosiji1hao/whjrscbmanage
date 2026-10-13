@@ -17,6 +17,7 @@ function App() {
     const [showSuper, setShowSuper] = React.useState(false);
     const [showJs, setShowJs] = React.useState(false);
     const [showExDate, setShowExDate] = React.useState(false);
+    const [showInstall, setShowInstall] = React.useState(false); // 分期=否时隐藏还款计划区
 
     var M_TITLE = { add: '新增业务信息', edit: '编辑业务信息', installment: '创建分期业务' };
 
@@ -32,7 +33,8 @@ function App() {
         if (m === 'add') {
             form.setFieldsValue({ our_bank_underwrite: '0', currency: '人民币', guarantee_info: '信用',
                 five_level_class: '正常一档', inspect_freq: '3', green_tech_flag: '0',
-                installment_flag: '0', fund_account_flag: '0', supervise_account_flag: '0', js_remark_flag: '0' });
+                installment_flag: '0', fund_account_flag: '0', supervise_account_flag: '0',
+                js_remark_flag: '0', exercise_flag: '0' });
         } else if (id && id !== '0') {
             setLoading(true);
             loadingRef.current = true;
@@ -64,14 +66,12 @@ function App() {
                 setShowSuper(String(d.supervise_account_flag || '0') === '1');
                 setShowJs(String(d.js_remark_flag || '0') === '1');
                 setShowExDate(String(d.exercise_flag || '0') === '1');
+                setShowInstall(String(d.installment_flag || '0') === '1');
+                // 还款计划并入主表：从 installment_plan(JSON) 解析回显（不再查独立表）
+                var pl = planFromStore(d.installment_plan);
+                setInstJson(pl.json);
+                setInstDetail(pl.detail);
             }, function() { setLoading(false); });
-            // 编辑/创建分期：把既有还款计划回显到弹窗（repayment_info 人读串 / installment_list JSON）
-            callData('schedule_of_business', [{ name: 'p_biz_uuid', type: 'String', value: id }], function(rows2) {
-                if (rows2 && rows2.length) {
-                    setInstDetail(rows2[0].repayment_info || '');
-                    setInstJson(rows2[0].installment_list || '[]');
-                }
-            }, null);
         }
         setTimeout(notifyHeight, 50);
     }, []);
@@ -260,9 +260,12 @@ function App() {
                 <Form form={form} layout="vertical" autoComplete="off"
                     onValuesChange={function(changed, all) {
                         if (loadingRef.current) return;
-                        if (changed.installment_flag !== undefined && String(changed.installment_flag) !== '1') {
-                            setInstDetail('');
-                            setInstJson('');
+                        if (changed.installment_flag !== undefined) {
+                            setShowInstall(String(changed.installment_flag) === '1');
+                            if (String(changed.installment_flag) !== '1') {
+                                setInstDetail('');
+                                setInstJson('');
+                            }
                         }
                         if (changed.int_rating !== undefined) {
                             var t = ratingToType(changed.int_rating);
@@ -424,14 +427,18 @@ function App() {
                                 <Select {...sel(DICTS.yn)} />
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
-                            <Form.Item label="还款计划">
-                                <Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item>
-                        </Col>
+                        {showInstall && (
+                            <React.Fragment>
+                            <Col span={12}>
+                                <Form.Item label="还款计划">
+                                    <Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item>
+                            </Col>
+                            </React.Fragment>
+                        )}
                         <Col span={12}>
                             <Form.Item label="是否我行承销" name="our_bank_underwrite">
                                 <Select {...sel(DICTS.yn)} />

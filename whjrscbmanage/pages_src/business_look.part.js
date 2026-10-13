@@ -17,6 +17,7 @@ function App() {
     const [showSuper, setShowSuper] = React.useState(false);
     const [showJs, setShowJs] = React.useState(false);
     const [showExDate, setShowExDate] = React.useState(false);
+    const [showInstall, setShowInstall] = React.useState(false); // 分期=否时隐藏还款计划区
     const [planModal, setPlanModal] = React.useState({ open: false, url: '' });
     const loadingRef = React.useRef(false);
     var cfgRef = { coupon_rate: 0, vat: 0, surcharge: 0, ready: false };
@@ -105,22 +106,21 @@ function App() {
                 setShowSuper(String(d.supervise_account_flag || '0') === '1');
                 setShowJs(String(d.js_remark_flag || '0') === '1');
                 setShowExDate(String(d.exercise_flag || '0') === '1');
+                setShowInstall(String(d.installment_flag || '0') === '1');
                 setShowPassage(String(d.is_passage || '0') === '1');
                 if (String(d.is_passage || '0') !== '1') {
                     needUpperInit = true;
                     initUpperWhenReady();
                 }
+                // 还款计划并入主表：从 installment_plan(JSON) 解析回显（不再查独立表）
+                var pl = planFromStore(d.installment_plan);
+                setInstJson(pl.json);
+                setInstDetail(pl.detail);
             });
         } else {
             loadingRef.current = false;
             setLoading(false);
         }
-        callData('schedule_of_business', [{ name: 'p_biz_uuid', type: 'String', value: id }], function(rows) {
-            if (rows && rows.length) {
-                setInstDetail(rows[0].repayment_info || '');
-                setInstJson(rows[0].installment_list || '[]');
-            }
-        }, null);
         setTimeout(notifyHeight, 50);
     }, []);
 
@@ -297,9 +297,12 @@ function App() {
                 <Form form={form} layout="vertical" autoComplete="off"
                     onValuesChange={function(changed) {
                         if (loadingRef.current) return;
-                        if (changed.installment_flag !== undefined && String(changed.installment_flag) !== '1') {
-                            setInstDetail('');
-                            setInstJson('');
+                        if (changed.installment_flag !== undefined) {
+                            setShowInstall(String(changed.installment_flag) === '1');
+                            if (String(changed.installment_flag) !== '1') {
+                                setInstDetail('');
+                                setInstJson('');
+                            }
                         }
                         if (changed.orig_amount !== undefined || changed.currency !== undefined) {
                             var amt2 = changed.orig_amount !== undefined ? changed.orig_amount : form.getFieldValue('orig_amount');
@@ -374,8 +377,12 @@ function App() {
                         <Col span={12}><Form.Item label="是否逾欠/违约" name="breach_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="五级分类" name="five_level_class"><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="是否涉及分期还款" name="installment_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        {showInstall && (
+                        <React.Fragment>
                         <Col span={12}><Form.Item label="还款计划"><Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button></Form.Item></Col>
                         <Col span={12}><Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item></Col>
+                        </React.Fragment>
+                        )}
                         <Col span={12}><Form.Item label="是否我行承销" name="our_bank_underwrite"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="约定资金用途" name="agreed_usage" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
                         <Col span={12}><Form.Item label="所属管理条线" name="manage_line"><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>

@@ -70,8 +70,6 @@ create table bus_bond_business
     upper_storage_rate     decimal(12, 6)                         null comment '上存利率 单位 自动计算（公式 coupon_rate 减 vat 减 surcharge 减 channel_fee_amount）',
     constraint uk_apply_no
         unique (apply_no),
-    constraint uk_bond_code
-        unique (bond_code),
     constraint uk_biz_uuid
         unique (biz_uuid)
 )

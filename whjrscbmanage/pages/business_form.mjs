@@ -326,7 +326,7 @@
     fiveLevel: ["正常一档", "正常二档", "正常三档", "关注", "次级", "可疑", "损失"],
     manageLine: [{ v: "金融市场部", t: "金融市场部" }],
     dept: [{ v: "0", t: "同业室" }, { v: "1", t: "利率室" }, { v: "2", t: "汇率室" }, { v: "3", t: "同业营销管理室" }, { v: "4", t: "自负盈亏账户" }],
-    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BB", "B", "CCC", "CC", "C"],
+    rating: ["AAA+", "AAA", "AAA-", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+"],
     exercise: [{ v: "0", t: "否" }, { v: "1", t: "是" }],
     bizType: [
       { v: "0", t: "非金融企业类债券投资" },
@@ -343,7 +343,7 @@
       { v: "11", t: "债务融资工具(余额包销或持有)" },
       { v: "12", t: "其他" }
     ],
-    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
+    status: [{ v: "0", t: "未完善" }, { v: "1", t: "审核中" }, { v: "2", t: "新增审核失败" }, { v: "3", t: "生效中" }, { v: "4", t: "已过期" }, { v: "5", t: "已中止" }],
     ynNot: [{ v: "0", t: "不涉及" }, { v: "1", t: "是" }]
   };
   DICTS.bondType = DICTS.symbolStandard;
@@ -359,8 +359,25 @@
   function padEcif(v) {
     var s = v === void 0 || v === null ? "" : String(v).trim();
     if (s === "") return "";
+    if (!/^\d+$/.test(s)) return s;
     while (s.length < 17) s = "0" + s;
     return s;
+  }
+  function planFromStore(t) {
+    var j = t === void 0 || t === null ? "" : String(t).trim();
+    if (j && j.charAt(0) === "[") {
+      try {
+        var arr = JSON.parse(j);
+        if (Array.isArray(arr)) {
+          var s = arr.map(function(x) {
+            return "还款时间:" + (x.installmentTime || x.repayment_date || "") + ",还款金额:" + (x.installmentAmount || x.repayment_amount || "");
+          }).join(";");
+          return { json: j, detail: s };
+        }
+      } catch (e) {
+      }
+    }
+    return { json: j && j !== "[]" ? j : "", detail: j };
   }
   function notifyHeight() {
     try {
@@ -391,6 +408,7 @@
     const [showSuper, setShowSuper] = React.useState(false);
     const [showJs, setShowJs] = React.useState(false);
     const [showExDate, setShowExDate] = React.useState(false);
+    const [showInstall, setShowInstall] = React.useState(false);
     var M_TITLE = { add: "新增业务信息", edit: "编辑业务信息", installment: "创建分期业务" };
     var loadingRef = React.useRef(false);
     React.useEffect(function() {
@@ -410,7 +428,8 @@
           installment_flag: "0",
           fund_account_flag: "0",
           supervise_account_flag: "0",
-          js_remark_flag: "0"
+          js_remark_flag: "0",
+          exercise_flag: "0"
         });
       } else if (id && id !== "0") {
         setLoading(true);
@@ -467,15 +486,13 @@
           setShowSuper(String(d.supervise_account_flag || "0") === "1");
           setShowJs(String(d.js_remark_flag || "0") === "1");
           setShowExDate(String(d.exercise_flag || "0") === "1");
+          setShowInstall(String(d.installment_flag || "0") === "1");
+          var pl = planFromStore(d.installment_plan);
+          setInstJson(pl.json);
+          setInstDetail(pl.detail);
         }, function() {
           setLoading(false);
         });
-        callData("schedule_of_business", [{ name: "p_biz_uuid", type: "String", value: id }], function(rows2) {
-          if (rows2 && rows2.length) {
-            setInstDetail(rows2[0].repayment_info || "");
-            setInstJson(rows2[0].installment_list || "[]");
-          }
-        }, null);
       }
       setTimeout(notifyHeight, 50);
     }, []);
@@ -668,9 +685,12 @@
         autoComplete: "off",
         onValuesChange: function(changed, all) {
           if (loadingRef.current) return;
-          if (changed.installment_flag !== void 0 && String(changed.installment_flag) !== "1") {
-            setInstDetail("");
-            setInstJson("");
+          if (changed.installment_flag !== void 0) {
+            setShowInstall(String(changed.installment_flag) === "1");
+            if (String(changed.installment_flag) !== "1") {
+              setInstDetail("");
+              setInstJson("");
+            }
           }
           if (changed.int_rating !== void 0) {
             var t = ratingToType(changed.int_rating);
@@ -715,7 +735,7 @@
         return { v: x, t: x };
       })) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "外部信用评级日期", name: "ext_rating_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "外部评级机构", name: "rating_agency" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "内部评级", name: "int_rating" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.rating.map(function(x) {
         return { v: x, t: x };
-      })) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "内部评级日期", name: "int_rating_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "主承销商", name: "lead_underwriter" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "行业分类", name: "industry", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.industry) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "客户分类", name: "customer_type" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.customerType), disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "发放日", name: "start_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "到期日", name: "mature_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "币种", name: "currency", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.currency) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额", name: "orig_amount", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额（折人民币）", name: "rmb_amount" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "业务余额（折人民币）", name: "balance" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "投资利率（%）", name: "invest_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "价值转移利率（%）", name: "transfer_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "担保情况", name: "guarantee_info" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.guaranty) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否涉及分期还款", name: "installment_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划" }, /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/plus.svg"), onClick: openPlan }, "添加还款计划"))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划明细" }, /* @__PURE__ */ React.createElement(Input.TextArea, { disabled: true, autoSize: { minRows: 2, maxRows: 4 }, value: instDetail }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否我行承销", name: "our_bank_underwrite" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "约定资金用途", name: "agreed_usage", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在资金发放/募集账户账号", name: "fund_account_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showFund && /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "资金发放/募集账户账号", name: "fund_account", rules: [{ required: true, message: "账号不允许为空" }] }, /* @__PURE__ */ React.createElement(Input, { placeholder: "失焦校验账号可用性", onBlur: function(e) {
+      })) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "内部评级日期", name: "int_rating_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "主承销商", name: "lead_underwriter" }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "行业分类", name: "industry", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.industry) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "客户分类", name: "customer_type" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.customerType), disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "发放日", name: "start_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "到期日", name: "mature_date", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(DatePicker, { style: { width: "100%" }, placeholder: "请选择日期" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "币种", name: "currency", rules: [{ required: true, message: "请选择" }] }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.currency) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额", name: "orig_amount", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "初始金额（折人民币）", name: "rmb_amount" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "业务余额（折人民币）", name: "balance" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 2, disabled: true }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "投资利率（%）", name: "invest_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "价值转移利率（%）", name: "transfer_rate" }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, precision: 6 }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "担保情况", name: "guarantee_info" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.guaranty) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否涉及分期还款", name: "installment_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showInstall && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划" }, /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/plus.svg"), onClick: openPlan }, "添加还款计划"))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "还款计划明细" }, /* @__PURE__ */ React.createElement(Input.TextArea, { disabled: true, autoSize: { minRows: 2, maxRows: 4 }, value: instDetail })))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否我行承销", name: "our_bank_underwrite" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "约定资金用途", name: "agreed_usage", rules: [{ required: true, message: "请输入" }] }, /* @__PURE__ */ React.createElement(Input, null))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在资金发放/募集账户账号", name: "fund_account_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showFund && /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "资金发放/募集账户账号", name: "fund_account", rules: [{ required: true, message: "账号不允许为空" }] }, /* @__PURE__ */ React.createElement(Input, { placeholder: "失焦校验账号可用性", onBlur: function(e) {
         checkAccount("fund_account", e.target.value);
       } }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "是否存在资金监管/回款专户账号", name: "supervise_account_flag" }, /* @__PURE__ */ React.createElement(Select, { ...sel(DICTS.yn) }))), showSuper && /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "资金监管/回款专户账号", name: "supervise_account", rules: [{ required: true, message: "账号不允许为空" }] }, /* @__PURE__ */ React.createElement(Input, { placeholder: "失焦校验账号可用性", onBlur: function(e) {
         checkAccount("supervise_account", e.target.value);

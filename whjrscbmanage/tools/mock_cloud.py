@@ -89,7 +89,6 @@ def save_business(business_id, b, op):
         cur.close()
         with conn().cursor() as c2:
             add_flow(c2, b.get("bondCode") or "", op, "biz_declare", b)
-            upsert_installment(c2, b.get("bondCode"), b.get("installment"))
         return {"businessId": _biz_uuid}
     # UPDATE
     fields = []
@@ -120,12 +119,21 @@ def save_business(business_id, b, op):
     fields.append("update_time=NOW()")
     vals.append(business_id)
     with conn().cursor() as cur:
+        # 改号联动（与 226007 同规则）：记录旧 bond_code，改号后同步迁移还款计划与审批流
+        old_bond = None
+        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+        r0 = cur.fetchone()
+        if r0:
+            old_bond = r0[0]
+        new_bond = b.get("bondCode") or old_bond
         if fields:
             cur.execute("UPDATE bus_bond_business SET %s WHERE biz_uuid=%%s" % ", ".join(fields), vals)
-        add_flow(cur, b.get("bondCode") or "", op, "biz_update", b)
+        if old_bond and new_bond and old_bond != new_bond:
+            cur.execute("UPDATE bus_repayment_schedule SET bond_code=%s WHERE bond_code=%s", (new_bond, old_bond))
+            cur.execute("UPDATE iassist_flow_data SET business_no=%s WHERE business_no=%s", (new_bond, old_bond))
+        add_flow(cur, new_bond or "", op, "biz_update", b)
         if insert:
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s", (insert, business_id))
-            upsert_installment(cur, b.get("bondCode"), insert)
         row = None
         if b.get("bondCode"):
             cur.execute("SELECT id, bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
@@ -176,7 +184,6 @@ def change_business(business_id, b, op):
         if b.get("installment"):
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s",
                         (b.get("installment"), business_id))
-            upsert_installment(cur, new_bond, b.get("installment"))
         flow = dict(b)
         flow.pop("operate", None)
         add_flow(cur, new_bond or "", op, "biz_change", b)

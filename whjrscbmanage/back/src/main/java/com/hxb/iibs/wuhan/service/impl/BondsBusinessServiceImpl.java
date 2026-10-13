@@ -87,14 +87,8 @@ public class BondsBusinessServiceImpl
         // 【本次新增】226006 新增业务：43个必填字段强校验
         validateMandatoryFieldsForNewBusiness(dto);
 
-        // 检查数据库中是否存在相同 bondCode 的生效记录，有则拒绝新增
-        Long existingCount = this.count(new LambdaQueryWrapper<BondsBusiness>()
-                .eq(BondsBusiness::getBondCode, dto.getBondCode()));
-        if (existingCount > 0) {
-            throw new BusiException("编号为" + dto.getBondCode() + "的债券业务已存在");
-        }
-        //防止同一个业务多次点击
-
+        // 【biz_uuid 身份改造】bond_code 不再是唯一身份（已切换为 biz_uuid），允许重复，
+        // 不再按 bond_code 查重拦截（如"创建分期"沿用同一债券编号是新业务、新 biz_uuid）。
 
         // 有 businessId → 从本地查草稿作基础，发 i助手审批；无 businessId → 纯新增，同样只转发给 i助手
         // 两路均不先写本地 DB，等审批通过后由 assistedApprovalSync 定时任务统一落地

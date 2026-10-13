@@ -515,11 +515,10 @@ public class CommonJob {
                     // 自动计算上存利率
                     calcUpperStorageRate(biz);
 
-                    // 如果已有草稿，将其 bondCode 置空并标记为 PASS_RETIRE
+                    // 如果已有草稿，将其状态标记为 PASS_RETIRE（biz_uuid 为身份，bond_code 不再置空以保留原编号）
                     BondsBusiness draft = bondsBusinessService.getByBondCodeAndStatus(biz.getBondCode(), Constant.BizStatus.AUDITING);
                     if(draft!=null){
                         bondsBusinessService.lambdaUpdate()
-                                .set(BondsBusiness::getBondCode, null)    // ✅ 强制生成 SET bond_code = NULL
                                 .set(BondsBusiness::getStatus, Constant.BizStatus.PASS_RETIRE).eq(BondsBusiness::getId, draft.getId())
                                 .update();
                     }
@@ -540,11 +539,10 @@ public class CommonJob {
                     log.warn("[processNewBusiness] 审批拒绝, bondCode={}, remark={}",
                             item.getBondCode(), item.getRemark());
 
-                    // 将草稿的业务状态标记为已拒绝
+                    // 将草稿的业务状态标记为已拒绝（biz_uuid 为身份，bond_code 保留，供"自动沿用旧编号"重报）
                     BondsBusiness draft = bondsBusinessService.getByBondCodeAndStatus(biz.getBondCode(), Constant.BizStatus.AUDITING);
                     if (draft != null) {
                         bondsBusinessService.lambdaUpdate()
-                                .set(BondsBusiness::getBondCode, null)
                                 .set(BondsBusiness::getStatus, Constant.BizStatus.REJECTED)
                                 .eq(BondsBusiness::getId, draft.getId())
                                 .update();
