@@ -689,6 +689,11 @@ function App() {
 
     function handleSubmit() {
         form.validateFields().then(function(values) {
+            // 与后端联动校验一致（226006/226007）：分期标志=1 时计划不能为空
+            if (outtext(values.installment_flag) === '1' && !instJson) {
+                antd.message.error('分期还款计划不能为空');
+                return;
+            }
             var ct = outtext(values.customer_type);
             var inspectFreq = (ct === '0' || ct === '1') ? 3 : 1;
             var body = {
@@ -764,6 +769,14 @@ function App() {
     var sel = function(opts, placeholder) {
         return { style: { width: '100%' }, placeholder: placeholder || '请选择', options: selOpts(opts) };
     };
+    // 字段提示：黄色感叹号 + 悬浮说明（口径见 docs/字段联动规则.md）
+    var hintTip = function(text) {
+        return (
+            <Tooltip title={text}>
+                <span style={{ marginLeft: 4, color: '#faad14', cursor: 'help' }}>{icon('/outlined/exclamation-circle.svg')}</span>
+            </Tooltip>
+        );
+    };
     var readOnlySpanStyle = { display: 'inline-block', paddingTop: 5 };
 
     return (
@@ -819,75 +832,75 @@ function App() {
                     }}>
                     <Row gutter={16}>
                         <Col span={12}><Form.Item label="标准/非标准业务" name="bond_type" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.symbolStandard)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label={<span>客户编号<Tooltip title="填写信贷系统客户编号，个人以P开头，企业以C开头"><span style={{ marginLeft: 4, color: '#faad14', cursor: 'help' }}>{icon('/outlined/exclamation-circle.svg')}</span></Tooltip></span>} name="customer_no" rules={[{ required: true, message: '请输入' }]}><Input placeholder="客户编号（失焦自动查ECIF）" onBlur={function(e) { ecifQuery(e.target.value); }} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="ECIF客户号" name="ecif_customer_no"><Input placeholder="填后 17 位，失焦自动补零" onBlur={function(e) { form.setFieldsValue({ ecif_customer_no: padEcif(e.target.value) }); }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label={<span>客户编号{hintTip('填写信贷系统客户编号，个人以P开头，企业以C开头。填写后，将自动获取ECIF客户号与客户名称')}</span>} name="customer_no" rules={[{ required: true, message: '请输入' }]}><Input placeholder="客户编号（失焦自动查ECIF）" onBlur={function(e) { ecifQuery(e.target.value); }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label={<span>ECIF客户号{hintTip('请填写17位ecif系统的客户号，可填写后面的数字，系统将自动在前补零至17位')}</span>} name="ecif_customer_no" rules={[{ required: true, message: '请输入' }]}><Input placeholder="填后 17 位，失焦自动补零" onBlur={function(e) { form.setFieldsValue({ ecif_customer_no: padEcif(e.target.value) }); }} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="融资人名称" name="customer_name" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="项目/债券名称" name="biz_name"><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="债券编号" name="bond_code"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="项目/债券名称" name="biz_name" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="债券编号" name="bond_code" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
                         <Col span={12}><Form.Item label="是否绿色/科技/养老/不涉及" name="green_tech_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.greenTech)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="外部信用评级" name="ext_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="外部信用评级日期" name="ext_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="外部评级机构" name="rating_agency"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="外部评级机构" name="rating_agency" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
                         <Col span={12}><Form.Item label="内部评级" name="int_rating" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.rating.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="内部评级日期" name="int_rating_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="主承销商" name="lead_underwriter"><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否有通道费" name="is_passage"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="主承销商" name="lead_underwriter" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否有通道费" name="is_passage" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showPassage && (
-                            <Col span={12}><Form.Item label="通道费金额(%)" name="passage_amount"><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="通道费金额(%)" name="passage_amount" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
                         )}
                         <Col span={12}><Form.Item label="上存利率(%)" name="upper_storage_rate" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={6} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="行业分类" name="industry" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.industry)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="客户分类" name="customer_type"><Select {...sel(DICTS.customerType)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否我行预警客户" name="alert_customer"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="业务品种" name="biz_type"><Select {...sel(DICTS.bizType)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="客户分类" name="customer_type" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.customerType)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否我行预警客户" name="alert_customer" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="业务品种" name="biz_type" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.bizType)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="发放日" name="start_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="到期日" name="mature_date"><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="币种" name="currency" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.currency)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="到期日" name="mature_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                        <Col span={12}><Form.Item label={<span>币种{hintTip('支持人民币/美元，美元数额为人民币的6.8倍')}</span>} name="currency" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.currency)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="初始金额" name="orig_amount" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="初始金额（折人民币）" name="rmb_amount"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="业务余额（折人民币）" name="balance"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="投资利率（%）" name="invest_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="价值转移利率（%）" name="transfer_rate"><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="担保情况" name="guarantee_info"><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否逾欠/违约" name="breach_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="五级分类" name="five_level_class"><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否涉及分期还款" name="installment_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="初始金额（折人民币）" name="rmb_amount" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="业务余额（折人民币）" name="balance" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="投资利率（%）" name="invest_rate" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="价值转移利率（%）" name="transfer_rate" rules={[{ required: true, message: '请输入' }]}><InputNumber style={{ width: '100%' }} precision={2} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="担保情况" name="guarantee_info" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否逾欠/违约" name="breach_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="五级分类" name="five_level_class" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.fiveLevel.map(function(x) { return { v: x, t: x }; }))} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否涉及分期还款" name="installment_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showInstall && (
                         <React.Fragment>
                         <Col span={12}><Form.Item label="还款计划"><Button icon={icon('/outlined/plus.svg')} onClick={openPlan}>添加还款计划</Button></Form.Item></Col>
                         <Col span={12}><Form.Item label="还款计划明细"><Input.TextArea disabled autoSize={{ minRows: 2, maxRows: 4 }} value={instDetail} /></Form.Item></Col>
                         </React.Fragment>
                         )}
-                        <Col span={12}><Form.Item label="是否我行承销" name="our_bank_underwrite"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否我行承销" name="our_bank_underwrite" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="约定资金用途" name="agreed_usage" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="所属管理条线" name="manage_line"><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="对应处室" name="dept"><Select {...sel(DICTS.dept)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否存在资金发放/募集账户账号" name="fund_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="所属管理条线" name="manage_line" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.manageLine)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="对应处室" name="dept" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.dept)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在资金发放/募集账户账号" name="fund_account_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showFund && (
                             <Col span={12}><Form.Item label="资金发放/募集账户账号" name="fund_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input placeholder="失焦校验账号可用性" onBlur={function(e) { checkAccount('fund_account', e.target.value); }} /></Form.Item></Col>
                         )}
-                        <Col span={12}><Form.Item label="是否存在资金监管/回款专户账号" name="supervise_account_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在资金监管/回款专户账号" name="supervise_account_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showSuper && (
                             <Col span={12}><Form.Item label="资金监管/回款专户账号" name="supervise_account" rules={[{ required: true, message: '账号不允许为空' }]}><Input placeholder="失焦校验账号可用性" onBlur={function(e) { checkAccount('supervise_account', e.target.value); }} /></Form.Item></Col>
                         )}
-                        <Col span={12}><Form.Item label="是否涉及我行资金监管" name="fund_used_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="我行监管资金是否已使用完毕" name="fund_used_up"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否涉及我行资金监管" name="fund_used_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="我行监管资金是否已使用完毕" name="fund_used_up" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="支用检查情况" name="drawdown_check"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="批复号" name="remark_number"><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="批复管理要求" name="remark"><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否存在金融市场部批复管理要求" name="js_remark_flag"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="批复号" name="remark_number" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="批复管理要求" name="remark" rules={[{ required: true, message: '请输入' }]}><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否存在金融市场部批复管理要求" name="js_remark_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
                         {showJs && (
                             <Col span={12}><Form.Item label="金融市场部批复管理要求" name="js_remark" rules={[{ required: true, message: '金融市场部批复管理要求不允许为空' }]}><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} /></Form.Item></Col>
                         )}
-                        <Col span={12}><Form.Item label="实地检查频率（月）" name="inspect_freq"><Input /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否原资产管理部回表业务" name="is_original_am"><Select {...sel(DICTS.yn)} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="是否行权" name="exercise_flag"><Select {...sel(DICTS.exercise)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="实地检查频率（月）" name="inspect_freq" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否原资产管理部回表业务" name="is_original_am" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.yn)} /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="是否行权" name="exercise_flag" rules={[{ required: true, message: '请选择' }]}><Select {...sel(DICTS.exercise)} /></Form.Item></Col>
                         {showExDate && (
-                            <Col span={12}><Form.Item label="行权日期" name="exercise_date"><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
+                            <Col span={12}><Form.Item label="行权日期" name="exercise_date" rules={[{ required: true, message: '请选择' }]}><DatePicker style={{ width: '100%' }} placeholder="请选择日期" /></Form.Item></Col>
                         )}
                         <Col span={12}><Form.Item label="所属客户经理" name="creator"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
                         <Col span={12}><Form.Item label="所属机构" name="org_name"><Input disabled style={{ background: '#f5f5f5' }} /></Form.Item></Col>
-                        <Col span={12}><Form.Item label="投后检查实施人员岗位" name="inspector_post"><Input /></Form.Item></Col>
+                        <Col span={12}><Form.Item label="投后检查实施人员岗位" name="inspector_post" rules={[{ required: true, message: '请输入' }]}><Input /></Form.Item></Col>
                     </Row>
                     <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

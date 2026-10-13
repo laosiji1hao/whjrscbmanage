@@ -703,32 +703,115 @@ function App() {
     }
     actCols.push({ key: 'a5', label: '中止', show: function() { return true; }, fn: actStop });
 
-    var columns = [
-        { title: '序号', key: '__idx', width: 60, render: function(_, __, i) { return (current - 1) * pageSize + i + 1; } },
-        { title: '债券编号或内部编号', dataIndex: 'bond_code', width: 130 },
-        { title: 'ECIF客户编号', dataIndex: 'ecif_customer_no', width: 120 },
-        { title: '客户编号', dataIndex: 'customer_no', width: 110 },
-        { title: '融资人名称', dataIndex: 'customer_name', width: 180, ellipsis: true },
-        { title: '项目/债券名称', dataIndex: 'biz_name', width: 200, ellipsis: true },
-        { title: '标准/非标准', dataIndex: 'bond_type', width: 110, render: function(v) { return dictText(DICTS.bondType, v); } },
-        { title: '状态', dataIndex: 'status', width: 90, render: function(v) { return statusText(v); } },
-        { title: '所属客户经理', dataIndex: 'related_name', width: 140, render: function(v) { return v || ''; } },
-        { title: '所属机构', dataIndex: 'dept_name', width: 140, render: function(v) { return v || ''; } },
-        { title: '创建时间', dataIndex: 'create_time', width: 160, render: function(v) { return fmtDate(v); } },
-        { title: '操作', key: '__act', width: IS_MANAGER ? 180 : 260, fixed: 'right',
-          render: function(_, r) {
-              var btns = [];
-              actCols.forEach(function(a) {
-                  if (!a.show(r)) return;
-                  btns.push(React.createElement(Button, {
-                      key: a.key, size: 'small', type: 'link',
-                      onClick: function() { a.fn(r); }
-                  }, a.label));
-              });
-              return React.createElement(Space, { size: 0 }, btns);
-          } }
-    ];
+    // 表头（业务口径）：业务管理=manager / 我的业务=view
+    //   序号 债券编号 ECIF客户编号 客户编号 融资人名称 项目名称 创建日期 状态 [+ 业务所属客户经理 业务所属机构]
+    // 列宽可用鼠标拖表头右缘调整；按 页面+角色 记在本机浏览器里，刷新后保持
+    var COLS_KEY = 'whjrscb_pool_colw_' + mode;
+    // 两步赋值写法（等同 writer 的 Hook 解构转换产物）：帆软填报预览下 useState 解构会失效，
+    // 且该转换只认 const [...]，这里直接写成转换后的形状，避免漏转
+    var colWHook = React.useState(function() {
+        try { return JSON.parse(window.localStorage.getItem(COLS_KEY) || '{}') || {}; } catch (e) { return {}; }
+    });
+    var colW = colWHook[0];
+    var setColW = colWHook[1];
+    // 表格容器宽度：用来补一列占位列，把容器余量吃掉
+    // （否则 antd 会把各列等比撑开，拖动 200px 实际只走 ~100px，手感对不上）
+    var wrapHook = React.useState(0);
+    var wrapW = wrapHook[0];
+    var setWrapW = wrapHook[1];
+    var wrapRef = React.useRef(null);
+    React.useEffect(function() {
+        var el = wrapRef.current;
+        if (!el) return;
+        function sync() { setWrapW(el.clientWidth); }
+        sync();
+        var ro = null;
+        if (window.ResizeObserver) { ro = new ResizeObserver(sync); ro.observe(el); }
+        else { window.addEventListener('resize', sync); }
+        return function() { if (ro) ro.disconnect(); else window.removeEventListener('resize', sync); };
+    }, []);
+    function rememberWidths(w) {
+        try { window.localStorage.setItem(COLS_KEY, JSON.stringify(w)); } catch (e) {}
+    }
+    function startResize(colKey, e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var startX = e.clientX;
+        // 起点必须是「表头此刻的真实宽度」，不能用存过的值/兜底值，否则一拖就跳
+        var th = e.currentTarget && e.currentTarget.closest ? e.currentTarget.closest('th') : null;
+        var startW = th ? Math.round(th.getBoundingClientRect().width) : (colW[colKey] || 100);
+        function onMove(ev) {
+            var w = Math.max(56, Math.round(startW + ev.clientX - startX));
+            setColW(function(prev) { var n = Object.assign({}, prev); n[colKey] = w; return n; });
+        }
+        function onUp() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.body.style.userSelect = '';
+            setColW(function(prev) { rememberWidths(prev); return prev; });
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.body.style.userSelect = 'none';
+    }
+    function ResizableHeader(props) {
+        var onResize = props.onResize;
+        var rest = {};
+        Object.keys(props).forEach(function(k) { if (k !== 'onResize') rest[k] = props[k]; });
+        rest.style = Object.assign({}, rest.style, { position: 'relative' });
+        if (!onResize) return React.createElement('th', rest, rest.children);
+        return React.createElement('th', rest, rest.children,
+            React.createElement('span', {
+                key: 'rz',
+                style: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 8, cursor: 'col-resize',
+                         userSelect: 'none', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' },
+                onMouseDown: function(e) { onResize(e); }
+            },
+            React.createElement('span', { style: { width: 2, height: '55%', background: '#d9d9d9' } }))
+        );
+    }
 
+    var BASE_COLS = [
+        { title: '序号', key: '__idx', width: 60, render: function(_, __, i) { return (current - 1) * pageSize + i + 1; } },
+        { title: '债券编号', key: 'bond_code', dataIndex: 'bond_code', width: 130 },
+        { title: 'ECIF客户编号', key: 'ecif_customer_no', dataIndex: 'ecif_customer_no', width: 120 },
+        { title: '客户编号', key: 'customer_no', dataIndex: 'customer_no', width: 110 },
+        { title: '融资人名称', key: 'customer_name', dataIndex: 'customer_name', width: 180, ellipsis: true },
+        { title: '项目名称', key: 'biz_name', dataIndex: 'biz_name', width: 200, ellipsis: true },
+        { title: '创建日期', key: 'create_time', dataIndex: 'create_time', width: 120, render: function(v) { return fmtDate(v); } },
+        { title: '状态', key: 'status', dataIndex: 'status', width: 90, render: function(v) { return statusText(v); } }
+    ];
+    if (IS_MANAGER) {
+        BASE_COLS.push({ title: '业务所属客户经理', key: 'related_name', dataIndex: 'related_name', width: 140, render: function(v) { return v || ''; } });
+        BASE_COLS.push({ title: '业务所属机构', key: 'dept_name', dataIndex: 'dept_name', width: 140, render: function(v) { return v || ''; } });
+    }
+    BASE_COLS.push({ title: '操作', key: '__act', width: IS_MANAGER ? 180 : 260, fixed: 'right',
+        render: function(_, r) {
+            var btns = [];
+            actCols.forEach(function(a) {
+                if (!a.show(r)) return;
+                btns.push(React.createElement(Button, {
+                    key: a.key, size: 'small', type: 'link',
+                    onClick: function() { a.fn(r); }
+                }, a.label));
+            });
+            return React.createElement(Space, { size: 0 }, btns);
+        } });
+
+    var totalW = 0;
+    var columns = BASE_COLS.map(function(c) {
+        var w = colW[c.key] || c.width;
+        totalW += w;
+        return Object.assign({}, c, {
+            width: w,
+            onHeaderCell: function() { return { width: w, onResize: function(e) { startResize(c.key, e); } }; }
+        });
+    });
+    // 占位列：吃掉容器余量，使 sum(列宽)==容器宽度 —— 各列严格等于声明宽度，拖动 1:1
+    var spacer = Math.max(0, Math.round(wrapW - totalW));
+    var tableCols = spacer > 1
+        ? columns.concat([{ title: '', key: '__spacer', width: spacer, render: function() { return ''; } }])
+        : columns;
     return (
         <div style={{ padding: '16px', background: '#f5f5f5', minHeight: '100vh' }}>
             <div style={{ background: '#fff', padding: '16px 24px', borderRadius: '8px' }}>
@@ -762,14 +845,18 @@ function App() {
                     </Space>
                 </div>
 
-                <Table rowKey="id" loading={loading} columns={columns} dataSource={data} size="middle"
-                    scroll={{ x: 1900, y: 'calc(100vh - 320px)' }} pagination={{
+                <div ref={wrapRef}>
+                <Table rowKey="id" loading={loading} columns={tableCols} dataSource={data} size="middle"
+                    components={{ header: { cell: ResizableHeader } }}
+                    scroll={{ x: totalW + spacer, y: 'calc(100vh - 320px)' }} pagination={{
                         current: current, pageSize: pageSize, total: total,
                         showSizeChanger: true, showQuickJumper: true,
                         pageSizeOptions: ['10', '20', '50', '100'],
                         showTotal: function(t) { return '共 ' + t + ' 条'; },
                         onChange: handlePageChange
                     }} />
+
+                </div>
 
                 {modal.open && (
                     <Modal title={modal.title} open={true} footer={null} width={modal.width} destroyOnClose

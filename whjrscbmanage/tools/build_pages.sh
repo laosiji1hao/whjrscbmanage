@@ -30,8 +30,12 @@ for jsx in pages/*.jsx; do
   cp "$DEPLOY/$name.cpt" "pages/$name.cpt"
 done
 
-# 3. 注入云平台模板参数（cloudUrl/prjId/fine_username）
+# 3. 注入云平台模板参数（cloudUrl/prjId/fine_username）—— 只作用在部署目录，prjId 填本机值
 node tools/inject_params.js "$DEPLOY"
+
+# 3b. 仓库交付产物：补上底座缺失的 cloudUrl/prjId 空声明即可，不写本机 prjId
+#     （上面第 2 步的 cp 发生在注入之前，不补的话仓库产物会丢掉这两项声明）
+node tools/inject_params.js pages --decl-only
 
 # 4. 数据层 cpt 同步到挂载目录（/api/data report_path 由页面 reportName 推导，必须同目录树）
 cp data/whjrscbmanage_data.cpt "$DATA_DEPLOY/whjrscbmanage_data.cpt"
