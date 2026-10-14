@@ -229,6 +229,19 @@ def terminate_business(business_id, op, updater_type, bond_code=None):
     return {}
 
 
+def delete_business(business_id):
+    """22600D：删除新增审核失败的业务（按 biz_uuid），并清理其关联审批流"""
+    with conn().cursor() as cur:
+        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+        row = cur.fetchone()
+        if not row:
+            return {"ok": False, "msg": "业务不存在"}
+        if row[0]:
+            cur.execute("DELETE FROM iassist_flow_data WHERE business_no=%s", (row[0],))
+        cur.execute("DELETE FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+    return {"ok": True}
+
+
 def handle(data):
     body = (data.get("iibs") or {}).get("req", {}).get("body", {})
     op = body.get("operator", "admin")
@@ -256,6 +269,8 @@ def handle(data):
         return change_manager(body.get("businessId"), body, op)
     if code == "226009":  # 中止（按 biz_uuid）
         return terminate_business(body.get("businessId"), op, body.get("updaterType"), body.get("bondCode"))
+    if code == "22600D":  # 删除新增审核失败的业务
+        return delete_business(body.get("businessId"))
     return {"error": "unknown code " + code}
 
 
@@ -282,7 +297,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             req = {}
         url = self.path
-        m = re.search(r"flow_whjrscbmanage_(\d+)$", url)
+        m = re.search(r"flow_whjrscbmanage_([A-Za-z0-9]+)$", url)
         code = m.group(1) if m else ""
         req["code"] = code
         try:

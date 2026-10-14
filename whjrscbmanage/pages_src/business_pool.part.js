@@ -137,6 +137,18 @@ function App() {
         });
     }
     function actConfig() { openDialog('config', { id: 0 }, '配置计算参数', 700); }
+    function actDelete(r) {
+        if (gated(r)) return;
+        Modal.confirm({
+            title: '提示', content: '确认删除该笔新增审核失败的业务？', okText: '确定', cancelText: '取消',
+            onOk: function() {
+                CLIENT.call('22600D', { businessId: r.biz_uuid, bondCode: r.bond_code }, function() {
+                    try { window.parent.FR.Msg.toast('已删除'); } catch (e) {}
+                    reload(current, pageSize);
+                }, null);
+            }
+        });
+    }
     function actAdd() { openDialog('business_form', { mode: 'add', biz_uuid: '' }, '新增业务信息', 1200); }
 
     function handlePageChange(page, size) { setCurrent(page); setPageSize(size); reload(page, size); }
@@ -220,12 +232,13 @@ function App() {
     if (!IS_MANAGER) {
         actCols.push({ key: 'a1', label: '完善业务信息', show: function(r) { return String(r.status) === '0'; }, fn: actComplete });
     }
-    actCols.push({ key: 'a2', label: '变更客户经理', show: function() { return true; }, fn: actChangeMgr });
-    actCols.push({ key: 'a3', label: '编辑', show: function() { return true; }, fn: actEdit });
+    actCols.push({ key: 'a2', label: '变更客户经理', show: function(r) { return String(r.status) === '3'; }, fn: actChangeMgr });
+    actCols.push({ key: 'a3', label: '编辑', show: function(r) { return String(r.status) === '2' || String(r.status) === '3'; }, fn: actEdit });
     if (!IS_MANAGER) {
-        actCols.push({ key: 'a4', label: '创建分期', show: function() { return true; }, fn: actInstallment });
+        actCols.push({ key: 'a4', label: '创建分期', show: function(r) { return String(r.status) === '3'; }, fn: actInstallment });
     }
-    actCols.push({ key: 'a5', label: '中止', show: function() { return true; }, fn: actStop });
+    actCols.push({ key: 'a5', label: '中止', show: function(r) { return String(r.status) === '3'; }, fn: actStop });
+    actCols.push({ key: 'a6', label: '删除', show: function(r) { return String(r.status) === '2'; }, fn: actDelete });
 
     // 表头（业务口径）：业务管理=manager / 我的业务=view
     //   序号 债券编号 ECIF客户编号 客户编号 融资人名称 项目名称 创建日期 状态 [+ 业务所属客户经理 业务所属机构]

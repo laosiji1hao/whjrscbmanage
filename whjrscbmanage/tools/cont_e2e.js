@@ -107,6 +107,11 @@ async function queryBizByUuid(page, uuid) {
     await pick(form, 'installment_flag', '是');
     await typeText(form, 'agreed_usage', '流动资金贷款');
     await typeText(form, 'remark_number', 'P-E2E-001');
+    // 对齐后端必填白名单（form 33/33）：补填主承销商/投资利率/价值转移利率/批复管理要求
+    await typeText(form, 'lead_underwriter', '中金公司');
+    await setNum(form, 'invest_rate', '4.00');
+    await setNum(form, 'transfer_rate', '1.50');
+    await typeText(form, 'remark', '端到端测试批复要求');
 
     // 添加还款计划
     await form.locator('button:has-text("添加还款计划")').click();
