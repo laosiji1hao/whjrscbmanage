@@ -377,12 +377,13 @@
     return d.isValid() ? d.format("YYYY-MM-DD") : String(v);
   }
   function App() {
-    var { Table, Button, Input, Select, Space, Modal } = antd;
+    var { Table, Button, Input, Select, Space, Modal, AutoComplete } = antd;
     var _hook_001_ = React.useState([]);var data = _hook_001_[0];var setData = _hook_001_[1];
     var _hook_002_ = React.useState(false);var loading = _hook_002_[0];var setLoading = _hook_002_[1];
     var _hook_003_ = React.useState([]);var custOpts = _hook_003_[0];var setCustOpts = _hook_003_[1];
     var _hook_004_ = React.useState("");var custName = _hook_004_[0];var setCustName = _hook_004_[1];
-    var _hook_005_ = React.useState({ open: false, url: "", title: "", width: 1200 });var modal = _hook_005_[0];var setModal = _hook_005_[1];
+    var _hook_005_ = React.useState(false);var openC = _hook_005_[0];var setOpenC = _hook_005_[1];
+    var _hook_006_ = React.useState({ open: false, url: "", title: "", width: 1200 });var modal = _hook_006_[0];var setModal = _hook_006_[1];
     function fetchList(customerName) {
       setLoading(true);
       callData("declare_list", [{ name: "p_customer_name", type: "String", value: customerName || "" }], function(rows) {
@@ -423,6 +424,7 @@
         var d = e.data;
         if (!d) return;
         if (d.type === "fr_form_saved") {
+          if (d.msg) antd.message.success(d.msg, 2);
           setModal({ open: false, url: "", title: "", width: 1200 });
           fetchList(custName);
         }
@@ -456,18 +458,30 @@
       } }
     ];
     return  React.createElement("div", { style: { padding: "16px", background: "#f5f5f5", minHeight: "100vh" } },  React.createElement("div", { style: { background: "#fff", padding: "16px 24px", borderRadius: "8px" } },  React.createElement("h2", { style: { margin: "0 0 4px" } }, "我的业务申报列表"),  React.createElement("div", { style: { color: "#888", marginBottom: 16 } }, "当前查询结果条数为：", data.length),  React.createElement("div", { style: { marginBottom: 16, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 } },  React.createElement(Space, { wrap: true },  React.createElement("span", null, "客户名称:"),  React.createElement(
-      Select,
+      AutoComplete,
       {
-        showSearch: true,
         allowClear: true,
         placeholder: "全部",
         style: { minWidth: 220 },
         value: custName || void 0,
+        open: openC,
+        onDropdownVisibleChange: setOpenC,
+        onKeyDown: function(e) {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            setOpenC(false);
+            setCustName(function(p) {
+              return String(p || "").slice(0, -1);
+            });
+          }
+        },
         onChange: function(v) {
           setCustName(v || "");
         },
         options: custOpts,
-        optionFilterProp: "label"
+        filterOption: function(input, option) {
+          return String(option.value).indexOf(String(input)) !== -1;
+        }
       }
     ),  React.createElement(Button, { type: "primary", icon: icon("/outlined/search.svg"), onClick: handleSearch }, "查询"),  React.createElement(Button, { icon: icon("/outlined/reload.svg"), onClick: handleReset }, "重置")),  React.createElement(Button, { type: "primary", icon: icon("/outlined/plus.svg"), onClick: function() {
       openForm("");

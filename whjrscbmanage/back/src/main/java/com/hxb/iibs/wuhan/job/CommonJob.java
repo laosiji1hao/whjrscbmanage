@@ -265,8 +265,8 @@ public class CommonJob {
         // apply_no 用于关联外部表和去重【226009 新增】
         entity.setApplyNo(src.getApplyNo());
 
-        //默认同步为标准
-        entity.setBondType("0");
+        //默认同步为非标准（业务口径：人民币外部同步的业务 = 非标准业务）
+        entity.setBondType("1");
 
         // 基本信息（字段名一致，直接映射）
         entity.setBizName(src.getBizName());

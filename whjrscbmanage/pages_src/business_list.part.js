@@ -1,10 +1,11 @@
 /* ===== 我的业务申报列表（原 business_list）===== */
 function App() {
-    var { Table, Button, Input, Select, Space, Modal } = antd;
+    var { Table, Button, Input, Select, Space, Modal, AutoComplete } = antd;
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
     const [custOpts, setCustOpts] = React.useState([]);
     const [custName, setCustName] = React.useState('');
+    const [openC, setOpenC] = React.useState(false); // 客户名称下拉受控（Backspace 需先关下拉）
     const [modal, setModal] = React.useState({ open: false, url: '', title: '', width: 1200 });
 
     function fetchList(customerName) {
@@ -40,6 +41,7 @@ function App() {
             var d = e.data;
             if (!d) return;
             if (d.type === 'fr_form_saved') {
+                if (d.msg) antd.message.success(d.msg, 2); // 父级可见的成功提示
                 setModal({ open: false, url: '', title: '', width: 1200 });
                 fetchList(custName);
             }
@@ -72,9 +74,11 @@ function App() {
                 <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <Space wrap>
                         <span>客户名称:</span>
-                        <Select showSearch allowClear placeholder="全部"
-                            style={{ minWidth: 220 }} value={custName || undefined}
-                            onChange={function(v) { setCustName(v || ''); }} options={custOpts} optionFilterProp="label" />
+                        <AutoComplete allowClear placeholder="全部" style={{ minWidth: 220 }} value={custName || undefined}
+                            open={openC} onDropdownVisibleChange={setOpenC}
+                            onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenC(false); setCustName(function(p) { return String(p || '').slice(0, -1); }); } }}
+                            onChange={function(v) { setCustName(v || ''); }} options={custOpts}
+                            filterOption={function(input, option) { return String(option.value).indexOf(String(input)) !== -1; }} />
                         <Button type="primary" icon={icon('/outlined/search.svg')} onClick={handleSearch}>查询</Button>
                         <Button icon={icon('/outlined/reload.svg')} onClick={handleReset}>重置</Button>
                     </Space>

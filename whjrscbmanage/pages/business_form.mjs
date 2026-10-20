@@ -388,9 +388,9 @@
     } catch (e) {
     }
   }
-  function closeSelf() {
+  function closeSelf(msg) {
     try {
-      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved", msg: msg || "" }, "*");
     } catch (e) {
     }
   }
@@ -419,6 +419,7 @@
       setRecordId(id);
       if (m === "add") {
         form.setFieldsValue({
+          bond_type: "0",
           our_bank_underwrite: "0",
           currency: "人民币",
           guarantee_info: "信用",
@@ -667,11 +668,16 @@
             window.parent.FR.Msg.toast(mode === "installment" ? "创建分期业务信息审批中" : "新增业务业务信息审批中");
           } catch (e) {
           }
-          setTimeout(closeSelf, 300);
+          antd.message.success(mode === "installment" ? "创建分期业务信息审批中" : "新增业务业务信息审批中", 2);
+          setTimeout(function() {
+            closeSelf(mode === "installment" ? "创建分期业务信息审批中" : "新增业务业务信息审批中");
+          }, 300);
         }, function() {
           setSaving(false);
+          antd.message.error("保存失败，请重试");
         });
       }).catch(function() {
+        antd.message.error("请完善必填项后再保存");
       });
     }
     var sel = function(opts, placeholder) {
@@ -766,7 +772,7 @@
         {
           id: "planFrame",
           src: planModal.url,
-          style: { width: "100%", height: "420px", border: "none" }
+          style: { width: "100%", height: "720px", border: "none" }
         }
       )
     ));

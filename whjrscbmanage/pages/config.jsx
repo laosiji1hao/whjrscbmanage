@@ -367,9 +367,9 @@ function notifyHeight() {
         window.parent.postMessage({ type: 'fr_iframe_resize', height: h }, '*');
     } catch (e) {}
 }
-function closeSelf() {
+function closeSelf(msg) {
     try {
-        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved' }, '*');
+        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved', msg: msg || '' }, '*');
     } catch (e) {}
 }
 
@@ -513,7 +513,7 @@ function App() {
             ], function(rows) {
                 setSaving(false);
                 if (spOk(rows)) { setTimeout(closeSelf, 300); }
-            }, function() { setSaving(false); });
+            }, function() { setSaving(false); antd.message.error('保存失败，请重试'); });
         }).catch(function() {});
     }
 
@@ -523,23 +523,13 @@ function App() {
                 <Form form={form} layout="vertical" autoComplete="off">
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item label="票面利率（年化）" name="coupon_rate">
-                                <Input disabled style={{ background: '#f5f5f5' }} />
+                            <Form.Item label="增值税(%)" name="vat" rules={[{ required: true, message: '请输入增值税' }]}>
+                                <InputNumber style={{ width: '100%' }} min={0} max={100} step={0.001} placeholder="如 0.06" suffix="%" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="增值税" name="vat" rules={[{ required: true, message: '请输入增值税' }]}>
-                                <InputNumber style={{ width: '100%' }} min={0} max={100} step={0.001} placeholder="如 0.06" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="附加税" name="surcharge" rules={[{ required: true, message: '请输入附加税' }]}>
-                                <InputNumber style={{ width: '100%' }} min={0} max={100} step={0.001} placeholder="如 0.012" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="最后修改人" >
-                                <Input value={CUR_USER} disabled style={{ background: '#f5f5f5' }} />
+                            <Form.Item label="附加税(%)" name="surcharge" rules={[{ required: true, message: '请输入附加税' }]}>
+                                <InputNumber style={{ width: '100%' }} min={0} max={100} step={0.001} placeholder="如 0.012" suffix="%" />
                             </Form.Item>
                         </Col>
                     </Row>

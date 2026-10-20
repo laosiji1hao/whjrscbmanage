@@ -47,9 +47,10 @@ function App() {
             }, function() {
                 setSaving(false);
                 try { window.parent.FR.Msg.toast('申请更改客户经理审批中'); } catch (e) {}
-                setTimeout(closeSelf, 300);
-            }, function() { setSaving(false); });
-        }).catch(function() {});
+                antd.message.success('申请更改客户经理审批中', 2);
+                setTimeout(function() { closeSelf('申请更改客户经理审批中'); }, 300);
+            }, function() { setSaving(false); antd.message.error('申请提交失败，请重试'); });
+        }).catch(function() { antd.message.error('请选择归属机构和客户经理后再提交'); });
     }
 
     return (

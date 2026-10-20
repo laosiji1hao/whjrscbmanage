@@ -388,9 +388,9 @@
     } catch (e) {
     }
   }
-  function closeSelf() {
+  function closeSelf(msg) {
     try {
-      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved", msg: msg || "" }, "*");
     } catch (e) {
     }
   }
@@ -714,11 +714,16 @@
             window.parent.FR.Msg.toast("申请变更业务信息审批中");
           } catch (e) {
           }
-          setTimeout(closeSelf, 300);
+          antd.message.success("申请变更业务信息审批中", 2);
+          setTimeout(function() {
+            closeSelf("申请变更业务信息审批中");
+          }, 300);
         }, function() {
           setSaving(false);
+          antd.message.error("变更申请提交失败，请重试");
         });
       }).catch(function() {
+        antd.message.error("请完善必填项后再提交");
       });
     }
     var sel = function(opts, placeholder) {
@@ -816,7 +821,7 @@
         {
           id: "planFrame2",
           src: planModal.url,
-          style: { width: "100%", height: "420px", border: "none" }
+          style: { width: "100%", height: "720px", border: "none" }
         }
       )
     ));

@@ -468,7 +468,7 @@
   }
   var WINDOW_POOL_MODE = "view";
   function App() {
-    var { Table, Button, Input, Select, Space, Modal } = antd;
+    var { Table, Button, Input, Select, Space, Modal, AutoComplete } = antd;
     var [mode, setMode] = React.useState(function() {
       try {
         var qm = new URLSearchParams(window.location.search).get("mode");
@@ -491,6 +491,8 @@
     const [status, setStatus] = React.useState("");
     const [custOpts, setCustOpts] = React.useState([]);
     const [bizOpts, setBizOpts] = React.useState([]);
+    const [openC, setOpenC] = React.useState(false);
+    const [openB, setOpenB] = React.useState(false);
     const [auditMap, setAuditMap] = React.useState({});
     const [modal, setModal] = React.useState({ open: false, url: "", title: "", width: 1e3 });
     var IS_MANAGER = mode === "manager";
@@ -537,7 +539,7 @@
       callData("audit_all", [], function(rows) {
         var m = {};
         (rows || []).forEach(function(r) {
-          m[r.bond_code] = r.approval_id;
+          m[r.bond_code] = r.flow_code || r.approval_id;
         });
         setAuditMap(m);
       }, null);
@@ -566,6 +568,10 @@
       }
       return false;
     }
+    function inApproval(r) {
+      return auditMap[r.bond_code] !== void 0;
+    }
+    var FLOW_LABEL = { "biz_declare": "新增申请审核中", "biz_change": "变更申请审批中", "biz_mgr_change": "客户经理变更申请审批中", "biz_terminate": "中止申请审批中" };
     function openDialog(pageName, extra, title, width) {
       var q = "";
       if (extra) {
@@ -623,8 +629,11 @@
               window.parent.FR.Msg.toast("中止业务流程审批中");
             } catch (e) {
             }
+            antd.message.success("中止业务流程审批中", 2);
             reload(current, pageSize);
-          }, null);
+          }, function() {
+            antd.message.error("中止申请提交失败，请重试");
+          });
         }
       });
     }
@@ -644,8 +653,11 @@
               window.parent.FR.Msg.toast("已删除");
             } catch (e) {
             }
+            antd.message.success("已删除", 2);
             reload(current, pageSize);
-          }, null);
+          }, function() {
+            antd.message.error("删除失败，请重试");
+          });
         }
       });
     }
@@ -675,6 +687,7 @@
         var d = e.data;
         if (!d) return;
         if (d.type === "fr_form_saved") {
+          if (d.msg) antd.message.success(d.msg, 2);
           setModal({ open: false, url: "", title: "", width: 1e3 });
           reload(current, pageSize);
         }
@@ -781,25 +794,25 @@
     var actCols = [];
     if (!IS_MANAGER) {
       actCols.push({ key: "a1", label: "完善业务信息", show: function(r) {
-        return String(r.status) === "0";
+        return String(r.status) === "0" && !inApproval(r);
       }, fn: actComplete });
     }
     actCols.push({ key: "a2", label: "变更客户经理", show: function(r) {
-      return String(r.status) === "3";
+      return String(r.status) === "3" && !inApproval(r);
     }, fn: actChangeMgr });
     actCols.push({ key: "a3", label: "编辑", show: function(r) {
-      return String(r.status) === "2" || String(r.status) === "3";
+      return (String(r.status) === "2" || String(r.status) === "3") && !inApproval(r);
     }, fn: actEdit });
     if (!IS_MANAGER) {
       actCols.push({ key: "a4", label: "创建分期", show: function(r) {
-        return String(r.status) === "3";
+        return String(r.status) === "3" && !inApproval(r);
       }, fn: actInstallment });
     }
     actCols.push({ key: "a5", label: "中止", show: function(r) {
-      return String(r.status) === "3";
+      return String(r.status) === "3" && !inApproval(r);
     }, fn: actStop });
     actCols.push({ key: "a6", label: "删除", show: function(r) {
-      return String(r.status) === "2";
+      return String(r.status) === "2" && !inApproval(r);
     }, fn: actDelete });
     var COLS_KEY = "whjrscb_pool_colw_" + mode;
     var colWHook = React.useState(function() {
@@ -933,6 +946,10 @@
       width: IS_MANAGER ? 180 : 260,
       fixed: "right",
       render: function(_, r) {
+        if (inApproval(r)) {
+          var lbl = FLOW_LABEL[auditMap[r.bond_code]] || "审批中";
+          return React.createElement("span", { style: { color: "#fa8c16" } }, lbl);
+        }
         var btns = [];
         actCols.forEach(function(a) {
           if (!a.show(r)) return;
@@ -966,32 +983,56 @@
       return "";
     } }]) : columns;
     return /* @__PURE__ */ React.createElement("div", { style: { padding: "16px", background: "#f5f5f5", minHeight: "100vh" } }, /* @__PURE__ */ React.createElement("div", { style: { background: "#fff", padding: "16px 24px", borderRadius: "8px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#888", marginBottom: 16 } }, "当前查询结果条数为：", total), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 16, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 } }, /* @__PURE__ */ React.createElement(Space, { wrap: true }, /* @__PURE__ */ React.createElement("span", null, "融资人名称:"), /* @__PURE__ */ React.createElement(
-      Select,
+      AutoComplete,
       {
-        showSearch: true,
         allowClear: true,
         placeholder: "全部",
         style: { width: 180 },
         value: custName || void 0,
+        open: openC,
+        onDropdownVisibleChange: setOpenC,
+        onKeyDown: function(e) {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            setOpenC(false);
+            setCustName(function(p) {
+              return String(p || "").slice(0, -1);
+            });
+          }
+        },
         onChange: function(v) {
           setCustName(v || "");
         },
         options: custOpts,
-        optionFilterProp: "label"
+        filterOption: function(input, option) {
+          return String(option.value).indexOf(String(input)) !== -1;
+        }
       }
     ), /* @__PURE__ */ React.createElement("span", null, "项目/债券名称:"), /* @__PURE__ */ React.createElement(
-      Select,
+      AutoComplete,
       {
-        showSearch: true,
         allowClear: true,
         placeholder: "全部",
         style: { width: 180 },
         value: bizName || void 0,
+        open: openB,
+        onDropdownVisibleChange: setOpenB,
+        onKeyDown: function(e) {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            setOpenB(false);
+            setBizName(function(p) {
+              return String(p || "").slice(0, -1);
+            });
+          }
+        },
         onChange: function(v) {
           setBizName(v || "");
         },
         options: bizOpts,
-        optionFilterProp: "label"
+        filterOption: function(input, option) {
+          return String(option.value).indexOf(String(input)) !== -1;
+        }
       }
     ), !IS_MANAGER && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, "状态:"), /* @__PURE__ */ React.createElement(
       Select,

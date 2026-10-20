@@ -192,7 +192,7 @@
         "type": "list",
         "db_connection": "common_db",
         "params": [],
-        "sql": "SELECT business_no AS bond_code, MIN(id) AS approval_id FROM whjrscbmanage.iassist_flow_data WHERE approval_status = 0 GROUP BY business_no"
+        "sql": "SELECT business_no AS bond_code, MIN(id) AS approval_id, SUBSTRING_INDEX(GROUP_CONCAT(flow_code ORDER BY id DESC), ',', 1) AS flow_code FROM whjrscbmanage.iassist_flow_data WHERE approval_status = 0 GROUP BY business_no"
       },
       {
         "name": "manager_options",

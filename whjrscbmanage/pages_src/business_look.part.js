@@ -286,9 +286,10 @@ function App() {
                     window.parent.contentPane && window.parent.contentPane.parameterCommit();
                     window.parent.FR.Msg.toast('申请变更业务信息审批中');
                 } catch (e) {}
-                setTimeout(closeSelf, 300);
-            }, function() { setSaving(false); });
-        }).catch(function() {});
+                antd.message.success('申请变更业务信息审批中', 2); // 独立页面可见反馈
+                setTimeout(function() { closeSelf('申请变更业务信息审批中'); }, 300); // 父级(业务池)收到后也提示
+            }, function() { setSaving(false); antd.message.error('变更申请提交失败，请重试'); });
+        }).catch(function() { antd.message.error('请完善必填项后再提交'); });
     }
 
     var sel = function(opts, placeholder) {
@@ -441,7 +442,7 @@ function App() {
                     onCancel={function() { setPlanModal({ open: false, url: '' }); }}
                     styles={{ body: { padding: 0 } }}>
                     <iframe id="planFrame2" src={planModal.url}
-                        style={{ width: '100%', height: '420px', border: 'none' }} />
+                        style={{ width: '100%', height: '720px', border: 'none' }} />
                 </Modal>
             )}
         </div>

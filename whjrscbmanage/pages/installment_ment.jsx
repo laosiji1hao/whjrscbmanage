@@ -367,9 +367,9 @@ function notifyHeight() {
         window.parent.postMessage({ type: 'fr_iframe_resize', height: h }, '*');
     } catch (e) {}
 }
-function closeSelf() {
+function closeSelf(msg) {
     try {
-        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved' }, '*');
+        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved', msg: msg || '' }, '*');
     } catch (e) {}
 }
 

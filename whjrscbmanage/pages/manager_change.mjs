@@ -346,9 +346,9 @@
     } catch (e) {
     }
   }
-  function closeSelf() {
+  function closeSelf(msg) {
     try {
-      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved", msg: msg || "" }, "*");
     } catch (e) {
     }
   }
@@ -402,11 +402,16 @@
             window.parent.FR.Msg.toast("申请更改客户经理审批中");
           } catch (e) {
           }
-          setTimeout(closeSelf, 300);
+          antd.message.success("申请更改客户经理审批中", 2);
+          setTimeout(function() {
+            closeSelf("申请更改客户经理审批中");
+          }, 300);
         }, function() {
           setSaving(false);
+          antd.message.error("申请提交失败，请重试");
         });
       }).catch(function() {
+        antd.message.error("请选择归属机构和客户经理后再提交");
       });
     }
     return /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 24px", paddingBottom: 24 } }, /* @__PURE__ */ React.createElement(Form, { form, layout: "vertical", autoComplete: "off" }, /* @__PURE__ */ React.createElement(Form.Item, { label: "归属机构", name: "dept1", rules: [{ required: true, message: "请选择归属机构" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择归属机构", options: orgOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { label: "客户经理", name: "person1", rules: [{ required: true, message: "请选择客户经理" }] }, /* @__PURE__ */ React.createElement(Select, { placeholder: "请选择客户经理", options: mgrOpts, showSearch: true, optionFilterProp: "label" })), /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "变更申请")))));

@@ -89,6 +89,10 @@ def save_business(business_id, b, op):
         cur.close()
         with conn().cursor() as c2:
             add_flow(c2, b.get("bondCode") or "", op, "biz_declare", b)
+            # 模拟 i助手：新增申报写入 busi_mobile 审批表（待审），审批结果由 sim_approve.py 回同步
+            c2.execute("INSERT INTO busi_mobile.mock_approval_new (bond_code, apply_no, biz_uuid, approve_status) "
+                       "VALUES (%s,%s,%s,'')",
+                       (b.get("bondCode") or "", b.get("applyNo") or "", _biz_uuid))
         return {"businessId": _biz_uuid}
     # UPDATE
     fields = []
@@ -110,7 +114,7 @@ def save_business(business_id, b, op):
         "inspectFreq": "inspect_freq", "inspectorPost": "inspector_post", "remarkNumber": "remark_number",
         "leadUnderwriter": "lead_underwriter",
     }
-    insert = b.get("installment")  # JSON → installment_plan 文本（返回给页面回显用）
+    insert = b.get("installment")
     for k, col in mapping.items():
         if k in b and b[k] != "" and b[k] is not None:
             fields.append("%s=%%s" % col)
@@ -134,6 +138,9 @@ def save_business(business_id, b, op):
         add_flow(cur, new_bond or "", op, "biz_update", b)
         if insert:
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s", (insert, business_id))
+        elif str(b.get("installmentFlag") or "") == "0":
+            # 分期=否且未带计划 → 清掉存量还款计划
+            cur.execute("UPDATE bus_bond_business SET installment_plan=NULL WHERE biz_uuid=%s", (business_id,))
         row = None
         if b.get("bondCode"):
             cur.execute("SELECT id, bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
@@ -181,9 +188,13 @@ def change_business(business_id, b, op):
         if old_bond and new_bond and old_bond != new_bond:
             cur.execute("UPDATE bus_repayment_schedule SET bond_code=%s WHERE bond_code=%s", (new_bond, old_bond))
             cur.execute("UPDATE iassist_flow_data SET business_no=%s WHERE business_no=%s", (new_bond, old_bond))
-        if b.get("installment"):
+        inst = b.get("installment")
+        if inst:
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s",
-                        (b.get("installment"), business_id))
+                        (inst, business_id))
+        elif str(b.get("installmentFlag") or "") == "0":
+            # 分期=否且未带计划 → 清掉存量还款计划（避免"删了又出现"）
+            cur.execute("UPDATE bus_bond_business SET installment_plan=NULL WHERE biz_uuid=%s", (business_id,))
         flow = dict(b)
         flow.pop("operate", None)
         add_flow(cur, new_bond or "", op, "biz_change", b)
@@ -192,21 +203,21 @@ def change_business(business_id, b, op):
 
 def change_manager(business_id, b, op):
     with conn().cursor() as cur:
-        cur.execute("SELECT id, creator, org_code, org_name FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+        cur.execute("SELECT id, bond_code, creator, org_code, org_name FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
         row = cur.fetchone()
         rid = row[0] if row else None
-        old_handler = row[1] if row else None
-        old_org_code = row[2] if row else None
-        old_org_name = row[3] if row else None
-        cur.execute("UPDATE bus_bond_business SET creator=%s, org_code=%s, org_name=%s, update_time=NOW() WHERE biz_uuid=%s",
-                    (b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"), business_id))
+        bond = row[1] if row else None
+        old_handler = row[2] if row else None
+        old_org_code = row[3] if row else None
+        old_org_name = row[4] if row else None
+        # 【审批通过前不改归属】：提交换经理只记历史+挂审批流；creator 变更待审批通过由 sim_approve 落地
         cur.execute("INSERT INTO bus_manager_change_history (business_id, old_handler, old_org_code, old_org_name, "
                     "new_handler, new_org_code, new_org_name, change_reason, applicant_oa) "
                     "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                     (rid, old_handler or "", old_org_code or "", old_org_name,
                      b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"),
                      b.get("changeReason"), b.get("creator") or op))
-        add_flow(cur, "", op, "biz_mgr_change", b)
+        add_flow(cur, bond or "", op, "biz_mgr_change", b)
     return {}
 
 

@@ -367,9 +367,9 @@ function notifyHeight() {
         window.parent.postMessage({ type: 'fr_iframe_resize', height: h }, '*');
     } catch (e) {}
 }
-function closeSelf() {
+function closeSelf(msg) {
     try {
-        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved' }, '*');
+        if (window.parent !== window) window.parent.postMessage({ type: 'fr_form_saved', msg: msg || '' }, '*');
     } catch (e) {}
 }
 
@@ -480,7 +480,7 @@ var WINDOW_POOL_MODE = 'manager';
  * 导出：本页直接取全量生成 57 列 CSV（替代原 export 页）
  */
 function App() {
-    var { Table, Button, Input, Select, Space, Modal } = antd;
+    var { Table, Button, Input, Select, Space, Modal, AutoComplete } = antd;
     var [mode, setMode] = React.useState(function() {
         try {
             var qm = new URLSearchParams(window.location.search).get('mode');
@@ -503,6 +503,8 @@ function App() {
     const [status, setStatus] = React.useState('');
     const [custOpts, setCustOpts] = React.useState([]);
     const [bizOpts, setBizOpts] = React.useState([]);
+    const [openC, setOpenC] = React.useState(false); // 融资人名称下拉受控（Backspace 需先关下拉）
+    const [openB, setOpenB] = React.useState(false); // 项目/债券名称下拉受控
     const [auditMap, setAuditMap] = React.useState({});
     const [modal, setModal] = React.useState({ open: false, url: '', title: '', width: 1000 });
 
@@ -547,7 +549,7 @@ function App() {
     React.useEffect(function() {
         callData('audit_all', [], function(rows) {
             var m = {};
-            (rows || []).forEach(function(r) { m[r.bond_code] = r.approval_id; });
+            (rows || []).forEach(function(r) { m[r.bond_code] = r.flow_code || r.approval_id; });
             setAuditMap(m);
         }, null);
         // 筛选下拉数据：融资人名称 / 项目债券名称（DISTINCT）
@@ -567,6 +569,9 @@ function App() {
         if (auditMap[r.bond_code] !== undefined) { antd.message.warning('本业务正在经历审批流程，不可变更'); return true; }
         return false;
     }
+    // 是否在审批中（有在批审批流）→ 审批中的业务不提供任何操作入口
+    function inApproval(r) { return auditMap[r.bond_code] !== undefined; }
+    var FLOW_LABEL = { 'biz_declare': '新增申请审核中', 'biz_change': '变更申请审批中', 'biz_mgr_change': '客户经理变更申请审批中', 'biz_terminate': '中止申请审批中' };
 
     function openDialog(pageName, extra, title, width) {
         var q = '';
@@ -607,8 +612,9 @@ function App() {
             onOk: function() {
                 CLIENT.call('226009', { businessId: r.biz_uuid, bondCode: r.bond_code, terminator: CUR_USER, updaterType: IS_MANAGER ? '1' : '0' }, function() {
                     try { window.parent.FR.Msg.toast('中止业务流程审批中'); } catch (e) {}
+                    antd.message.success('中止业务流程审批中', 2);
                     reload(current, pageSize);
-                }, null);
+                }, function() { antd.message.error('中止申请提交失败，请重试'); });
             }
         });
     }
@@ -620,8 +626,9 @@ function App() {
             onOk: function() {
                 CLIENT.call('22600D', { businessId: r.biz_uuid, bondCode: r.bond_code }, function() {
                     try { window.parent.FR.Msg.toast('已删除'); } catch (e) {}
+                    antd.message.success('已删除', 2);
                     reload(current, pageSize);
-                }, null);
+                }, function() { antd.message.error('删除失败，请重试'); });
             }
         });
     }
@@ -639,6 +646,7 @@ function App() {
             var d = e.data;
             if (!d) return;
             if (d.type === 'fr_form_saved') {
+                if (d.msg) antd.message.success(d.msg, 2); // 父级可见的成功提示
                 setModal({ open: false, url: '', title: '', width: 1000 });
                 reload(current, pageSize);
             }
@@ -706,15 +714,15 @@ function App() {
 
     var actCols = [];
     if (!IS_MANAGER) {
-        actCols.push({ key: 'a1', label: '完善业务信息', show: function(r) { return String(r.status) === '0'; }, fn: actComplete });
+        actCols.push({ key: 'a1', label: '完善业务信息', show: function(r) { return String(r.status) === '0' && !inApproval(r); }, fn: actComplete });
     }
-    actCols.push({ key: 'a2', label: '变更客户经理', show: function(r) { return String(r.status) === '3'; }, fn: actChangeMgr });
-    actCols.push({ key: 'a3', label: '编辑', show: function(r) { return String(r.status) === '2' || String(r.status) === '3'; }, fn: actEdit });
+    actCols.push({ key: 'a2', label: '变更客户经理', show: function(r) { return String(r.status) === '3' && !inApproval(r); }, fn: actChangeMgr });
+    actCols.push({ key: 'a3', label: '编辑', show: function(r) { return (String(r.status) === '2' || String(r.status) === '3') && !inApproval(r); }, fn: actEdit });
     if (!IS_MANAGER) {
-        actCols.push({ key: 'a4', label: '创建分期', show: function(r) { return String(r.status) === '3'; }, fn: actInstallment });
+        actCols.push({ key: 'a4', label: '创建分期', show: function(r) { return String(r.status) === '3' && !inApproval(r); }, fn: actInstallment });
     }
-    actCols.push({ key: 'a5', label: '中止', show: function(r) { return String(r.status) === '3'; }, fn: actStop });
-    actCols.push({ key: 'a6', label: '删除', show: function(r) { return String(r.status) === '2'; }, fn: actDelete });
+    actCols.push({ key: 'a5', label: '中止', show: function(r) { return String(r.status) === '3' && !inApproval(r); }, fn: actStop });
+    actCols.push({ key: 'a6', label: '删除', show: function(r) { return String(r.status) === '2' && !inApproval(r); }, fn: actDelete });
 
     // 表头（业务口径）：业务管理=manager / 我的业务=view
     //   序号 债券编号 ECIF客户编号 客户编号 融资人名称 项目名称 创建日期 状态 [+ 业务所属客户经理 业务所属机构]
@@ -800,6 +808,10 @@ function App() {
     }
     BASE_COLS.push({ title: '操作', key: '__act', width: IS_MANAGER ? 180 : 260, fixed: 'right',
         render: function(_, r) {
+            if (inApproval(r)) {
+                var lbl = FLOW_LABEL[auditMap[r.bond_code]] || '审批中';
+                return React.createElement('span', { style: { color: '#fa8c16' } }, lbl);
+            }
             var btns = [];
             actCols.forEach(function(a) {
                 if (!a.show(r)) return;
@@ -832,11 +844,17 @@ function App() {
                 <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <Space wrap>
                         <span>融资人名称:</span>
-                        <Select showSearch allowClear placeholder="全部" style={{ width: 180 }} value={custName || undefined}
-                            onChange={function(v) { setCustName(v || ''); }} options={custOpts} optionFilterProp="label" />
+                        <AutoComplete allowClear placeholder="全部" style={{ width: 180 }} value={custName || undefined}
+                            open={openC} onDropdownVisibleChange={setOpenC}
+                            onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenC(false); setCustName(function(p) { return String(p || '').slice(0, -1); }); } }}
+                            onChange={function(v) { setCustName(v || ''); }}
+                            options={custOpts} filterOption={function(input, option) { return String(option.value).indexOf(String(input)) !== -1; }} />
                         <span>项目/债券名称:</span>
-                        <Select showSearch allowClear placeholder="全部" style={{ width: 180 }} value={bizName || undefined}
-                            onChange={function(v) { setBizName(v || ''); }} options={bizOpts} optionFilterProp="label" />
+                        <AutoComplete allowClear placeholder="全部" style={{ width: 180 }} value={bizName || undefined}
+                            open={openB} onDropdownVisibleChange={setOpenB}
+                            onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenB(false); setBizName(function(p) { return String(p || '').slice(0, -1); }); } }}
+                            onChange={function(v) { setBizName(v || ''); }}
+                            options={bizOpts} filterOption={function(input, option) { return String(option.value).indexOf(String(input)) !== -1; }} />
                         {!IS_MANAGER && (
                             <React.Fragment>
                                 <span>状态:</span>

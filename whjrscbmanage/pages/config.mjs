@@ -365,9 +365,9 @@
     } catch (e) {
     }
   }
-  function closeSelf() {
+  function closeSelf(msg) {
     try {
-      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved" }, "*");
+      if (window.parent !== window) window.parent.postMessage({ type: "fr_form_saved", msg: msg || "" }, "*");
     } catch (e) {
     }
   }
@@ -413,11 +413,12 @@
           }
         }, function() {
           setSaving(false);
+          antd.message.error("保存失败，请重试");
         });
       }).catch(function() {
       });
     }
-    return /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 24px", paddingBottom: 20 } }, /* @__PURE__ */ React.createElement(Spin, { spinning: loading }, /* @__PURE__ */ React.createElement(Form, { form, layout: "vertical", autoComplete: "off" }, /* @__PURE__ */ React.createElement(Row, { gutter: 16 }, /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "票面利率（年化）", name: "coupon_rate" }, /* @__PURE__ */ React.createElement(Input, { disabled: true, style: { background: "#f5f5f5" } }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "增值税", name: "vat", rules: [{ required: true, message: "请输入增值税" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, min: 0, max: 100, step: 1e-3, placeholder: "如 0.06" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "附加税", name: "surcharge", rules: [{ required: true, message: "请输入附加税" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, min: 0, max: 100, step: 1e-3, placeholder: "如 0.012" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "最后修改人" }, /* @__PURE__ */ React.createElement(Input, { value: CUR_USER, disabled: true, style: { background: "#f5f5f5" } })))), /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "保存"))))));
+    return /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 24px", paddingBottom: 20 } }, /* @__PURE__ */ React.createElement(Spin, { spinning: loading }, /* @__PURE__ */ React.createElement(Form, { form, layout: "vertical", autoComplete: "off" }, /* @__PURE__ */ React.createElement(Row, { gutter: 16 }, /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "增值税(%)", name: "vat", rules: [{ required: true, message: "请输入增值税" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, min: 0, max: 100, step: 1e-3, placeholder: "如 0.06", suffix: "%" }))), /* @__PURE__ */ React.createElement(Col, { span: 12 }, /* @__PURE__ */ React.createElement(Form.Item, { label: "附加税(%)", name: "surcharge", rules: [{ required: true, message: "请输入附加税" }] }, /* @__PURE__ */ React.createElement(InputNumber, { style: { width: "100%" }, min: 0, max: 100, step: 1e-3, placeholder: "如 0.012", suffix: "%" })))), /* @__PURE__ */ React.createElement(Form.Item, { style: { marginBottom: 0, marginTop: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 } }, /* @__PURE__ */ React.createElement(Button, { onClick: closeSelf }, "取消"), /* @__PURE__ */ React.createElement(Button, { type: "primary", loading: saving, onClick: handleSubmit }, "保存"))))));
   }
   ReactDOM.createRoot(document.getElementById("app-root")).render(
     React.createElement(
