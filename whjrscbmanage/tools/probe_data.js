@@ -14,8 +14,8 @@ const D = [
   ['config_get', []],
   ['pool_list_mine', [{n:'p_operator',t:'String',v:'admin'},{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''},{n:'p_pageno',t:'String',v:'1'},{n:'p_pagesize',t:'String',v:'20'},{n:'p_cutpage',t:'String',v:''}]],
   ['pool_total_mine', [{n:'p_operator',t:'String',v:'admin'},{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''}]],
-  ['pool_list_all', [{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_pageno',t:'String',v:'1'},{n:'p_pagesize',t:'String',v:'20'},{n:'p_cutpage',t:'String',v:''}]],
-  ['pool_total_all', [{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''}]],
+  ['pool_list_all', [{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''},{n:'p_pageno',t:'String',v:'1'},{n:'p_pagesize',t:'String',v:'20'},{n:'p_cutpage',t:'String',v:''}]],
+  ['pool_total_all', [{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''}]],
   ['pool_filter_opt', []],
   ['audit_all', []],
   ['manager_options', []],
@@ -27,7 +27,7 @@ const D = [
   await login(page, BASE);
   let pass = 0, fail = 0;
   for (const [ds, params] of D) {
-    const body = { report_path: '/whjrscbmanage/data/whjrscbmanage_data.cpt', datasource_name: ds,
+    const body = { report_path: '/busi_center/Finance_market_dept/whjrscbmange/data/whjrscbmanage_data.cpt', datasource_name: ds,
       page_number: -1, page_size: -1,
       parameters: params.map(p => ({ name: p.n, type: p.t, value: p.v })) };
     const res = await page.evaluate(async (b) => {

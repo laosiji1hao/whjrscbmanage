@@ -500,21 +500,18 @@
       var p = [
         { name: "p_customer_name", type: "String", value: custName },
         { name: "p_biz_name", type: "String", value: bizName },
+        { name: "p_status", type: "String", value: status },
         { name: "p_pageno", type: "String", value: String(page || 1) },
         { name: "p_pagesize", type: "String", value: String(size || pageSize) }
       ];
-      if (!IS_MANAGER) {
-        p.push({ name: "p_status", type: "String", value: status });
-      }
       return p;
     }
     function countParams() {
-      var p = [
+      return [
         { name: "p_customer_name", type: "String", value: custName },
-        { name: "p_biz_name", type: "String", value: bizName }
+        { name: "p_biz_name", type: "String", value: bizName },
+        { name: "p_status", type: "String", value: status }
       ];
-      if (!IS_MANAGER) p.push({ name: "p_status", type: "String", value: status });
-      return p;
     }
     function fetchList(page, size) {
       setLoading(true);
@@ -1034,7 +1031,7 @@
           return String(option.value).indexOf(String(input)) !== -1;
         }
       }
-    ), !IS_MANAGER && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, "状态:"), /* @__PURE__ */ React.createElement(
+    ), /* @__PURE__ */ React.createElement("span", null, "状态:"), /* @__PURE__ */ React.createElement(
       Select,
       {
         allowClear: true,
@@ -1046,7 +1043,7 @@
         },
         options: selOpts(DICTS.status)
       }
-    )), /* @__PURE__ */ React.createElement(Button, { type: "primary", icon: icon("/outlined/search.svg"), onClick: handleSearch }, "查询"), /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/reload.svg"), onClick: handleReset }, "重置"), !IS_MANAGER && /* @__PURE__ */ React.createElement(Button, { type: "primary", icon: icon("/outlined/plus.svg"), onClick: actAdd }, "新增业务")), /* @__PURE__ */ React.createElement(Space, null, /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/export.svg"), onClick: handleExport }, "导出"), IS_MANAGER && /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/setting.svg"), onClick: actConfig }, "配置上存利率计算参数"))), /* @__PURE__ */ React.createElement("div", { ref: wrapRef }, /* @__PURE__ */ React.createElement(
+    ), /* @__PURE__ */ React.createElement(Button, { type: "primary", icon: icon("/outlined/search.svg"), onClick: handleSearch }, "查询"), /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/reload.svg"), onClick: handleReset }, "重置"), !IS_MANAGER && /* @__PURE__ */ React.createElement(Button, { type: "primary", icon: icon("/outlined/plus.svg"), onClick: actAdd }, "新增业务")), /* @__PURE__ */ React.createElement(Space, null, /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/export.svg"), onClick: handleExport }, "导出"), IS_MANAGER && /* @__PURE__ */ React.createElement(Button, { icon: icon("/outlined/setting.svg"), onClick: actConfig }, "配置上存利率计算参数"))), /* @__PURE__ */ React.createElement("div", { ref: wrapRef }, /* @__PURE__ */ React.createElement(
       Table,
       {
         rowKey: "id",

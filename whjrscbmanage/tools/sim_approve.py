@@ -6,7 +6,8 @@
     python tools/sim_approve.py 通过|否决 <债券编号|apply_no> [--biz_type <码> --dept <码> --is_passage 0|1 --passage_amount <金额>]
 
 按待批审批流类型分支：
-- biz_declare（新增申报）：真实 i助手审批时补填 业务品种/对应处室/是否通道费/通道费金额，
+- biz_declare / biz_update（新增申报 / 编辑后重新申报）：真实 i助手审批时补填
+  业务品种/对应处室/是否通道费/通道费金额，
   「通过」必带这 4 项（写入 busi_mobile.mock_approval_new → approve_status='成功'）→ 本地 审核中(1)→生效中(3)、
   写入 4 项 + 计算上存利率 + 补 8 项默认 + 审批流通过 + 同号其它审核中草稿置退休(6)；
   「否决」→ 本地 新增审核失败(2)、审批流否决。
@@ -50,8 +51,8 @@ def main():
     if not flow:
         print('[X] 该业务没有待批审批流，无需审批（或先走业务池操作发起申请）'); sys.exit(2)
 
-    # ── biz_declare：新增申报审批 ──
-    if flow_code == 'biz_declare':
+    # ── biz_declare / biz_update：新增申报（含编辑后重新申报）审批 ──
+    if flow_code in ('biz_declare', 'biz_update'):
         if a.action == '通过':
             for f in ('biz_type', 'dept', 'is_passage', 'passage_amount'):
                 if getattr(a, f) is None:

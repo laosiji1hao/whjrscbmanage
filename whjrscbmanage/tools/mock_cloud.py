@@ -230,11 +230,8 @@ def terminate_business(business_id, op, updater_type, bond_code=None):
             r0 = cur.fetchone()
             if r0:
                 bc = r0[0]
-        # 列名走白名单格式化（%s 会把列名也引成字符串，导致恒假），值走参数化
-        col = "biz_uuid" if business_id else "bond_code"
-        val = business_id if business_id else (bc or "")
-        cur.execute("UPDATE bus_bond_business SET status=5, termination_reason='中止', update_time=NOW() "
-                    "WHERE %s=%%s" % col, (val,))
+        # 与真实后端一致：提交只发审批流，不动业务状态；审批通过后由定时任务
+        # （本地由 sim_approve.py 扮演）置 status=5，业务才会从列表消失。
         add_flow(cur, bc or "", op, "biz_terminate", {"bondCode": bc, "terminator": op,
                                                       "updaterType": updater_type})
     return {}

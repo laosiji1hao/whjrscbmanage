@@ -38,21 +38,18 @@ function App() {
         var p = [
             { name: 'p_customer_name', type: 'String', value: custName },
             { name: 'p_biz_name', type: 'String', value: bizName },
+            { name: 'p_status', type: 'String', value: status },
             { name: 'p_pageno', type: 'String', value: String(page || 1) },
             { name: 'p_pagesize', type: 'String', value: String(size || pageSize) }
         ];
-        if (!IS_MANAGER) {
-            p.push({ name: 'p_status', type: 'String', value: status });
-        }
         return p;
     }
     function countParams() {
-        var p = [
+        return [
             { name: 'p_customer_name', type: 'String', value: custName },
-            { name: 'p_biz_name', type: 'String', value: bizName }
+            { name: 'p_biz_name', type: 'String', value: bizName },
+            { name: 'p_status', type: 'String', value: status }
         ];
-        if (!IS_MANAGER) p.push({ name: 'p_status', type: 'String', value: status });
-        return p;
     }
 
     function fetchList(page, size) {
@@ -379,13 +376,9 @@ function App() {
                             onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenB(false); setBizName(function(p) { return String(p || '').slice(0, -1); }); } }}
                             onChange={function(v) { setBizName(v || ''); }}
                             options={bizOpts} filterOption={function(input, option) { return String(option.value).indexOf(String(input)) !== -1; }} />
-                        {!IS_MANAGER && (
-                            <React.Fragment>
-                                <span>状态:</span>
-                                <Select allowClear placeholder="全部" style={{ width: 120 }} value={status || undefined}
-                                    onChange={function(v) { setStatus(v || ''); }} options={selOpts(DICTS.status)} />
-                            </React.Fragment>
-                        )}
+                        <span>状态:</span>
+                        <Select allowClear placeholder="全部" style={{ width: 120 }} value={status || undefined}
+                            onChange={function(v) { setStatus(v || ''); }} options={selOpts(DICTS.status)} />
                         <Button type="primary" icon={icon('/outlined/search.svg')} onClick={handleSearch}>查询</Button>
                         <Button icon={icon('/outlined/reload.svg')} onClick={handleReset}>重置</Button>
                         {!IS_MANAGER && (
