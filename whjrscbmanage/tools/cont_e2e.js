@@ -8,6 +8,7 @@ const { login } = require(WS + '/foundation/tools/api_tester/fr_login');
 const BASE = 'http://localhost:8075/webroot';
 const U4 = 'a3b3c3d3000000000000000000000004';
 const U5 = 'a3b3c3d3000000000000000000000005';
+const PY = process.env.FR_PY || 'C:/Users/asus/AppData/Local/Programs/Python/Python312/python.exe';
 const PAGE = n => BASE + '/decision/view/report?op=write&reportlet=busi_center/Finance_market_dept/whjrscbmange/pages/' + n + '.cpt&t=' + Date.now();
 
 let bad = [];
@@ -146,7 +147,7 @@ async function queryBizByUuid(page, uuid) {
     if (String(arow.customer_type) === '1' || String(arow.customer_no) === 'C0001') ok('ECIF/评级联动落库（customer_type=' + (arow.customer_type === null || arow.customer_type === undefined ? '' : arow.customer_type) + '）');
     else fail('联动字段落库缺失 customer_type=' + arow.customer_type);
 
-    // ═══ 流程 B：中止（226009）════
+    // ═══ 流程 B：中止（226009）——审批通过后才落地 status=5 ════
     console.log('【流程B 中止业务】');
     await page.goto(PAGE('business_pool_view'), { waitUntil: 'domcontentloaded' });
     await page.locator('#app-root').waitFor({ timeout: 15000 });
@@ -154,8 +155,14 @@ async function queryBizByUuid(page, uuid) {
     await btn(page.locator('.ant-modal:has-text("确认中止业务")'), '确定').click();
     await page.waitForTimeout(2500);
     const e1 = await queryBizByUuid(page, U4);
-    if (e1.length && String(e1[0].status) === '5') ok('中止生效 status=5');
-    else fail('中止未生效 status=' + (e1[0] && e1[0].status));
+    if (e1.length && String(e1[0].status) === '3') ok('提交中止后业务仍可见（status=3，操作列显示「中止申请审批中」并锁定）');
+    else fail('提交中止后状态异常 status=' + (e1[0] && e1[0].status));
+    // 模拟定时任务：审批通过后才置为中止
+    const { execSync } = require('child_process');
+    execSync('"' + PY + '" tools/sim_approve.py 通过 BC000001', { stdio: 'inherit' });
+    const e2 = await queryBizByUuid(page, U4);
+    if (e2.length && String(e2[0].status) === '5') ok('中止审批通过后 status=5（从列表隐藏）');
+    else fail('中止审批通过后未生效 status=' + (e2[0] && e2[0].status));
 
     // ═══ 流程 D：变更客户经理（226008）════（先做：226008 只落空 bondCode 的流，不阻塞后续变更申请）
     console.log('【流程D 变更客户经理】');
@@ -170,8 +177,14 @@ async function queryBizByUuid(page, uuid) {
     await mgr.locator('button:has-text("变更申请")').click();
     await page.waitForTimeout(2500);
     const d = await queryBizByUuid(page, U5);
-    if (d.length && String(d[0].creator) === 'cm001') ok('客户经理变更落库 creator=cm001');
-    else fail('换经理落库异常 creator=' + (d[0] && d[0].creator));
+    if (d.length && String(d[0].creator) !== 'cm001') ok('提交换经理审批前归属不变（creator 仍为 ' + (d[0] && d[0].creator) + '，审批通过才变更）');
+    else fail('换经理提交即改归属异常 creator=' + (d[0] && d[0].creator));
+    // 模拟定时任务审批通过后，归属才变更为 cm001
+    const { execSync: sync } = require('child_process');
+    sync('"' + PY + '" tools/sim_approve.py 通过 BC000002', { stdio: 'inherit' });
+    const d2 = await queryBizByUuid(page, U5);
+    if (d2.length && String(d2[0].creator) === 'cm001') ok('换经理审批通过后归属变更为 cm001');
+    else fail('换经理审批通过未变更归属 creator=' + (d2[0] && d2[0].creator));
 
     // ═══ 流程 C：查看/变更申请（226007；226007 会给 BC000002 落审批流 → 必须放 D 之后；
     // D 已把 creator 换成 cm001 → 个人池看不见，用 manager 全景池跑）════

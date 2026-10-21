@@ -515,14 +515,24 @@ public class CommonJob {
                     // 自动计算上存利率
                     calcUpperStorageRate(biz);
 
-                    // 如果已有草稿，将其状态标记为 PASS_RETIRE（biz_uuid 为身份，bond_code 不再置空以保留原编号）
-                    BondsBusiness draft = bondsBusinessService.getByBondCodeAndStatus(biz.getBondCode(), Constant.BizStatus.AUDITING);
-                    if(draft!=null){
-                        bondsBusinessService.lambdaUpdate()
-                                .set(BondsBusiness::getStatus, Constant.BizStatus.PASS_RETIRE).eq(BondsBusiness::getId, draft.getId())
-                                .update();
+                    // 【身份=biz_uuid】审批通过：若本地已有该 biz_uuid 的审核中草稿（审批流主链路），
+                    // 直接更新为生效中，避免重复插入撞唯一键；其余情况才新建。
+                    BondsBusiness draft = resolveBizByYbid(item.getYbid());
+                    if (draft != null && StringUtils.hasText(draft.getBizUuid())
+                            && draft.getBizUuid().equals(biz.getBizUuid())) {
+                        biz.setId(draft.getId());
+                        biz.setCreateTime(draft.getCreateTime());
+                        bondsBusinessService.updateById(biz);
+                    } else {
+                        // 无同身份草稿：新建；若有同号其它审核中草稿（不同 biz_uuid），置退休
+                        if (draft != null) {
+                            bondsBusinessService.lambdaUpdate()
+                                    .set(BondsBusiness::getStatus, Constant.BizStatus.PASS_RETIRE)
+                                    .eq(BondsBusiness::getId, draft.getId())
+                                    .update();
+                        }
+                        bondsBusinessService.save(biz);
                     }
-                    bondsBusinessService.save(biz);
 
                     // 还款计划：先将旧的审批中计划标记为已失效，再保存新的生效计划
                     if ("1".equals(biz.getInstallmentFlag()) && StringUtils.hasText(biz.getInstallmentPlan())) {
@@ -539,8 +549,8 @@ public class CommonJob {
                     log.warn("[processNewBusiness] 审批拒绝, bondCode={}, remark={}",
                             item.getBondCode(), item.getRemark());
 
-                    // 将草稿的业务状态标记为已拒绝（biz_uuid 为身份，bond_code 保留，供"自动沿用旧编号"重报）
-                    BondsBusiness draft = bondsBusinessService.getByBondCodeAndStatus(biz.getBondCode(), Constant.BizStatus.AUDITING);
+                    // 【身份=biz_uuid】将审批流对应的本地草稿标记为新增审核失败（保留编号供自动沿用重报）
+                    BondsBusiness draft = resolveBizByYbid(item.getYbid());
                     if (draft != null) {
                         bondsBusinessService.lambdaUpdate()
                                 .set(BondsBusiness::getStatus, Constant.BizStatus.REJECTED)
@@ -777,9 +787,10 @@ public class CommonJob {
                 // 先更新审批流水状态
                 saveFlowData(vo.getYbid(), vo.getApproveStatus(), vo.getRemark());
 
-                BondsBusiness biz = findBizByBondCode(vo.getBondCode());
+                BondsBusiness biz = resolveBizByYbid(vo.getYbid());
                 if (biz == null) {
-                    log.warn("[processUpdateBusiness] bondCode={} 在本方未找到，跳过", vo.getBondCode());
+                    log.warn("[processUpdateBusiness] ybid={} 对应的业务未找到（business_no={}），跳过",
+                            vo.getYbid(), vo.getBondCode());
                     continue;
                 }
 
@@ -1112,20 +1123,21 @@ public class CommonJob {
                     continue;
                 }
 
-                BondsBusiness biz = findBizByBondCode(item.getBondCode());
+                BondsBusiness biz = resolveBizByYbid(item.getYbid());
                 if (biz == null) {
-                    log.warn("[processHandlerChange] bondCode={} 在本方未找到，跳过", item.getBondCode());
+                    log.warn("[processHandlerChange] ybid={} 对应的业务未找到（business_no={}），跳过",
+                            item.getYbid(), item.getBondCode());
                     saveFlowData(item.getYbid(), item.getApproveStatus(), item.getRemark());
                     continue;
                 }
 
                 // ① INSERT 历史记录（changeManager 已不再同步写，此处全权负责）
                 var existingHist = managerChangeHistoryService.lambdaQuery()
-                        .eq(BusManagerChangeHistory::getBusinessId, biz.getId())
+                        .eq(BusManagerChangeHistory::getBusinessId, biz.getBizUuid())
                         .oneOpt();
                 if (existingHist.isEmpty()) {
                     BusManagerChangeHistory hist = new BusManagerChangeHistory();
-                    hist.setBusinessId(biz.getId());
+                    hist.setBusinessId(biz.getBizUuid());
                     hist.setOldHandler(item.getOldHandler());
                     hist.setOldOrgCode(item.getOldOrgCode());
                     hist.setOldOrgName(item.getOldOrgName());
@@ -1168,7 +1180,7 @@ public class CommonJob {
         for (var item : items) {
             try {
                 if ("成功".equals(item.getApproveStatus())) {
-                    BondsBusiness biz = findBizByBondCode(item.getBondCode());
+                    BondsBusiness biz = resolveBizByYbid(item.getYbid());
                     if (biz == null) {
                         log.warn("[processTerminateBusiness] bondCode={} 在本方未找到，跳过", item.getBondCode());
                         saveFlowDataWithoutRemark(item.getYbid(), item.getApproveStatus());
@@ -1265,6 +1277,24 @@ public class CommonJob {
         if (bondCode == null) return null;
         return bondsBusinessService.lambdaQuery()
                 .eq(BondsBusiness::getBondCode, bondCode)
+                .oneOpt()
+                .orElse(null);
+    }
+
+    /** 按审批流解析本地业务：流 business_no 现为 biz_uuid（身份=唯一键），兼容迁移前 bond_code 存量流 */
+    private BondsBusiness resolveBizByYbid(Long ybid) {
+        if (ybid == null) return null;
+        FlowData fd = flowDataService.getById(ybid);
+        if (fd == null || fd.getBusinessNo() == null || fd.getBusinessNo().isEmpty()) return null;
+        BondsBusiness biz = findBizByBizUuid(fd.getBusinessNo());
+        if (biz != null) return biz;
+        return findBizByBondCode(fd.getBusinessNo());
+    }
+
+    private BondsBusiness findBizByBizUuid(String bizUuid) {
+        if (bizUuid == null || bizUuid.isEmpty()) return null;
+        return bondsBusinessService.lambdaQuery()
+                .eq(BondsBusiness::getBizUuid, bizUuid)
                 .oneOpt()
                 .orElse(null);
     }

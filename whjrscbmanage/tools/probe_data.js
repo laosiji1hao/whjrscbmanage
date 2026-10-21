@@ -8,9 +8,7 @@ const CPT = '/webroot/decision/api/data';
 const D = [
   ['declare_list', [{n:'p_operator',t:'String',v:'admin'},{n:'p_customer_name',t:'String',v:''}]],
   ['declare_customer_opt', [{n:'p_operator',t:'String',v:'admin'}]],
-  ['get_business', [{n:'p_id',t:'String',v:'4'}]],
-  ['schedule_by_bond', [{n:'p_bond_code',t:'String',v:'BC000002'}]],
-  ['schedule_of_business', [{n:'p_id',t:'String',v:'5'}]],
+  ['get_business', [{n:'p_biz_uuid',t:'String',v:'c8d8e8f8000000000000000000000001'}]],
   ['config_get', []],
   ['pool_list_mine', [{n:'p_operator',t:'String',v:'admin'},{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''},{n:'p_pageno',t:'String',v:'1'},{n:'p_pagesize',t:'String',v:'20'},{n:'p_cutpage',t:'String',v:''}]],
   ['pool_total_mine', [{n:'p_operator',t:'String',v:'admin'},{n:'p_customer_name',t:'String',v:''},{n:'p_biz_name',t:'String',v:''},{n:'p_status',t:'String',v:''}]],

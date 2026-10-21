@@ -36,8 +36,8 @@ def main():
         "status=3, termination_reason=NULL "
         "WHERE id=5")
     print("id=5 恢复行数:", cur.rowcount)
-    # 2) id=4 BC000001 恢复
-    cur.execute("UPDATE bus_bond_business SET bond_code='BC000001', status=0, termination_reason=NULL, "
+    # 2) id=4 BC000001 恢复为生效中（供 e2e 流程 B「中止」使用；中止成功后下一轮再以生效中姿态复活）
+    cur.execute("UPDATE bus_bond_business SET bond_code='BC000001', status=3, termination_reason=NULL, "
                 "creator='admin', org_name='武汉营业部' WHERE id=4")
     cur.execute("UPDATE bus_bond_business SET bond_code='12312313' WHERE id=3")
     cur.execute("UPDATE bus_bond_business SET bond_code='BC000003' WHERE id=6")

@@ -58,14 +58,24 @@ public class IAssistServiceImpl implements IIAssistService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendIAssist(ITfHelperMain main, String flowCode) {
-        // Step 1: 检查是否已有进行中的审批流程，同一 bond_code 不能重复送审
+        // 身份=biz_uuid：审批流按 biz_uuid 关联（bond_code 可重复，不可再作为唯一关联）
+        String bizUuid = main.getData().stream()
+                .filter(m -> "biz_uuid".equals(m.get("fieldName")))
+                .map(m -> String.valueOf(m.get("value")))
+                .filter(v -> !v.isEmpty())
+                .findFirst()
+                .orElse("");
         String bondCode = main.getData().stream()
                 .filter(m -> "bond_code".equals(m.get("fieldName")))
                 .map(m -> String.valueOf(m.get("value")))
                 .findFirst()
                 .orElse("");
+        // 兼容存量流（迁移前 business_no 存的是 bond_code）：biz_uuid 缺失时退用 bond_code
+        String businessNo = !bizUuid.isEmpty() ? bizUuid : bondCode;
+
+        // Step 1: 检查是否已有进行中的审批流程，同一 biz_uuid 不能重复送审
         boolean pendingExists = flowDataService.lambdaQuery()
-                .eq(FlowData::getBusinessNo, bondCode)
+                .eq(FlowData::getBusinessNo, businessNo)
                 .eq(FlowData::getApprovalStatus, Constant.ApprovalStatus.PENDING)
                 .exists();
         if (pendingExists) {
@@ -74,7 +84,7 @@ public class IAssistServiceImpl implements IIAssistService {
 
         // Step 2: 写审计日志，获取 ybid
         FlowData auditRecord = new FlowData();
-        auditRecord.setBusinessNo(bondCode);
+        auditRecord.setBusinessNo(businessNo);
         auditRecord.setApplicantOa(main.getOperatePersonnel());
         auditRecord.setFlowCode(flowCode);
         auditRecord.setData(JSON.toJSONString(main));

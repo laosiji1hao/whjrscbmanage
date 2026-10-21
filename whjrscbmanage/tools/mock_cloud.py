@@ -38,26 +38,6 @@ def add_flow(cur, business_no, applicant_oa, flow_code, data):
                 (business_no, applicant_oa, flow_code, json.dumps(data, ensure_ascii=False)))
 
 
-def upsert_installment(cur, bond_code, install_json, applicant_oa=None):
-    """installment JSON: [{installmentTime:'YYYY-MM-DD', installmentAmount:'100'}] → bus_repayment_schedule status=2"""
-    if not bond_code or not install_json:
-        return
-    try:
-        items = json.loads(install_json)
-    except Exception:
-        return
-    if not isinstance(items, list) or not items:
-        return
-    cur.execute("DELETE FROM bus_repayment_schedule WHERE bond_code=%s", (bond_code,))
-    for i, it in enumerate(items, 1):
-        rdate = it.get("installmentTime", "")
-        amt = it.get("installmentAmount", "")
-        if not rdate or amt in ("", None):
-            continue
-        cur.execute("INSERT INTO bus_repayment_schedule (bond_code, sort, repayment_date, repayment_amount, status) "
-                    "VALUES (%s,%s,%s,%s,2)", (bond_code, i, rdate, float(amt)))
-
-
 def save_business(business_id, b, op):
     cur = conn().cursor()
     if business_id in ("", "0", None):
@@ -88,7 +68,8 @@ def save_business(business_id, b, op):
         new_id = cur.lastrowid
         cur.close()
         with conn().cursor() as c2:
-            add_flow(c2, b.get("bondCode") or "", op, "biz_declare", b)
+            # 审批流以 biz_uuid 关联（不再用 bond_code）
+            add_flow(c2, _biz_uuid, op, "biz_declare", b)
             # 模拟 i助手：新增申报写入 busi_mobile 审批表（待审），审批结果由 sim_approve.py 回同步
             c2.execute("INSERT INTO busi_mobile.mock_approval_new (bond_code, apply_no, biz_uuid, approve_status) "
                        "VALUES (%s,%s,%s,'')",
@@ -123,19 +104,10 @@ def save_business(business_id, b, op):
     fields.append("update_time=NOW()")
     vals.append(business_id)
     with conn().cursor() as cur:
-        # 改号联动（与 226007 同规则）：记录旧 bond_code，改号后同步迁移还款计划与审批流
-        old_bond = None
-        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
-        r0 = cur.fetchone()
-        if r0:
-            old_bond = r0[0]
-        new_bond = b.get("bondCode") or old_bond
+        # 身份=biz_uuid：改号无需重链还款计划/审批流（二者均按 biz_uuid 关联）
         if fields:
             cur.execute("UPDATE bus_bond_business SET %s WHERE biz_uuid=%%s" % ", ".join(fields), vals)
-        if old_bond and new_bond and old_bond != new_bond:
-            cur.execute("UPDATE bus_repayment_schedule SET bond_code=%s WHERE bond_code=%s", (new_bond, old_bond))
-            cur.execute("UPDATE iassist_flow_data SET business_no=%s WHERE business_no=%s", (new_bond, old_bond))
-        add_flow(cur, new_bond or "", op, "biz_update", b)
+        add_flow(cur, business_id, op, "biz_update", b)
         if insert:
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s", (insert, business_id))
         elif str(b.get("installmentFlag") or "") == "0":
@@ -177,17 +149,9 @@ def change_business(business_id, b, op):
     fields.append("update_time=NOW()")
     vals.append(business_id)
     with conn().cursor() as cur:
-        # 改号联动：记录旧 bond_code，改号后同步还款计划表与审批流表
-        old_bond = None
-        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
-        r0 = cur.fetchone()
-        old_bond = r0[0] if r0 else None
-        new_bond = b.get("bondCode") or old_bond
+        # 身份=biz_uuid：债券编号编辑/改号不再需要重链还款计划与审批流（二者均按 biz_uuid 关联）
         if fields:
             cur.execute("UPDATE bus_bond_business SET %s WHERE biz_uuid=%%s" % ", ".join(fields), vals)
-        if old_bond and new_bond and old_bond != new_bond:
-            cur.execute("UPDATE bus_repayment_schedule SET bond_code=%s WHERE bond_code=%s", (new_bond, old_bond))
-            cur.execute("UPDATE iassist_flow_data SET business_no=%s WHERE business_no=%s", (new_bond, old_bond))
         inst = b.get("installment")
         if inst:
             cur.execute("UPDATE bus_bond_business SET installment_plan=%s WHERE biz_uuid=%s",
@@ -197,7 +161,7 @@ def change_business(business_id, b, op):
             cur.execute("UPDATE bus_bond_business SET installment_plan=NULL WHERE biz_uuid=%s", (business_id,))
         flow = dict(b)
         flow.pop("operate", None)
-        add_flow(cur, new_bond or "", op, "biz_change", b)
+        add_flow(cur, business_id, op, "biz_change", b)
     return {"businessId": business_id}
 
 
@@ -211,41 +175,40 @@ def change_manager(business_id, b, op):
         old_org_code = row[3] if row else None
         old_org_name = row[4] if row else None
         # 【审批通过前不改归属】：提交换经理只记历史+挂审批流；creator 变更待审批通过由 sim_approve 落地
+        # 身份=biz_uuid：history.business_id 存 biz_uuid（不再用主表自增 id）
         cur.execute("INSERT INTO bus_manager_change_history (business_id, old_handler, old_org_code, old_org_name, "
                     "new_handler, new_org_code, new_org_name, change_reason, applicant_oa) "
                     "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                    (rid, old_handler or "", old_org_code or "", old_org_name,
+                    (business_id, old_handler or "", old_org_code or "", old_org_name,
                      b.get("newCreator"), b.get("newOrgCode"), b.get("newOrgName"),
                      b.get("changeReason"), b.get("creator") or op))
-        add_flow(cur, bond or "", op, "biz_mgr_change", b)
+        add_flow(cur, business_id, op, "biz_mgr_change", b)
     return {}
 
 
 def terminate_business(business_id, op, updater_type, bond_code=None):
     with conn().cursor() as cur:
-        # 优先按 biz_uuid 定位；无则退回按 bond_code
-        bc = bond_code
+        # 身份=biz_uuid：审批流以 biz_uuid 关联；业务状态等审批通过后才落地（sim_approve 扮演定时任务）
         if business_id:
-            cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+            add_flow(cur, business_id, op, "biz_terminate", {"bondCode": bond_code, "terminator": op,
+                                                             "updaterType": updater_type})
+        else:
+            bc = bond_code or ""
+            cur.execute("SELECT biz_uuid FROM bus_bond_business WHERE bond_code=%s LIMIT 1", (bc,))
             r0 = cur.fetchone()
-            if r0:
-                bc = r0[0]
-        # 与真实后端一致：提交只发审批流，不动业务状态；审批通过后由定时任务
-        # （本地由 sim_approve.py 扮演）置 status=5，业务才会从列表消失。
-        add_flow(cur, bc or "", op, "biz_terminate", {"bondCode": bc, "terminator": op,
-                                                      "updaterType": updater_type})
+            add_flow(cur, r0[0] if r0 else bc, op, "biz_terminate", {"bondCode": bc, "terminator": op,
+                                                                     "updaterType": updater_type})
     return {}
 
 
 def delete_business(business_id):
     """22600D：删除新增审核失败的业务（按 biz_uuid），并清理其关联审批流"""
     with conn().cursor() as cur:
-        cur.execute("SELECT bond_code FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
+        cur.execute("SELECT biz_uuid FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
         row = cur.fetchone()
         if not row:
             return {"ok": False, "msg": "业务不存在"}
-        if row[0]:
-            cur.execute("DELETE FROM iassist_flow_data WHERE business_no=%s", (row[0],))
+        cur.execute("DELETE FROM iassist_flow_data WHERE business_no=%s", (business_id,))
         cur.execute("DELETE FROM bus_bond_business WHERE biz_uuid=%s", (business_id,))
     return {"ok": True}
 

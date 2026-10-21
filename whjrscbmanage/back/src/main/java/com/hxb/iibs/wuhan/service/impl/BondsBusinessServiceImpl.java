@@ -185,11 +185,10 @@ public class BondsBusinessServiceImpl
         entity = convertToEntity(dto, entity);
         entity.setUpdateTime(LocalDateTime.now());
 
-        // 【biz_uuid 身份改造】改号联动：债券编号被改时，同步迁移还款计划与审批流里的旧编号
+        // 【身份=biz_uuid】改号不再需要重链：还款计划已并入主表，审批流以 biz_uuid 关联
         String newBond = entity.getBondCode();
         if (oldBond != null && newBond != null && !oldBond.equals(newBond)) {
-            Db.update("UPDATE bus_repayment_schedule SET bond_code = {0} WHERE bond_code = {1}", newBond, oldBond);
-            Db.update("UPDATE iassist_flow_data SET business_no = {0} WHERE business_no = {1}", newBond, oldBond);
+            log.info("[updateBusiness] 债券编号由 {} 改为 {}（审批流/计划按 biz_uuid 关联，无需重链）", oldBond, newBond);
         }
 
         // 【本次改造】比对新旧还款计划，生成 update_context
@@ -389,6 +388,7 @@ public class BondsBusinessServiceImpl
 
         // 只塞5个字段，ybid 让 sendIAssist 自动填充
         main.addDataItem("bond_code",    entity.getBondCode());
+        main.addDataItem("biz_uuid",     entity.getBizUuid());
         main.addDataItem("biz_name",     entity.getBizName() != null ? entity.getBizName() : "");
         main.addDataItem("updator",      terminator);
         main.addDataItem("apply_date",   LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
@@ -649,6 +649,7 @@ public class BondsBusinessServiceImpl
 
         // 公共必要字段
         main.addDataItem("bond_code", entity.getBondCode());
+        main.addDataItem("biz_uuid", entity.getBizUuid()); // 审批流以 biz_uuid 关联
         main.addDataItem("biz_name", entity.getBizName());
         main.addDataItem("updator_type", updaterType);
         main.addDataItem("apply_date", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
@@ -703,6 +704,7 @@ public class BondsBusinessServiceImpl
     private void fillBusinessFields(ITfHelperMain main, BondsBusiness entity, String tabName) {
         // ---- 全流程公共字段 ----
         main.addDataItem("bond_code", entity.getBondCode());
+        main.addDataItem("biz_uuid", entity.getBizUuid()); // 业务唯一键，审批流以此关联
         main.addDataItem("biz_name", entity.getBizName());
         main.addDataItem("customer_no", entity.getCustomerNo());
         main.addDataItem("customer_name", entity.getCustomerName());

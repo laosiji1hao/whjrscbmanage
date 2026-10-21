@@ -43,8 +43,8 @@ def main():
         print('[X] 未在 bus_bond_business 找到该业务（' + a.key + '）'); sys.exit(1)
     bid, bcode, buuid, bstatus = brow
 
-    # 找待批审批流（approval_status=0）
-    cur.execute("SELECT id, flow_code FROM whjrscbmanage.iassist_flow_data WHERE business_no=%s AND approval_status=0 ORDER BY id LIMIT 1", (bcode,))
+    # 找待批审批流（approval_status=0）—— 审批流以 biz_uuid 关联
+    cur.execute("SELECT id, flow_code FROM whjrscbmanage.iassist_flow_data WHERE business_no=%s AND approval_status=0 ORDER BY id LIMIT 1", (buuid,))
     flow = cur.fetchone()
     flow_code = flow[1] if flow else None
 
@@ -80,9 +80,10 @@ def main():
                         "alert_customer='0', breach_flag='0', five_level_class='正常一档', manage_line='金融市场部', "
                         "fund_used_flag='0', fund_used_up='0', is_original_am='0', inspector_post='客户经理', update_time=NOW() WHERE id=%s",
                         (a.biz_type, a.dept, a.is_passage, a.passage_amount, upper, bid))
-            # 3) 审批流通过 + 同号其它审核中草稿退休
+            # 3) 审批流通过 + 同号其它审核中草稿退休（按 biz_uuid 身份，排除本业务）
             cur.execute("UPDATE whjrscbmanage.iassist_flow_data SET approval_status=1 WHERE id=%s", (flow[0],))
-            cur.execute("UPDATE whjrscbmanage.bus_bond_business SET status=6 WHERE bond_code=%s AND status=1 AND id<>%s", (bcode, bid))
+            cur.execute("UPDATE whjrscbmanage.bus_bond_business SET status=6 "
+                        "WHERE bond_code=%s AND status=1 AND biz_uuid<>%s", (bcode, buuid))
             print(f'[OK] 新增通过：id={bid} bond_code={bcode} 审核中→生效中(3)，4项={a.biz_type}/{a.dept}/{a.is_passage}/{a.passage_amount} 上存={upper}')
         else:  # 否决
             cur.execute("UPDATE busi_mobile.mock_approval_new SET approve_status='失败' WHERE bond_code=%s OR biz_uuid=%s", (bcode, buuid))
@@ -95,9 +96,9 @@ def main():
         if a.action == '通过':
             cur.execute("UPDATE whjrscbmanage.iassist_flow_data SET approval_status=1 WHERE id=%s", (flow[0],))
             if flow_code == 'biz_mgr_change':
-                # 换经理审批通过才变更归属（审批前业务仍归原负责人）
+                # 换经理审批通过才变更归属（审批前业务仍归原负责人）；history 按 biz_uuid 关联
                 cur.execute("SELECT new_handler, new_org_code, new_org_name FROM whjrscbmanage.bus_manager_change_history "
-                            "WHERE business_id=%s ORDER BY id DESC LIMIT 1", (bid,))
+                            "WHERE business_id=%s ORDER BY id DESC LIMIT 1", (buuid,))
                 h = cur.fetchone()
                 if h and h[0]:
                     cur.execute("SELECT creator FROM whjrscbmanage.bus_bond_business WHERE id=%s", (bid,))

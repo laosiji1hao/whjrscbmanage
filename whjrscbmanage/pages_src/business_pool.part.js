@@ -70,7 +70,7 @@ function App() {
     React.useEffect(function() {
         callData('audit_all', [], function(rows) {
             var m = {};
-            (rows || []).forEach(function(r) { m[r.bond_code] = r.flow_code || r.approval_id; });
+            (rows || []).forEach(function(r) { m[r.biz_uuid] = r.flow_code || r.approval_id; });
             setAuditMap(m);
         }, null);
         // 筛选下拉数据：融资人名称 / 项目债券名称（DISTINCT）
@@ -87,11 +87,11 @@ function App() {
     }, []);
 
     function gated(r) {
-        if (auditMap[r.bond_code] !== undefined) { antd.message.warning('本业务正在经历审批流程，不可变更'); return true; }
+        if (auditMap[r.biz_uuid] !== undefined) { antd.message.warning('本业务正在经历审批流程，不可变更'); return true; }
         return false;
     }
     // 是否在审批中（有在批审批流）→ 审批中的业务不提供任何操作入口
-    function inApproval(r) { return auditMap[r.bond_code] !== undefined; }
+    function inApproval(r) { return auditMap[r.biz_uuid] !== undefined; }
     var FLOW_LABEL = { 'biz_declare': '新增申请审核中', 'biz_change': '变更申请审批中', 'biz_mgr_change': '客户经理变更申请审批中', 'biz_terminate': '中止申请审批中' };
 
     function openDialog(pageName, extra, title, width) {
@@ -330,7 +330,7 @@ function App() {
     BASE_COLS.push({ title: '操作', key: '__act', width: IS_MANAGER ? 180 : 260, fixed: 'right',
         render: function(_, r) {
             if (inApproval(r)) {
-                var lbl = FLOW_LABEL[auditMap[r.bond_code]] || '审批中';
+                var lbl = FLOW_LABEL[auditMap[r.biz_uuid]] || '审批中';
                 return React.createElement('span', { style: { color: '#fa8c16' } }, lbl);
             }
             var btns = [];
@@ -365,13 +365,13 @@ function App() {
                 <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <Space wrap>
                         <span>融资人名称:</span>
-                        <AutoComplete allowClear placeholder="全部" style={{ width: 180 }} value={custName || undefined}
+                        <AutoComplete allowClear placeholder="全部" style={{ width: 260 }} value={custName || undefined}
                             open={openC} onDropdownVisibleChange={setOpenC}
                             onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenC(false); setCustName(function(p) { return String(p || '').slice(0, -1); }); } }}
                             onChange={function(v) { setCustName(v || ''); }}
                             options={custOpts} filterOption={function(input, option) { return String(option.value).indexOf(String(input)) !== -1; }} />
                         <span>项目/债券名称:</span>
-                        <AutoComplete allowClear placeholder="全部" style={{ width: 180 }} value={bizName || undefined}
+                        <AutoComplete allowClear placeholder="全部" style={{ width: 260 }} value={bizName || undefined}
                             open={openB} onDropdownVisibleChange={setOpenB}
                             onKeyDown={function(e) { if (e.key === 'Backspace') { e.preventDefault(); setOpenB(false); setBizName(function(p) { return String(p || '').slice(0, -1); }); } }}
                             onChange={function(v) { setBizName(v || ''); }}

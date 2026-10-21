@@ -536,7 +536,7 @@
       callData("audit_all", [], function(rows) {
         var m = {};
         (rows || []).forEach(function(r) {
-          m[r.bond_code] = r.flow_code || r.approval_id;
+          m[r.biz_uuid] = r.flow_code || r.approval_id;
         });
         setAuditMap(m);
       }, null);
@@ -559,14 +559,14 @@
       reload(1, pageSize);
     }, []);
     function gated(r) {
-      if (auditMap[r.bond_code] !== void 0) {
+      if (auditMap[r.biz_uuid] !== void 0) {
         antd.message.warning("本业务正在经历审批流程，不可变更");
         return true;
       }
       return false;
     }
     function inApproval(r) {
-      return auditMap[r.bond_code] !== void 0;
+      return auditMap[r.biz_uuid] !== void 0;
     }
     var FLOW_LABEL = { "biz_declare": "新增申请审核中", "biz_change": "变更申请审批中", "biz_mgr_change": "客户经理变更申请审批中", "biz_terminate": "中止申请审批中" };
     function openDialog(pageName, extra, title, width) {
@@ -944,7 +944,7 @@
       fixed: "right",
       render: function(_, r) {
         if (inApproval(r)) {
-          var lbl = FLOW_LABEL[auditMap[r.bond_code]] || "审批中";
+          var lbl = FLOW_LABEL[auditMap[r.biz_uuid]] || "审批中";
           return React.createElement("span", { style: { color: "#fa8c16" } }, lbl);
         }
         var btns = [];
@@ -984,7 +984,7 @@
       {
         allowClear: true,
         placeholder: "全部",
-        style: { width: 180 },
+        style: { width: 260 },
         value: custName || void 0,
         open: openC,
         onDropdownVisibleChange: setOpenC,
@@ -1010,7 +1010,7 @@
       {
         allowClear: true,
         placeholder: "全部",
-        style: { width: 180 },
+        style: { width: 260 },
         value: bizName || void 0,
         open: openB,
         onDropdownVisibleChange: setOpenB,
