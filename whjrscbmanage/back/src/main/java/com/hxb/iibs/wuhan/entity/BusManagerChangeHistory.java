@@ -23,8 +23,8 @@ public class BusManagerChangeHistory implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 关联业务主表 ID */
-    private Long businessId;
+    /** 关联业务唯一键 biz_uuid */
+    private String businessId;
 
     /** 原经办人 OA */
     private String oldHandler;
