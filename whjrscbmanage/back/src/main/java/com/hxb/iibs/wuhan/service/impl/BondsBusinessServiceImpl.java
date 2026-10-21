@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.hxb.iibs.wuhan.api.ICommonApi;
 import com.hxb.iibs.wuhan.api.IDataFactoryApi;
@@ -28,6 +29,7 @@ import com.hxb.iibs.wuhan.service.IBondsBusinessService;
 import com.hxb.iibs.wuhan.service.IBusManagerChangeHistoryService;
 import com.hxb.iibs.wuhan.service.IIAssistService;
 import com.hxb.iibs.wuhan.service.IRepaymentScheduleService;
+import com.hxb.iibs.wuhan.util.InstallmentPlanParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,11 +112,12 @@ public class BondsBusinessServiceImpl
             merged.setUpdateTime(LocalDateTime.now());
 
             if ("1".equals(dto.getInstallmentFlag())) {
-                repaymentScheduleService.replaceByBondCodeWithStatus(
-                        merged.getBondCode(),
-                        dto.getInstallmentItems(),
-                        Constant.RepaymentStatus.AUDITING);
-                List<InstallmentPlanItem> Items = fillMissingSort(dto.getInstallmentItems());
+                List<InstallmentPlanItem> Items = fillMissingSort(resolveInstallmentItems(dto));
+                if (!Items.isEmpty()) {
+                    repaymentScheduleService.replaceByBondCodeWithStatus(
+                            merged.getBondCode(), Items, Constant.RepaymentStatus.AUDITING);
+                }
+                // 发给 i助手保持文本（i助手当前不支持 JSON）；存本地统一由 CommonJob 规整为 JSON
                 merged.setInstallmentPlan(buildInstallmentPlanTextFromItems(Items));
             }
 
@@ -140,11 +143,12 @@ public class BondsBusinessServiceImpl
 
         // 同时将还款计划保存为"审批中"状态（草稿），供后续比对使用
         if ("1".equals(dto.getInstallmentFlag())) {
-            repaymentScheduleService.replaceByBondCodeWithStatus(
-                    entity.getBondCode(),
-                    dto.getInstallmentItems(),
-                    Constant.RepaymentStatus.AUDITING);
-            List<InstallmentPlanItem> Items = fillMissingSort(dto.getInstallmentItems());
+            List<InstallmentPlanItem> Items = fillMissingSort(resolveInstallmentItems(dto));
+            if (!Items.isEmpty()) {
+                repaymentScheduleService.replaceByBondCodeWithStatus(
+                        entity.getBondCode(), Items, Constant.RepaymentStatus.AUDITING);
+            }
+            // 发给 i助手保持文本（i助手当前不支持 JSON）；存本地统一由 CommonJob 规整为 JSON
             entity.setInstallmentPlan(buildInstallmentPlanTextFromItems(Items));
         }
 
@@ -388,12 +392,11 @@ public class BondsBusinessServiceImpl
 
         // 只塞5个字段，ybid 让 sendIAssist 自动填充
         main.addDataItem("bond_code",    entity.getBondCode());
-        main.addDataItem("biz_uuid",     entity.getBizUuid());
         main.addDataItem("biz_name",     entity.getBizName() != null ? entity.getBizName() : "");
         main.addDataItem("updator",      terminator);
         main.addDataItem("apply_date",   LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
 
-        iassistService.sendIAssist(main, "flow_006");
+        iassistService.sendIAssist(main, "flow_006", entity.getBizUuid());
 
         log.info("[sendIAssist226009] bondCode={}, terminator={}", entity.getBondCode(), terminator);
     }
@@ -599,7 +602,7 @@ public class BondsBusinessServiceImpl
         ITfHelperMain main = buildIAssistMain(entity, tabName, flowCode, operator);
         main.addDataItem("apply_date", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         main.addDataItem("apply_type", "0");
-        iassistService.sendIAssist(main, flowCode);
+        iassistService.sendIAssist(main, flowCode, entity.getBizUuid());
     }
 
     /**
@@ -621,7 +624,7 @@ public class BondsBusinessServiceImpl
         main.addDataItem("updator_org_code", entity.getOrgCode());
         main.addDataItem("updator_org_name", entity.getOrgName());
         main.addDataItem("updator_type", updaterType);
-        iassistService.sendIAssist(main, flowCode);
+        iassistService.sendIAssist(main, flowCode, entity.getBizUuid());
     }
 
     /**
@@ -649,7 +652,6 @@ public class BondsBusinessServiceImpl
 
         // 公共必要字段
         main.addDataItem("bond_code", entity.getBondCode());
-        main.addDataItem("biz_uuid", entity.getBizUuid()); // 审批流以 biz_uuid 关联
         main.addDataItem("biz_name", entity.getBizName());
         main.addDataItem("updator_type", updaterType);
         main.addDataItem("apply_date", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
@@ -663,7 +665,7 @@ public class BondsBusinessServiceImpl
         main.addDataItem("new_org_code", newOrgCode);
         main.addDataItem("new_org_name", newOrgName);
 
-        iassistService.sendIAssist(main, flowCode);
+        iassistService.sendIAssist(main, flowCode, entity.getBizUuid());
     }
 
     /**
@@ -704,7 +706,6 @@ public class BondsBusinessServiceImpl
     private void fillBusinessFields(ITfHelperMain main, BondsBusiness entity, String tabName) {
         // ---- 全流程公共字段 ----
         main.addDataItem("bond_code", entity.getBondCode());
-        main.addDataItem("biz_uuid", entity.getBizUuid()); // 业务唯一键，审批流以此关联
         main.addDataItem("biz_name", entity.getBizName());
         main.addDataItem("customer_no", entity.getCustomerNo());
         main.addDataItem("customer_name", entity.getCustomerName());
@@ -962,7 +963,7 @@ public class BondsBusinessServiceImpl
         main.addDataItem("apply_date", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         main.addDataItem("ybid", ""); // 占位，sendIAssist 会替换
 
-        iassistService.sendIAssist(main, flowCode);
+        iassistService.sendIAssist(main, flowCode, entity.getBizUuid());
     }
 
     // ===== 辅助方法 =====
@@ -1250,6 +1251,22 @@ public class BondsBusinessServiceImpl
                 .eq(BondsBusiness::getBondCode, bondCode)
                 .eq(BondsBusiness::getStatus, status)
                 .one();
+    }
+
+    /**
+     * 从 DTO 取分期计划结构化列表：前端 226006 发的是 `installment`（Object：JSON 字符串或数组）。
+     *
+     * @return 结构化列表，永不为 null
+     */
+    private List<InstallmentPlanItem> resolveInstallmentItems(BondBusinessSaveDTO dto) {
+        Object inst = dto.getInstallment();
+        if (inst == null) {
+            return dto.getInstallmentItems();
+        }
+        if (inst instanceof String) {
+            return InstallmentPlanParser.parse((String) inst);
+        }
+        return JSON.parseArray(JSON.toJSONString(inst), InstallmentPlanItem.class);
     }
 
     /**

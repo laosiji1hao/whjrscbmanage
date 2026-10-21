@@ -240,7 +240,12 @@ var CLIENT = (function() {
                 var cu = this.cloudUrl();
                 if (!myFR.cloudUrl) myFR.cloudUrl = cu;
                 if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-                window.myFR.callCloud(String(code), body || {}, function(data) {
+                // fine_username 兜底：myFR.callCloud 会写 body.operator = myFR.fine_username，
+                // 此处为空会变成 undefined 丢键 → 后端 flow.applicant_oa(NOT NULL) 插入失败
+                if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+                body = body || {};
+                if (!body.operator) body.operator = CUR_USER;
+                window.myFR.callCloud(String(code), body, function(data) {
                     if (onOk) onOk(data);
                 }, function(msg) {
                     if (msg) { try { antd.message.error(String(msg)); } catch (e) {} }
@@ -549,8 +554,8 @@ function App() {
             (rows || []).forEach(function(r) { m[r.biz_uuid] = r.flow_code || r.approval_id; });
             setAuditMap(m);
         }, null);
-        // 筛选下拉数据：融资人名称 / 项目债券名称（DISTINCT）
-        callData('pool_filter_opt', [], function(rows) {
+        // 筛选下拉数据：融资人名称 / 项目债券名称（DISTINCT，按角色收敛：个人池只看自己的，管理岗看全行）
+        callData('pool_filter_opt', [{ name: 'p_operator', type: 'String', value: IS_MANAGER ? '' : CUR_USER }], function(rows) {
             var c = [], b = [], seenC = {}, seenB = {};
             (rows || []).forEach(function(r) {
                 var cn = r.customer_name, bn = r.biz_name;
@@ -568,7 +573,16 @@ function App() {
     }
     // 是否在审批中（有在批审批流）→ 审批中的业务不提供任何操作入口
     function inApproval(r) { return auditMap[r.biz_uuid] !== undefined; }
-    var FLOW_LABEL = { 'biz_declare': '新增申请审核中', 'biz_change': '变更申请审批中', 'biz_mgr_change': '客户经理变更申请审批中', 'biz_terminate': '中止申请审批中' };
+    var FLOW_LABEL = {
+        // 本地/mock 审批流类型
+        'biz_declare': '新增申请审核中', 'biz_update': '新增申请审核中',
+        'biz_change': '变更申请审批中', 'biz_mgr_change': '客户经理变更申请审批中',
+        'biz_terminate': '中止申请审批中',
+        // 真实后端 i助手流程号（iassist_flow_data.flow_code 实际存 flow_NNN）
+        'flow_001': '新增申请审核中', 'flow_002': '变更申请审批中',
+        'flow_004': '客户经理变更申请审批中', 'flow_005': '客户经理变更申请审批中',
+        'flow_006': '中止申请审批中'
+    };
 
     function openDialog(pageName, extra, title, width) {
         var q = '';

@@ -57,21 +57,19 @@ public class IAssistServiceImpl implements IIAssistService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendIAssist(ITfHelperMain main, String flowCode) {
-        // 身份=biz_uuid：审批流按 biz_uuid 关联（bond_code 可重复，不可再作为唯一关联）
-        String bizUuid = main.getData().stream()
-                .filter(m -> "biz_uuid".equals(m.get("fieldName")))
-                .map(m -> String.valueOf(m.get("value")))
+    public void sendIAssist(ITfHelperMain main, String flowCode, String bizUuid) {
+        // 身份=biz_uuid：审批流按 biz_uuid 关联（bond_code 可重复，不可再作为唯一关联）。
+        // 注意：bizUuid 只存本系统 iassist_flow_data.business_no，**不随报文发给 i助手**
+        // （i助手当前不支持）。为空（如新增无 uuid）时退用报文里的 bond_code。
+        String bondCode = main.getData().stream()
+                .filter(m -> "bond_code".equals(m.get("fieldName")))
+                .map(m -> m.get("value"))
+                .filter(v -> v != null)
+                .map(v -> String.valueOf(v).trim())
                 .filter(v -> !v.isEmpty())
                 .findFirst()
                 .orElse("");
-        String bondCode = main.getData().stream()
-                .filter(m -> "bond_code".equals(m.get("fieldName")))
-                .map(m -> String.valueOf(m.get("value")))
-                .findFirst()
-                .orElse("");
-        // 兼容存量流（迁移前 business_no 存的是 bond_code）：biz_uuid 缺失时退用 bond_code
-        String businessNo = !bizUuid.isEmpty() ? bizUuid : bondCode;
+        String businessNo = (bizUuid != null && !bizUuid.trim().isEmpty()) ? bizUuid.trim() : bondCode;
 
         // Step 1: 检查是否已有进行中的审批流程，同一 biz_uuid 不能重复送审
         boolean pendingExists = flowDataService.lambdaQuery()

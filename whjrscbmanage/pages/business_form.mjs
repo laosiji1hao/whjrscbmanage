@@ -278,7 +278,10 @@
           var cu = this.cloudUrl();
           if (!myFR.cloudUrl) myFR.cloudUrl = cu;
           if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-          window.myFR.callCloud(String(code), body || {}, function(data) {
+          if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+          body = body || {};
+          if (!body.operator) body.operator = CUR_USER;
+          window.myFR.callCloud(String(code), body, function(data) {
             if (onOk) onOk(data);
           }, function(msg) {
             if (msg) {
@@ -488,6 +491,7 @@
           setShowJs(String(d.js_remark_flag || "0") === "1");
           setShowExDate(String(d.exercise_flag || "0") === "1");
           setShowInstall(String(d.installment_flag || "0") === "1");
+          if (String(d.status) === "0" && !d.bond_type) form.setFieldsValue({ bond_type: "1" });
           var pl = planFromStore(d.installment_plan);
           setInstJson(pl.json);
           setInstDetail(pl.detail);

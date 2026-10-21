@@ -287,7 +287,10 @@
           var cu = this.cloudUrl();
           if (!myFR.cloudUrl) myFR.cloudUrl = cu;
           if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-          window.myFR.callCloud(String(code), body || {}, function(data) {
+          if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+          body = body || {};
+          if (!body.operator) body.operator = CUR_USER;
+          window.myFR.callCloud(String(code), body, function(data) {
             if (onOk) onOk(data);
           }, function(msg) {
             if (msg) {
@@ -549,7 +552,7 @@
         });
         setAuditMap(m);
       }, null);
-      callData("pool_filter_opt", [], function(rows) {
+      callData("pool_filter_opt", [{ name: "p_operator", type: "String", value: IS_MANAGER ? "" : CUR_USER }], function(rows) {
         var c = [], b = [], seenC = {}, seenB = {};
         (rows || []).forEach(function(r) {
           var cn = r.customer_name, bn = r.biz_name;
@@ -577,7 +580,20 @@
     function inApproval(r) {
       return auditMap[r.biz_uuid] !== void 0;
     }
-    var FLOW_LABEL = { "biz_declare": "新增申请审核中", "biz_change": "变更申请审批中", "biz_mgr_change": "客户经理变更申请审批中", "biz_terminate": "中止申请审批中" };
+    var FLOW_LABEL = {
+      
+      "biz_declare": "新增申请审核中",
+      "biz_update": "新增申请审核中",
+      "biz_change": "变更申请审批中",
+      "biz_mgr_change": "客户经理变更申请审批中",
+      "biz_terminate": "中止申请审批中",
+      
+      "flow_001": "新增申请审核中",
+      "flow_002": "变更申请审批中",
+      "flow_004": "客户经理变更申请审批中",
+      "flow_005": "客户经理变更申请审批中",
+      "flow_006": "中止申请审批中"
+    };
     function openDialog(pageName, extra, title, width) {
       var q = "";
       if (extra) {

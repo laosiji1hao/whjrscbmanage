@@ -240,7 +240,12 @@ var CLIENT = (function() {
                 var cu = this.cloudUrl();
                 if (!myFR.cloudUrl) myFR.cloudUrl = cu;
                 if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-                window.myFR.callCloud(String(code), body || {}, function(data) {
+                // fine_username 兜底：myFR.callCloud 会写 body.operator = myFR.fine_username，
+                // 此处为空会变成 undefined 丢键 → 后端 flow.applicant_oa(NOT NULL) 插入失败
+                if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+                body = body || {};
+                if (!body.operator) body.operator = CUR_USER;
+                window.myFR.callCloud(String(code), body, function(data) {
                     if (onOk) onOk(data);
                 }, function(msg) {
                     if (msg) { try { antd.message.error(String(msg)); } catch (e) {} }

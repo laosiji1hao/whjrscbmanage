@@ -240,7 +240,12 @@ var CLIENT = (function() {
                 var cu = this.cloudUrl();
                 if (!myFR.cloudUrl) myFR.cloudUrl = cu;
                 if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-                window.myFR.callCloud(String(code), body || {}, function(data) {
+                // fine_username 兜底：myFR.callCloud 会写 body.operator = myFR.fine_username，
+                // 此处为空会变成 undefined 丢键 → 后端 flow.applicant_oa(NOT NULL) 插入失败
+                if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+                body = body || {};
+                if (!body.operator) body.operator = CUR_USER;
+                window.myFR.callCloud(String(code), body, function(data) {
                     if (onOk) onOk(data);
                 }, function(msg) {
                     if (msg) { try { antd.message.error(String(msg)); } catch (e) {} }
@@ -542,6 +547,8 @@ function App() {
                 setShowJs(String(d.js_remark_flag || '0') === '1');
                 setShowExDate(String(d.exercise_flag || '0') === '1');
                 setShowInstall(String(d.installment_flag || '0') === '1');
+                // 完善业务信息（status=0 未完善草稿）：业务类型默认「非标准业务」(1)
+                if (String(d.status) === '0' && !d.bond_type) form.setFieldsValue({ bond_type: '1' });
                 // 还款计划并入主表：从 installment_plan(JSON) 解析回显（不再查独立表）
                 var pl = planFromStore(d.installment_plan);
                 setInstJson(pl.json);

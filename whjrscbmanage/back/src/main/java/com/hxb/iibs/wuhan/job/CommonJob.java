@@ -507,6 +507,8 @@ public class CommonJob {
         for (var item : items) {
             try {
                 BondsBusiness biz = buildBondsBusinessFromReturn(item);
+                normalizePlanJson(biz);
+                sanitizeWidths(biz);
                 if ("成功".equals(item.getApproveStatus())) {
                     // 构建完整的业务对象
                     biz.setStatus(Constant.BizStatus.EFFECTIVE);
@@ -659,7 +661,7 @@ public class CommonJob {
         biz.setInspectorPost(item.getInspectorPost());
 
         // 经办人信息（来自 i助手回传的 handler/org_name）
-        biz.setBizType(Constant.BizTypeEnum.encode(item.getBizType()));
+        biz.setBizType(decodeBizType(item.getBizType()));
         biz.setCreator(item.getHandler());
         biz.setOrgCode(item.getOrgCode());
         biz.setOrgName(item.getOrgName());
@@ -671,33 +673,73 @@ public class CommonJob {
 
     private String decodeBondType(String val) {
         if (val == null) return null;
-        return switch (val.trim()) {
+        String v = val.trim();
+        if ("0".equals(v) || "1".equals(v)) return v;
+        return switch (v) {
             case "标债" -> "0";
             case "非标" -> "1";
-            default -> val;
+            default -> {
+                log.warn("[decodeBondType] 未识别的标债类型: '{}'，置空", v);
+                yield null;
+            }
         };
     }
 
     private String decodeGreenTechFlag(String val) {
         if (val == null) return null;
-        return switch (val.trim()) {
+        String v = val.trim();
+        if (v.matches("[0-3]")) return v;
+        return switch (v) {
             case "绿色" -> "0";
             case "科技" -> "1";
             case "养老" -> "2";
             case "不涉及" -> "3";
-            default -> val;
+            default -> {
+                log.warn("[decodeGreenTechFlag] 未识别的绿色科技标识: '{}'，置空", v);
+                yield null;
+            }
         };
+    }
+
+    /** 业务品种解码：已是编码直接放行；中文标签反查；未识别置空（biz_type varchar(10)） */
+    private String decodeBizType(String val) {
+        if (val == null) return null;
+        String v = val.trim();
+        if (v.isEmpty()) return null;
+        if (v.matches("\\d{1,2}")) {
+            try {
+                int n = Integer.parseInt(v);
+                if (n >= 0 && n <= 12) return v;
+            } catch (NumberFormatException ignored) { }
+        }
+        String code = Constant.BizTypeEnum.encode(v);
+        if (code != null && !code.equals(v)) return code;
+        log.warn("[decodeBizType] 未识别的业务品种: '{}'，置空避免超长", v);
+        return null;
     }
 
     private String decodeIndustry(String val) {
         if (val == null) return null;
-        return switch (val.trim()) {
-            case "货币金融服务" -> "0";
-            case "资本市场服务" -> "1";
-            case "保险业" -> "2";
-            case "其他金融业" -> "3";
-            default -> val;
-        };
+        String v = val.trim();
+        if (v.isEmpty()) return null;
+        // 已是行业编码（0~17）直接放行
+        if (v.matches("\\d{1,2}")) {
+            try {
+                int code = Integer.parseInt(v);
+                if (code >= 0 && code <= 17) return v;
+            } catch (NumberFormatException ignored) { }
+        }
+        // 金融业子类（i助手可能回传细分行业）→ 金融业(0)
+        if ("货币金融服务".equals(v) || "资本市场服务".equals(v)
+                || "保险业".equals(v) || "其他金融业".equals(v)) {
+            return Constant.IndustryEnum.FINANCE;
+        }
+        // 18 类行业反查（Constant.IndustryEnum.encode 的默认分支会原样返回未识别值）
+        String code = Constant.IndustryEnum.encode(v);
+        if (code != null && !code.equals(v)) return code;
+        // 未识别：置空避免中文标签写进 industry varchar(10) 触发 data too long
+        log.warn("[decodeIndustry] 未识别的行业分类: '{}'（长度 {}），置空避免超长", v, v.length());
+        return null;
     }
 
     // 【注】decodeCustomerType 方法在第 322 行已定义，使用 Constant.CustomerTypeEnum.encode
@@ -749,6 +791,59 @@ public class CommonJob {
      */
     private List<InstallmentPlanItem> parseInstallmentPlan(String raw) {
         return InstallmentPlanParser.parse(raw);
+    }
+
+    /** 落地前把 installment_plan 规整为前端/mock 一致的 JSON（兼容存量文本，避免前端解析失败） */
+    private void normalizePlanJson(BondsBusiness biz) {
+        String raw = biz.getInstallmentPlan();
+        if (raw == null || raw.trim().isEmpty()) return;
+        List<InstallmentPlanItem> items = InstallmentPlanParser.parse(raw);
+        biz.setInstallmentPlan(InstallmentPlanParser.toJson(items));
+    }
+
+    /**
+     * bus_bond_business 各 varchar 列宽（与建表 DDL 一致）。
+     * text 列（installment_plan/remark/js_remark）不在此表，**永不截断**。
+     */
+    private static final Map<String, Integer> DB_TEXT_WIDTH = Map.ofEntries(
+            Map.entry("bizUuid", 36), Map.entry("bondCode", 50), Map.entry("applyNo", 60),
+            Map.entry("ecifCustomerNo", 20), Map.entry("customerNo", 20), Map.entry("customerName", 100),
+            Map.entry("bizName", 255), Map.entry("bondType", 10), Map.entry("bizType", 10),
+            Map.entry("greenTechFlag", 10), Map.entry("extRating", 20), Map.entry("ratingAgency", 100),
+            Map.entry("intRating", 20), Map.entry("industry", 10), Map.entry("customerType", 10),
+            Map.entry("alertCustomer", 10), Map.entry("currency", 10), Map.entry("guaranteeInfo", 255),
+            Map.entry("breachFlag", 10), Map.entry("fiveLevelClass", 50), Map.entry("fundUsedFlag", 10),
+            Map.entry("fundUsedUp", 10), Map.entry("installmentFlag", 10), Map.entry("ourBankUnderwrite", 10),
+            Map.entry("manageLine", 50), Map.entry("dept", 50), Map.entry("agreedUsage", 255),
+            Map.entry("fundAccount", 50), Map.entry("fundAccountFlag", 10), Map.entry("superviseAccount", 50),
+            Map.entry("superviseAccountFlag", 10), Map.entry("drawdownCheck", 500), Map.entry("isOriginalAm", 10),
+            Map.entry("exerciseFlag", 10), Map.entry("jsRemarkFlag", 10), Map.entry("inspectFreq", 20),
+            Map.entry("inspectorPost", 100), Map.entry("creator", 50), Map.entry("orgCode", 50),
+            Map.entry("orgName", 100), Map.entry("terminationReason", 500), Map.entry("instPlanDates", 4000),
+            Map.entry("instPlanAmounts", 8000), Map.entry("leadUnderwriter", 255), Map.entry("supervisionFlag", 10),
+            Map.entry("remarkNumber", 60), Map.entry("isPassage", 10));
+
+    /**
+     * 按业务表列宽统一兜底：防止 i助手回传值（审批表列更宽）直接写库时报
+     * "Data too long for column"。超长截断并告警（text 列不在此列，不截断）。
+     */
+    private void sanitizeWidths(BondsBusiness biz) {
+        for (java.lang.reflect.Field f : BondsBusiness.class.getDeclaredFields()) {
+            if (f.getType() != String.class) continue;
+            Integer max = DB_TEXT_WIDTH.get(f.getName());
+            if (max == null) continue;
+            try {
+                f.setAccessible(true);
+                String v = (String) f.get(biz);
+                if (v != null && v.length() > max) {
+                    f.set(biz, v.substring(0, max));
+                    log.warn("[sanitizeWidths] 字段 {} 超长 {} > {}，已截断（前30字: {}）",
+                            f.getName(), v.length(), max, v.substring(0, Math.min(30, v.length())));
+                }
+            } catch (Exception e) {
+                log.warn("[sanitizeWidths] 字段 {} 处理失败: {}", f.getName(), e.getMessage());
+            }
+        }
     }
 
     /**
@@ -819,6 +914,8 @@ public class CommonJob {
                         repaymentScheduleService.replaceByBondCodeWithStatus(
                                 biz.getBondCode(), newPlans, Constant.RepaymentStatus.EFFECTIVE);
                     }
+                    normalizePlanJson(biz);
+                    sanitizeWidths(biz);
                     bondsBusinessService.updateById(biz);
                 }
                 n++;

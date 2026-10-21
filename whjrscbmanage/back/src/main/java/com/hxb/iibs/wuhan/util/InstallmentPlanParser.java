@@ -120,4 +120,25 @@ public class InstallmentPlanParser {
         }
         return items;
     }
+
+    /**
+     * 将分期计划序列化为与前端一致的主表 JSON 字符串（installment_plan 列的存储格式）。
+     *
+     * <p>格式与 mock/前端约定一致：{@code [{"installmentTime":"YYYY-MM-DD","installmentAmount":"100"},…]}
+     * （金额为无 0 尾的普通字符串）。
+     */
+    public static String toJson(List<InstallmentPlanItem> items) {
+        if (items == null || items.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) sb.append(',');
+            InstallmentPlanItem it = items.get(i);
+            sb.append("{\"installmentTime\":\"")
+              .append(it.getPlanTime() == null ? "" : it.getPlanTime().toString())
+              .append("\",\"installmentAmount\":\"")
+              .append(it.getAmount() == null ? "" : it.getAmount().stripTrailingZeros().toPlainString())
+              .append("\"}");
+        }
+        return sb.append(']').toString();
+    }
 }

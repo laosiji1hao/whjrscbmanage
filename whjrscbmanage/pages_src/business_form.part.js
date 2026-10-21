@@ -67,6 +67,8 @@ function App() {
                 setShowJs(String(d.js_remark_flag || '0') === '1');
                 setShowExDate(String(d.exercise_flag || '0') === '1');
                 setShowInstall(String(d.installment_flag || '0') === '1');
+                // 完善业务信息（status=0 未完善草稿）：业务类型默认「非标准业务」(1)
+                if (String(d.status) === '0' && !d.bond_type) form.setFieldsValue({ bond_type: '1' });
                 // 还款计划并入主表：从 installment_plan(JSON) 解析回显（不再查独立表）
                 var pl = planFromStore(d.installment_plan);
                 setInstJson(pl.json);

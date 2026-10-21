@@ -278,7 +278,10 @@
           var cu = this.cloudUrl();
           if (!myFR.cloudUrl) myFR.cloudUrl = cu;
           if (!myFR.prjId) myFR.prjId = CLOUD_FALLBACK.prjId;
-          window.myFR.callCloud(String(code), body || {}, function(data) {
+          if (!myFR.fine_username) myFR.fine_username = CUR_USER;
+          body = body || {};
+          if (!body.operator) body.operator = CUR_USER;
+          window.myFR.callCloud(String(code), body, function(data) {
             if (onOk) onOk(data);
           }, function(msg) {
             if (msg) {
