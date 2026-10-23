@@ -108,7 +108,9 @@ function App() {
                 setShowExDate(String(d.exercise_flag || '0') === '1');
                 setShowInstall(String(d.installment_flag || '0') === '1');
                 setShowPassage(String(d.is_passage || '0') === '1');
-                if (String(d.is_passage || '0') !== '1') {
+                // 仅当库里上存利率为空时才按配置初始化；已有值不得覆盖（否则未改动也会报「上存利率变更」）
+                var hasUpper = d.upper_storage_rate !== null && d.upper_storage_rate !== undefined && String(d.upper_storage_rate) !== '';
+                if (String(d.is_passage || '0') !== '1' && !hasUpper) {
                     needUpperInit = true;
                     initUpperWhenReady();
                 }
@@ -220,7 +222,8 @@ function App() {
                 return;
             }
             var ct = outtext(values.customer_type);
-            var inspectFreq = (ct === '0' || ct === '1') ? 3 : 1;
+            // 编辑页与原版一致：检查频率发送字段实际值（不再按客户分类重算，避免未改也报变更）
+            var inspectFreq = outtext(values.inspect_freq);
             var body = {
                 businessId: outtext(recordId),
                 bondCode: outtext(values.bond_code),

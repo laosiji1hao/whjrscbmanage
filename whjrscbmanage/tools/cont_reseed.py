@@ -4,7 +4,7 @@
 
 - BC000001(id=4) 恢复 status=0 未完善（上一轮中止后为 5，视图查不到行）
 - BC000002(id=5) 恢复为 status=3 生效中 + 补全 look 页必填字段 + invest_rate（供通道费计算不产生 NaN）
-- 清理 E2E001 残留（bus_bond_business / bus_repayment_schedule / iassist_flow_data）
+- 清理 E2E001 残留（bus_bond_business / iassist_flow_data）
 - 复位 bus_upper_storage_config（vat=0.06/surcharge=0.012/updater 空）
 仅用于本机开发/e2e。
 """
@@ -43,7 +43,6 @@ def main():
     cur.execute("UPDATE bus_bond_business SET bond_code='BC000003' WHERE id=6")
     print("id=4/3/6 恢复行数:", cur.rowcount)
     # 3) 清理测试残留（业务行 + 还款计划 + 审批流，幂等含改号变体）
-    cur.execute("DELETE FROM bus_repayment_schedule WHERE bond_code != '12312313'")
     cur.execute("DELETE FROM iassist_flow_data WHERE business_no <> '12312313' "
                 "OR business_no IS NULL OR business_no = ''")
     cur.execute("DELETE FROM bus_bond_business WHERE bond_code='E2E001'")

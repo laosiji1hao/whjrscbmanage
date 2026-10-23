@@ -95,20 +95,6 @@ create table bus_manager_change_history
 create index idx_business_id
     on bus_manager_change_history (business_id);
 
-create table bus_repayment_schedule
-(
-    id               bigint auto_increment comment '主键'
-        primary key,
-    bond_code        varchar(50)                        not null comment '债券编号 关联 bus_bond_business bond_code',
-    sort             int                                not null comment '期次序号 从 1 开始',
-    repayment_date   date                               not null comment '还款时间',
-    repayment_amount decimal(18, 2)                     not null comment '还款金额 单位 元',
-    create_time      datetime default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time      datetime default (now())           not null on update CURRENT_TIMESTAMP comment '更新时间',
-    status           tinyint  default 1                 not null comment '状态 0 已失效 1 审批中 2 已生效'
-)
-    comment '还款计划明细表';
-
 create table bus_upper_storage_config
 (
     id          int auto_increment comment '主键'

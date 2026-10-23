@@ -16,7 +16,6 @@ import com.hxb.iibs.wuhan.dto.InstallmentPlanItem;
 import com.hxb.iibs.wuhan.entity.BondsBusiness;
 import com.hxb.iibs.wuhan.entity.BusManagerChangeHistory;
 import com.hxb.iibs.wuhan.entity.ITfHelperMain;
-import com.hxb.iibs.wuhan.entity.RepaymentSchedule;
 import com.hxb.iibs.wuhan.entity.WhfrUser;
 import com.hxb.iibs.wuhan.entity.WhoaBranchInfo;
 import com.hxb.iibs.wuhan.mapper.IAssistedApprovalMapper;
@@ -28,7 +27,6 @@ import com.hxb.iibs.wuhan.mapper.BondBusinessMapper;
 import com.hxb.iibs.wuhan.service.IBondsBusinessService;
 import com.hxb.iibs.wuhan.service.IBusManagerChangeHistoryService;
 import com.hxb.iibs.wuhan.service.IIAssistService;
-import com.hxb.iibs.wuhan.service.IRepaymentScheduleService;
 import com.hxb.iibs.wuhan.util.InstallmentPlanParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +71,6 @@ public class BondsBusinessServiceImpl
     private WhoaBranchInfoMapper whoaBranchInfoMapper;
     @Autowired
     private IBusManagerChangeHistoryService managerChangeHistoryService;
-    @Autowired
-    private IRepaymentScheduleService repaymentScheduleService;
 
     /**
      * 226006 新增债券业务。
@@ -113,10 +109,7 @@ public class BondsBusinessServiceImpl
 
             if ("1".equals(dto.getInstallmentFlag())) {
                 List<InstallmentPlanItem> Items = fillMissingSort(resolveInstallmentItems(dto));
-                if (!Items.isEmpty()) {
-                    repaymentScheduleService.replaceByBondCodeWithStatus(
-                            merged.getBondCode(), Items, Constant.RepaymentStatus.AUDITING);
-                }
+                // bus_repayment_schedule 已删除；计划只随主表 installment_plan 走
                 // 发给 i助手保持文本（i助手当前不支持 JSON）；存本地统一由 CommonJob 规整为 JSON
                 merged.setInstallmentPlan(buildInstallmentPlanTextFromItems(Items));
             }
@@ -144,10 +137,7 @@ public class BondsBusinessServiceImpl
         // 同时将还款计划保存为"审批中"状态（草稿），供后续比对使用
         if ("1".equals(dto.getInstallmentFlag())) {
             List<InstallmentPlanItem> Items = fillMissingSort(resolveInstallmentItems(dto));
-            if (!Items.isEmpty()) {
-                repaymentScheduleService.replaceByBondCodeWithStatus(
-                        entity.getBondCode(), Items, Constant.RepaymentStatus.AUDITING);
-            }
+            // bus_repayment_schedule 已删除；计划只随主表 installment_plan 走
             // 发给 i助手保持文本（i助手当前不支持 JSON）；存本地统一由 CommonJob 规整为 JSON
             entity.setInstallmentPlan(buildInstallmentPlanTextFromItems(Items));
         }
@@ -197,9 +187,6 @@ public class BondsBusinessServiceImpl
 
         // 【本次改造】比对新旧还款计划，生成 update_context
         List<String> extraChanges = new ArrayList<>();
-        // 查询已生效的还款计划（status=2）进行比对
-        List<RepaymentSchedule> oldSchedules =
-                repaymentScheduleService.listByBondCodeWithStatus(entity.getBondCode(), Constant.RepaymentStatus.EFFECTIVE);
 
         // 先取出原始数据
         List<InstallmentPlanItem> rawItems = dto.getInstallmentItems();
@@ -222,19 +209,12 @@ public class BondsBusinessServiceImpl
                 ? fillMissingSort(rawItems)
                 : Collections.emptyList();
 
-        String oldPlanText = buildInstallmentPlanText(oldSchedules);
-        String newPlanText = buildInstallmentPlanTextFromItems(newItems);
-
-        if (!Objects.equals(oldPlanText, newPlanText)) {
-            String change = "还款计划由[" + nullSafe(oldPlanText) + "]变为[" + nullSafe(newPlanText) + "]";
-            extraChanges.add(change);
-        }
+        // 旧计划取自主表 installment_plan(JSON)（bus_repayment_schedule 已删除）
+        String planChange = buildPlanChangeText(oldEntityCopy, newItems);
+        if (planChange != null) extraChanges.add(planChange);
 
         // 生成 update_context（基于 oldEntityCopy vs dto）
         String updateContext = buildUpdateContext(oldEntityCopy, dto, extraChanges);
-
-        // 写出新计划（无论是否有变化都要写，因为可能删除了所有期次）
-        repaymentScheduleService.replaceByBondCode(entity.getBondCode(), newItems);
 
         String tabName = "update_business_accountmanager";
         sendIAssist226007(entity, tabName, "flow_002", updaterType, dto.getOperator(), updateContext);
@@ -548,7 +528,7 @@ public class BondsBusinessServiceImpl
         entity.setInstallmentFlag(dto.getInstallmentFlag());
         entity.setInstallmentPlan(dto.getInstallmentPlan());
 
-        // 【本次改造】分期还款计划已迁移到 bus_repayment_schedule 明细表，此处不再解析 installmentPlan
+        // 分期还款计划已并入主表 installment_plan(JSON)，独立表 bus_repayment_schedule 已删除
 
         entity.setLeadUnderwriter(dto.getLeadUnderwriter());  // 主承销商【226006 新增】
 
@@ -905,17 +885,18 @@ public class BondsBusinessServiceImpl
         return String.join(";", changes);
     }
 
+
     /**
-     * 将还款明细表还原为前端友好的展示文本，用于 update_context 中的变更描述。
-     * 输出示例："第1期 2026-07-31 还款50000元； 第2期 2026-08-31 还款80000元"
+     * 生成还款计划变更文本（旧计划取自主表 installment_plan JSON）；无变化返回 null。
+     * 抽成独立方法便于测试：只改其他字段时不得误报「还款计划由[]变为[...]」。
      */
-    private String buildInstallmentPlanText(List<RepaymentSchedule> schedules) {
-        if (schedules == null || schedules.isEmpty()) return "";
-        return schedules.stream()
-                .map(r -> "第" + r.getSort() + "期 "
-                        + r.getRepaymentDate() + " "
-                        + "还款" + r.getRepaymentAmount().stripTrailingZeros().toPlainString() + "元")
-                .collect(Collectors.joining("；"));
+    String buildPlanChangeText(BondsBusiness oldEntity, List<InstallmentPlanItem> newItems) {
+        List<InstallmentPlanItem> oldItems = fillMissingSort(InstallmentPlanParser.parse(
+                oldEntity == null ? null : oldEntity.getInstallmentPlan()));
+        String oldPlanText = buildInstallmentPlanTextFromItems(oldItems);
+        String newPlanText = buildInstallmentPlanTextFromItems(fillMissingSort(newItems));
+        if (Objects.equals(oldPlanText, newPlanText)) return null;
+        return "还款计划由[" + nullSafe(oldPlanText) + "]变为[" + nullSafe(newPlanText) + "]";
     }
 
     /**

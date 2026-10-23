@@ -23,7 +23,6 @@ import com.hxb.iibs.wuhan.service.IBondsBusinessService;
 import com.hxb.iibs.wuhan.service.IGapsPBaseService;
 import com.hxb.iibs.wuhan.service.IHxbCpodFhcharProductSerialService;
 import com.hxb.iibs.wuhan.service.IUpperStorageConfigService;
-import com.hxb.iibs.wuhan.service.IRepaymentScheduleService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
@@ -96,8 +95,6 @@ public class CommonJob {
     private IBusManagerChangeHistoryService managerChangeHistoryService;
     @Autowired
     private IUpperStorageConfigService upperStorageConfigService;
-    @Autowired
-    private IRepaymentScheduleService repaymentScheduleService;
 
 
     // ============================================================
@@ -536,16 +533,6 @@ public class CommonJob {
                         bondsBusinessService.save(biz);
                     }
 
-                    // 还款计划：先将旧的审批中计划标记为已失效，再保存新的生效计划
-                    if ("1".equals(biz.getInstallmentFlag()) && StringUtils.hasText(biz.getInstallmentPlan())) {
-                        List<InstallmentPlanItem> planItems = parseInstallmentPlan(biz.getInstallmentPlan());
-                        // replaceByBondCodeWithStatus 会自动将旧计划标记为 INVALID
-                        repaymentScheduleService.replaceByBondCodeWithStatus(
-                                biz.getBondCode(),
-                                planItems,
-                                Constant.RepaymentStatus.EFFECTIVE);
-                    }
-
                 } else {
                     // 审批拒绝：只记录警告日志，不写业务主体
                     log.warn("[processNewBusiness] 审批拒绝, bondCode={}, remark={}",
@@ -557,13 +544,6 @@ public class CommonJob {
                         bondsBusinessService.lambdaUpdate()
                                 .set(BondsBusiness::getStatus, Constant.BizStatus.REJECTED)
                                 .eq(BondsBusiness::getId, draft.getId())
-                                .update();
-
-                        // 同时将该债券的草稿还款计划标记为已失效
-                        repaymentScheduleService.lambdaUpdate()
-                                .eq(RepaymentSchedule::getBondCode, biz.getBondCode())
-                                .eq(RepaymentSchedule::getStatus, Constant.RepaymentStatus.AUDITING)
-                                .set(RepaymentSchedule::getStatus, Constant.RepaymentStatus.INVALID)
                                 .update();
                     }
                 }
@@ -676,8 +656,11 @@ public class CommonJob {
         String v = val.trim();
         if ("0".equals(v) || "1".equals(v)) return v;
         return switch (v) {
+            // 前端/业务库口径
+            case "标准化业务", "标准业务", "标准债券", "标准" -> "0";
+            case "非标准化业务", "非标准业务", "非标准债券", "非标准", "非标" -> "1";
+            // 旧口径
             case "标债" -> "0";
-            case "非标" -> "1";
             default -> {
                 log.warn("[decodeBondType] 未识别的标债类型: '{}'，置空", v);
                 yield null;
@@ -893,26 +876,20 @@ public class CommonJob {
                     // 审批拒绝：不修改业务数据，只记录日志
                     log.warn("[processUpdateBusiness] 审批拒绝, bondCode={}, remark={}",
                             vo.getBondCode(), vo.getRemark());
-                    repaymentScheduleService.lambdaUpdate()
-                            .eq(RepaymentSchedule::getBondCode, biz.getBondCode())
-                            .eq(RepaymentSchedule::getStatus, Constant.RepaymentStatus.AUDITING)
-                            .set(RepaymentSchedule::getStatus, Constant.RepaymentStatus.EFFECTIVE)
-                            .update();
 
                 } else if ("成功".equals(vo.getApproveStatus())) {
                     // 【本次改造】解析 update_context，逐字段应用变更（普通字段）
                     applyUpdateContext(biz, vo.getUpdateContext());
                     // 【修复】审批通过后，新还款计划应为已生效(EFFECTIVE=2)，而非审批中(AUDITING=1)
                     List<InstallmentPlanItem> newPlans = parseRepaymentPlanChange(vo.getUpdateContext());
-                    if(newPlans.isEmpty()){
-                        repaymentScheduleService.lambdaUpdate()
-                                .eq(RepaymentSchedule::getBondCode, biz.getBondCode())
-                                .eq(RepaymentSchedule::getStatus, Constant.RepaymentStatus.AUDITING)
-                                .set(RepaymentSchedule::getStatus, Constant.RepaymentStatus.EFFECTIVE)
-                                .update();
-                    }else {
-                        repaymentScheduleService.replaceByBondCodeWithStatus(
-                                biz.getBondCode(), newPlans, Constant.RepaymentStatus.EFFECTIVE);
+                    boolean planChanged = vo.getUpdateContext() != null
+                            && vo.getUpdateContext().contains("还款计划由");
+                    // 【主表还款计划】审批通过后必须回写 installment_plan：
+                    // 有变更 → 新计划 JSON；计划被清空 → 置空；未涉及计划变更 → 保持原值
+                    if (!newPlans.isEmpty()) {
+                        biz.setInstallmentPlan(InstallmentPlanParser.toJson(newPlans));
+                    } else if (planChanged) {
+                        biz.setInstallmentPlan("");
                     }
                     normalizePlanJson(biz);
                     sanitizeWidths(biz);
@@ -1049,14 +1026,15 @@ public class CommonJob {
             return;
         }
 
-        String[] segments = updateContext.split(";");
+        // 变更轨迹由 buildUpdateContext 用中文分号「；」连接，兼容英文分号
+        String[] segments = updateContext.split("[;；]");
         int applied = 0;
 
         for (String segment : segments) {
             String trimmed = segment.trim();
             if (trimmed.isEmpty()) continue;
 
-            // 格式：「XXX由YYY变为ZZZ」
+            // 格式：「XXX由[旧值]变为[新值]」
             int fromIdx = trimmed.indexOf("由");
             int toIdx = trimmed.indexOf("变为");
 
@@ -1066,7 +1044,11 @@ public class CommonJob {
             }
 
             String fieldLabel = trimmed.substring(0, fromIdx);          // 如 "ecif客户号"
-            String newValue = trimmed.substring(toIdx + 2);            // "变为" 之后的部分
+            String newValue = trimmed.substring(toIdx + 2).trim();     // "变为" 之后的部分
+            // 去掉外层的 [...]（buildUpdateContext 用 [旧]变为[新] 包裹）
+            if (newValue.length() >= 2 && newValue.startsWith("[") && newValue.endsWith("]")) {
+                newValue = newValue.substring(1, newValue.length() - 1);
+            }
 
             FieldMapping mapping = CONTEXT_FIELD_MAP.get(fieldLabel);
             if (mapping == null) {
@@ -1188,12 +1170,13 @@ public class CommonJob {
      */
     private String encodeForEnum(String propertyName, String label) {
         return switch (propertyName) {
-            case "bondType" -> Constant.BondTypeEnum.encode(label);
-            case "greenTechFlag" -> Constant.GreenTechFlag.encode(label);
-            case "bizType" -> Constant.BizTypeEnum.encode(label);
-            case "industry" -> Constant.IndustryEnum.encode(label);
-            case "customerType" -> Constant.CustomerTypeEnum.encode(label);
-            case "guaranteeInfo" -> Constant.GuaranteeInfoEnum.encode(label);
+            // 复用已加固的解码器：未知标签置空+告警，避免中文写进 varchar(10) 短列
+            case "bondType" -> decodeBondType(label);
+            case "greenTechFlag" -> decodeGreenTechFlag(label);
+            case "bizType" -> decodeBizType(label);
+            case "industry" -> decodeIndustry(label);
+            case "customerType" -> Constant.CustomerTypeEnum.encode(label); // 未知返回 null
+            case "guaranteeInfo" -> Constant.GuaranteeInfoEnum.encode(label); // 长列(255)，未知原样可接受
             default -> label;  // 其余字段原样保存
         };
     }
@@ -1286,13 +1269,7 @@ public class CommonJob {
                         biz.setUpdateTime(LocalDateTime.now());
                         bondsBusinessService.updateById(biz);
                         log.info("[processTerminateBusiness] 业务已中止, bondCode={}", item.getBondCode());
-                        saveFlowDataWithoutRemark(item.getYbid(), item.getApproveStatus());
-                        repaymentScheduleService.lambdaUpdate()
-                                .eq(RepaymentSchedule::getBondCode, biz.getBondCode())
-                                .eq(RepaymentSchedule::getStatus, Constant.RepaymentStatus.AUDITING)
-                                .set(RepaymentSchedule::getStatus, Constant.RepaymentStatus.INVALID)
-                                .update();
-                    }
+                        saveFlowDataWithoutRemark(item.getYbid(), item.getApproveStatus());                    }
                 } else {
                     // 审批驳回：只记录日志，推进 FlowData
                     log.warn("[processTerminateBusiness] 中止申请被驳回, bondCode={}", item.getBondCode());
@@ -1355,14 +1332,7 @@ public class CommonJob {
                     .set(BondsBusiness::getStatus, Constant.BizStatus.EXPIRED)
                     .set(BondsBusiness::getUpdateTime, LocalDateTime.now())
                     .update();
-            if (ok) updated++;
-            //更新划款计划
-            repaymentScheduleService.lambdaUpdate()
-                    .eq(RepaymentSchedule::getBondCode, biz.getBondCode())
-                    .eq(RepaymentSchedule::getStatus, Constant.RepaymentStatus.EFFECTIVE)
-                    .set(RepaymentSchedule::getStatus, Constant.RepaymentStatus.INVALID)
-                    .update();
-        }
+            if (ok) updated++;        }
 
         log.info("[expireCheck] 处理完毕，更新 {} 条为已过期（共命中 {} 条）", updated, expiredList.size());
         XxlJobHelper.handleSuccess("expired=" + updated);

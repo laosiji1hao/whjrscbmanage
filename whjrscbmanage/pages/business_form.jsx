@@ -279,7 +279,7 @@ var DICTS = {
     customerType: [{v:'0',t:'一类'},{v:'1',t:'二类'},{v:'2',t:'三类'},{v:'3',t:'四类'}],
     currency: [{v:'人民币',t:'人民币'},{v:'美元',t:'美元'}],
     guaranty: [{v:'0',t:'信用'},{v:'1',t:'抵押'},{v:'2',t:'质押'},{v:'3',t:'保证'}],
-    fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
+    fiveLevel: ['正常一档'], // 业务确认：只保留正常一档
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
     dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
     rating: ['AAA+', 'AAA', 'AAA-', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+'],
@@ -676,8 +676,9 @@ function App() {
                 return;
             }
             var ct = outtext(values.customer_type);
-            var inspectFreq = (ct === '0' || ct === '1') ? 3 : 1;
+            // 新增/创建分期：沿用原新增页规则按客户分类重算；编辑（重新申报）：发送字段实际值，未改不报变更
             var isNew = mode === 'installment' || mode === 'add';
+            var inspectFreq = isNew ? ((ct === '0' || ct === '1') ? 3 : 1) : outtext(values.inspect_freq);
             var businessId = isNew ? '' : outtext(recordId); // 新增/创建分期恒空；编辑按 biz_uuid
 
             var body = {

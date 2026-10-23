@@ -279,7 +279,7 @@ var DICTS = {
     customerType: [{v:'0',t:'一类'},{v:'1',t:'二类'},{v:'2',t:'三类'},{v:'3',t:'四类'}],
     currency: [{v:'人民币',t:'人民币'},{v:'美元',t:'美元'}],
     guaranty: [{v:'0',t:'信用'},{v:'1',t:'抵押'},{v:'2',t:'质押'},{v:'3',t:'保证'}],
-    fiveLevel: ['正常一档','正常二档','正常三档','关注','次级','可疑','损失'],
+    fiveLevel: ['正常一档'], // 业务确认：只保留正常一档
     manageLine: [{v:'金融市场部',t:'金融市场部'}],
     dept: [{v:'0',t:'同业室'},{v:'1',t:'利率室'},{v:'2',t:'汇率室'},{v:'3',t:'同业营销管理室'},{v:'4',t:'自负盈亏账户'}],
     rating: ['AAA+', 'AAA', 'AAA-', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+'],
@@ -588,7 +588,9 @@ function App() {
                 setShowExDate(String(d.exercise_flag || '0') === '1');
                 setShowInstall(String(d.installment_flag || '0') === '1');
                 setShowPassage(String(d.is_passage || '0') === '1');
-                if (String(d.is_passage || '0') !== '1') {
+                // 仅当库里上存利率为空时才按配置初始化；已有值不得覆盖（否则未改动也会报「上存利率变更」）
+                var hasUpper = d.upper_storage_rate !== null && d.upper_storage_rate !== undefined && String(d.upper_storage_rate) !== '';
+                if (String(d.is_passage || '0') !== '1' && !hasUpper) {
                     needUpperInit = true;
                     initUpperWhenReady();
                 }
@@ -700,7 +702,8 @@ function App() {
                 return;
             }
             var ct = outtext(values.customer_type);
-            var inspectFreq = (ct === '0' || ct === '1') ? 3 : 1;
+            // 编辑页与原版一致：检查频率发送字段实际值（不再按客户分类重算，避免未改也报变更）
+            var inspectFreq = outtext(values.inspect_freq);
             var body = {
                 businessId: outtext(recordId),
                 bondCode: outtext(values.bond_code),

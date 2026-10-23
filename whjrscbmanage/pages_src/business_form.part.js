@@ -196,8 +196,9 @@ function App() {
                 return;
             }
             var ct = outtext(values.customer_type);
-            var inspectFreq = (ct === '0' || ct === '1') ? 3 : 1;
+            // 新增/创建分期：沿用原新增页规则按客户分类重算；编辑（重新申报）：发送字段实际值，未改不报变更
             var isNew = mode === 'installment' || mode === 'add';
+            var inspectFreq = isNew ? ((ct === '0' || ct === '1') ? 3 : 1) : outtext(values.inspect_freq);
             var businessId = isNew ? '' : outtext(recordId); // 新增/创建分期恒空；编辑按 biz_uuid
 
             var body = {

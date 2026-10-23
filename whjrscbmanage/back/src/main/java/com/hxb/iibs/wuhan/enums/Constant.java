@@ -48,13 +48,6 @@ public interface Constant {
         public static final int REJECT  = 2;
     }
 
-    /** 还款计划状态 */
-    class RepaymentStatus {
-        public static final int INVALID   = 0;  // 已失效，被新计划替换
-        public static final int AUDITING = 1;  // 审批中（草稿）
-        public static final int EFFECTIVE = 2; // 已生效
-    }
-
     /** 开关常量 */
     class Switch {
         public static final String YES = "是";
